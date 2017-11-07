@@ -59,7 +59,11 @@ class UserscriptInjector:
                     logError(err.str())
                     continue
 
-        logInfo(str(len(self.userscripts)) + " userscript(s) loaded.")
+        logInfo("")
+        logInfo(str(len(self.userscripts)) + " userscript(s) loaded:")
+        for s in self.userscripts:
+            logInfo(TAB + "• "+s.getName()+" ("+s.filename+")")
+        logInfo("")
 
     def getApplicableScripts(self, url):
         matchingScripts = []
