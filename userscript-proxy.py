@@ -7,10 +7,11 @@ from warnings import warn
 import shlex
 import warnings
 
-DIR_USERSCRIPTS = "userscripts"
+DIRS_USERSCRIPTS = ["userscripts"]
 PATTERN_USERSCRIPT = "*.user.js"
 RELEVANT_CONTENT_TYPES = ["text/html"]
 REGEX_TEXT_HTML = re.compile(r"text/html")
+TAB = "    "
 
 def logInfo(s):
     ctx.log.info(s)
@@ -25,37 +26,40 @@ class UserscriptInjector:
     def __init__(self):
         self.userscripts = []
         logInfo("Loading userscripts ...")
-        try:
-            os.chdir(DIR_USERSCRIPTS)
-        except FileNotFoundError:
-            logError("Cannot load userscripts. Directory `"+DIR_USERSCRIPTS+"` does not exist.")
-        except PermissionError:
-            logError("Cannot load userscripts. Permission was denied when trying to read directory `"+DIR_USERSCRIPTS+"`.")
-
-        numberOfUserscripts = 0
-        for unsafe_filename in glob.glob(PATTERN_USERSCRIPT):
-            filename = shlex.quote(unsafe_filename)
-            logInfo("    • "+filename)
+        for directory in DIRS_USERSCRIPTS:
+            logInfo("Looking for userscripts (`"+PATTERN_USERSCRIPT+"`) in directory `"+directory+"` ...")
             try:
-                content = open(filename).read()
+                os.chdir(directory)
+            except FileNotFoundError:
+                logWarning("Directory `"+directory+"` does not exist.")
+                continue
             except PermissionError:
-                logError("Could not read file `"+filename+"`: Permission denied.")
+                logError("Permission was denied when trying to read directory `"+DIR_USERSCRIPTS+"`.")
                 continue
-            except Exception as e:
-                logError("Could not read file `"+filename+"`: " + str(e))
-            try:
-                self.userscripts.append(Userscript(filename, content))
-            except MetadataError as err:
-                logError("Metadata error:")
-                logError(err.str())
-                continue
-            except UserscriptError as err:
-                logError("There was an error with a userscript:")
-                logError(err.str())
-                continue
-            numberOfUserscripts = numberOfUserscripts + 1
 
-        logInfo(str(numberOfUserscripts) + " userscript(s) loaded.")
+            for unsafe_filename in glob.glob(PATTERN_USERSCRIPT):
+                filename = shlex.quote(unsafe_filename)
+                logInfo(TAB + "• "+filename)
+                try:
+                    content = open(filename).read()
+                except PermissionError:
+                    logError("Could not read file `"+filename+"`: Permission denied.")
+                    continue
+                except Exception as e:
+                    logError("Could not read file `"+filename+"`: " + str(e))
+                    continue
+                try:
+                    self.userscripts.append(Userscript(filename, content))
+                except MetadataError as err:
+                    logError("Metadata error:")
+                    logError(err.str())
+                    continue
+                except UserscriptError as err:
+                    logError("There was an error with a userscript:")
+                    logError(err.str())
+                    continue
+
+        logInfo(str(len(self.userscripts)) + " userscript(s) loaded.")
 
     def getApplicableScripts(self, url):
         matchingScripts = []
