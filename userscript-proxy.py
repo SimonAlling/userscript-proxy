@@ -7,6 +7,12 @@ from warnings import warn
 import shlex
 import warnings
 
+def stringifyVersion(version):
+    return VERSION_PREFIX + str(version)
+
+VERSION = "0.0.1"
+VERSION_PREFIX = "v"
+WELCOME_MESSAGE = "Userscript Proxy " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS = ["userscripts"]
 PATTERN_USERSCRIPT = "*.user.js"
 RELEVANT_CONTENT_TYPES = ["text/html"]
@@ -25,6 +31,11 @@ def logError(s):
 class UserscriptInjector:
     def __init__(self):
         self.userscripts = []
+        logInfo("")
+        logInfo("╔═" + "═" * len(WELCOME_MESSAGE) + "═╗")
+        logInfo("║ " + WELCOME_MESSAGE            + " ║")
+        logInfo("╚═" + "═" * len(WELCOME_MESSAGE) + "═╝")
+        logInfo("")
         logInfo("Loading userscripts ...")
         for directory in DIRS_USERSCRIPTS:
             logInfo("Looking for userscripts (`"+PATTERN_USERSCRIPT+"`) in directory `"+directory+"` ...")
