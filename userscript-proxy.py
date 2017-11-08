@@ -92,13 +92,16 @@ class UserscriptInjector:
                     if script.isApplicable(flow.request.url):
                         logInfo("Injecting %s into %s" % (script.getName(), flow.request.url))
                         tag = soup.new_tag("script")
-                        tag.string = script.getContent()
+                        scriptContent = script.getContent()
                         if script.runAt == document_start:
+                            tag.string = scriptContent
+                            soup.head.append(tag)
+                        elif script.runAt == document_idle:
+                            tag.string = Userscript.wrapInEventListener("load", scriptContent)
                             soup.head.append(tag)
                         elif script.runAt == document_end:
+                            tag.string = scriptContent
                             soup.body.append(tag)
-                        else:
-                            logError(document_idle + " not supported.") # TODO: should be supported
                 flow.response.content = str(soup).encode("utf8")
 
 

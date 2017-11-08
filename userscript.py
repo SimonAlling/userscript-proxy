@@ -123,3 +123,10 @@ class Userscript:
 
     def getRunAt(self):
         return self.runAt
+
+    def wrapInEventListener(event, scriptContent):
+        return ("window.addEventListener(\""+event+"\", function() {"
+            + "\n"
+            + scriptContent
+            + "\n"
+            + "});")
