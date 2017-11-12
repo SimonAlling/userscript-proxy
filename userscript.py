@@ -1,7 +1,9 @@
 import re
 import metadata
-from utilities import first, second
-from metadata import tag_name, tag_type, tag_unique, tag_default, tag_required, tag_predicate
+import warnings
+from string import Template
+from utilities import first, second, isSomething
+from metadata import tag_name, tag_type, tag_unique, tag_default, tag_required, tag_predicate, PREFIX_TAG
 from urlmatch import urlmatch
 from patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 
@@ -83,6 +85,29 @@ METADATA_TAGS = [
 Metadata = metadata.Metadata(METADATA_TAGS)
 
 
+def f(s):
+    # Instead of f"bar" which requires Python 3.6.
+    # Uses globals() in a possibly confusing or dangerous way; be careful!
+    return s.format(**globals())
+
+STRING_WARNING_INVALID_REGEX = Template(f("""{PREFIX_TAG}{directive_include}/{PREFIX_TAG}{directive_exclude} patterns starting and ending with `/` are interpreted as regular expressions, and this pattern is not a valid regex:
+
+    $pattern
+
+The regex engine reported this error:
+
+    $error
+
+"""))
+
+
+def regexFromIncludePattern_safe(pattern):
+    try:
+        return regexFromIncludePattern(pattern)
+    except re.error as error:
+        # warnings.warn(STRING_WARNING_INVALID_REGEX.substitute(pattern=pattern, error=error)) # TODO: uncomment when we can handle warnings
+        return None
+
 class Userscript:
     def __init__(self, filename: str, content: str):
         self.filename = filename
@@ -92,8 +117,20 @@ class Userscript:
         self.runAt = self.valueOf(directive_run_at)
         self.noframes = self.valueOf(directive_noframes)
         self.matchPatterns = self.allValuesFor(directive_match)
-        self.includePatternRegexes = map(regexFromIncludePattern, self.allValuesFor(directive_include))
-        self.excludePatternRegexes = map(regexFromIncludePattern, self.allValuesFor(directive_exclude))
+        self.includePatternRegexes = list(filter(
+            isSomething,
+            list(map(
+                regexFromIncludePattern_safe,
+                self.allValuesFor(directive_include)
+            ))
+        ))
+        self.excludePatternRegexes = list(filter(
+            isSomething,
+            list(map(
+                regexFromIncludePattern_safe,
+                self.allValuesFor(directive_exclude)
+            ))
+        ))
 
     def __str__(self):
         return "%s; matches: %s" % (self.name, self.matches)
@@ -106,10 +143,10 @@ class Userscript:
 
     def isApplicable(self, url):
         for regex in self.excludePatternRegexes:
-            if regex.match(url):
+            if isSomething(regex.search(url)):
                 return False
         for regex in self.includePatternRegexes:
-            if regex.match(url):
+            if isSomething(regex.search(url)):
                 return True
         for pattern in self.matchPatterns:
             if urlmatch(pattern, url):
