@@ -76,17 +76,10 @@ class UserscriptInjector:
             logInfo(TAB + "• "+s.getName()+" ("+s.filename+")")
         logInfo("")
 
-    def getApplicableScripts(self, url):
-        matchingScripts = []
-        for script in self.userscripts:
-            if script.isApplicable(url):
-                matchingScripts.append(script)
-        return matchingScripts
 
     def response(self, flow: http.HTTPFlow):
         if "Content-Type" in flow.response.headers:
             if REGEX_TEXT_HTML.match(flow.response.headers["Content-Type"]):
-                applicableScripts = self.getApplicableScripts(flow.request.url)
                 soup = BeautifulSoup(flow.response.content, "html.parser") # TODO: maybe change parser
                 for script in self.userscripts:
                     if script.isApplicable(flow.request.url):
