@@ -1,6 +1,7 @@
 import re
 import metadata
-from metadata import first, second, tag_name, tag_type, tag_unique, tag_default, tag_required, tag_predicate
+from utilities import first, second
+from metadata import tag_name, tag_type, tag_unique, tag_default, tag_required, tag_predicate
 from urlmatch import urlmatch
 from patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 

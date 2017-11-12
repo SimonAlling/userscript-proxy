@@ -1,6 +1,7 @@
 import re
 from string import Template
 from functools import reduce
+from utilities import first, second, isSomething
 import warnings
 
 class MetadataError(Exception):
@@ -72,20 +73,6 @@ STRING_WARNING_NO_MATCH = Template(f("""This metadata line did not match the exp
     $line
 
 """))
-
-
-def first(tuple):
-    (a, b) = tuple
-    return a
-
-
-def second(tuple):
-    (a, b) = tuple
-    return b
-
-
-def isSomething(x):
-    return x != None
 
 
 def regex_metadataTag(tag):
