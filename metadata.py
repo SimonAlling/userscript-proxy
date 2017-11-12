@@ -38,35 +38,40 @@ INDEX_GROUP_TAGNAME = 1
 INDEX_GROUP_TAGVALUE = 2
 
 
-STRING_ERROR_NO_METADATA_BLOCK = """No metadata block found. The metadata block must follow this format:
+def f(s):
+    # Instead of f"bar" which requires Python 3.6.
+    # Uses globals() in a possibly confusing or dangerous way; be careful!
+    return s.format(**globals())
 
-    """+PREFIX_COMMENT             +""" ==UserScript==
-    """+PREFIX_COMMENT+" "+PREFIX_TAG+"""key    value
-    """+PREFIX_COMMENT             +""" ==/UserScript==
+STRING_ERROR_NO_METADATA_BLOCK = f("""No metadata block found. The metadata block must follow this format:
 
-It must start with `"""+PREFIX_COMMENT+" "+BLOCK_START+"""` and end with `"""+PREFIX_COMMENT+" "+BLOCK_END+"""`, and every line must be a line comment starting with an @-prefixed tag name, then whitespace, then a tag value (with the exception of boolean directives such as @noframes, which are automatically true if present).
+    {PREFIX_COMMENT} {BLOCK_START}
+    {PREFIX_COMMENT} {PREFIX_TAG}key    value
+    {PREFIX_COMMENT} {BLOCK_END}
 
-"""
-
-STRING_ERROR_MISSING_TAG = Template("""The """+PREFIX_TAG+"""$tagName metadata directive is required, but was not found.""")
-
-STRING_ERROR_MISSING_VALUE = Template("""The """+PREFIX_TAG+"""$tagName metadata directive requires a value, like so:
-
-    """+PREFIX_COMMENT+" "+PREFIX_TAG+"""$tagName    something
+It must start with `{PREFIX_COMMENT} {BLOCK_START}` and end with `{PREFIX_COMMENT} {BLOCK_END}`, and every line must be a line comment starting with an {PREFIX_TAG}-prefixed tag name, then whitespace, then a tag value (with the exception of boolean directives such as {PREFIX_TAG}noframes, which are automatically true if present).
 
 """)
 
-STRING_ERROR_PREDICATE_FAILED = Template("""Detected a """+PREFIX_TAG+"""$tagName metadata directive with an invalid value, namely:
+STRING_ERROR_MISSING_TAG = Template(f("""The {PREFIX_TAG}$tagName metadata directive is required, but was not found."""))
+
+STRING_ERROR_MISSING_VALUE = Template(f("""The {PREFIX_TAG}$tagName metadata directive requires a value, like so:
+
+    {PREFIX_COMMENT} {PREFIX_TAG}$tagName    something
+
+"""))
+
+STRING_ERROR_PREDICATE_FAILED = Template(f("""Detected a {PREFIX_TAG}$tagName metadata directive with an invalid value, namely:
 
     $tagValue
 
-""")
+"""))
 
-STRING_WARNING_NO_MATCH = Template("""This metadata line did not match the expected pattern and was ignored:
+STRING_WARNING_NO_MATCH = Template(f("""This metadata line did not match the expected pattern and was ignored:
 
     $line
 
-""")
+"""))
 
 
 def first(tuple):
