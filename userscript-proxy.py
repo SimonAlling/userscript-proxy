@@ -50,7 +50,7 @@ class UserscriptInjector:
 
             for unsafe_filename in glob.glob(PATTERN_USERSCRIPT):
                 filename = shlex.quote(unsafe_filename)
-                logInfo(TAB + "• "+filename)
+                logInfo("Found " + filename + ".")
                 try:
                     content = open(filename).read()
                 except PermissionError:
@@ -66,7 +66,7 @@ class UserscriptInjector:
                     logError(err.str())
                     continue
                 except UserscriptError as err:
-                    logError("There was an error with a userscript:")
+                    logError("Userscript error:")
                     logError(err.str())
                     continue
 
@@ -83,7 +83,7 @@ class UserscriptInjector:
                 soup = BeautifulSoup(flow.response.content, "html.parser") # TODO: maybe change parser
                 for script in self.userscripts:
                     if script.isApplicable(flow.request.url):
-                        logInfo("Injecting %s into %s" % (script.getName(), flow.request.url))
+                        logInfo("Injecting %s into %s ..." % (script.getName(), flow.request.url))
                         tag = soup.new_tag("script")
                         scriptContent = script.getContent()
                         if script.runAt == document_start:
