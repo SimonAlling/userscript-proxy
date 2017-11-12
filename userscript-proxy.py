@@ -10,7 +10,7 @@ import warnings
 def stringifyVersion(version):
     return VERSION_PREFIX + str(version)
 
-VERSION = "0.0.1"
+VERSION = "0.1.0"
 VERSION_PREFIX = "v"
 WELCOME_MESSAGE = "Userscript Proxy " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS = ["userscripts"]
