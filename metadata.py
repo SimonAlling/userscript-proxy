@@ -1,7 +1,8 @@
+from typing import Tuple, List, Pattern, Match, Optional, Union, Callable, NamedTuple
 import re
 from string import Template
 from functools import reduce
-from utilities import first, second, isSomething
+from utilities import A, B, first, second, isSomething
 import warnings
 
 class MetadataError(Exception):
@@ -9,42 +10,48 @@ class MetadataError(Exception):
         Exception.__init__(self,*args,**kwargs)
 
 
-tag_name = "name"
-tag_type = "type"
-tag_unique = "unique"
-tag_default = "default"
-tag_required = "required"
-tag_predicate = "predicate"
+TagValue = Union[str, bool]
+Predicate = Optional[Callable[[TagValue], bool]]
+TagDeclaration = NamedTuple("TagDeclaration", [
+    ("name", str),
+    ("type", type),
+    ("unique", bool),
+    ("default", Optional[TagValue]),
+    ("required", bool),
+    ("predicate", Predicate),
+])
+
+MetadataItem = Tuple[str, TagValue]
+TMetadata = List[MetadataItem]
+
+PREFIX_COMMENT: str = "//"
+PREFIX_TAG: str = "@"
+BLOCK_START: str = "==UserScript=="
+BLOCK_END: str = "==/UserScript=="
 
 
-PREFIX_COMMENT = "//"
-PREFIX_TAG = "@"
-BLOCK_START = "==UserScript=="
-BLOCK_END = "==/UserScript=="
-
-
-REGEX_EMPTY_LINE_COMMENT = re.compile(r"^(?:\/\/)?\s*$")
-REGEX_METADATA_BLOCK = re.compile(
+REGEX_EMPTY_LINE_COMMENT: Pattern = re.compile(r"^(?:\/\/)?\s*$")
+REGEX_METADATA_BLOCK: Pattern = re.compile(
     PREFIX_COMMENT + r"\s*" + BLOCK_START + r"\n"
     + r"(.*)"
     + PREFIX_COMMENT + r"\s*" + BLOCK_END,
     re.DOTALL
 )
-REGEX_METADATA_LINE = re.compile(
+REGEX_METADATA_LINE: Pattern = re.compile(
     r"^" + PREFIX_COMMENT
     + r"\s*" + PREFIX_TAG
     + r"([^\s]+)(?:\s+?(\S.*)?)?$"
 )
-INDEX_GROUP_TAGNAME = 1
-INDEX_GROUP_TAGVALUE = 2
+INDEX_GROUP_TAGNAME: int = 1
+INDEX_GROUP_TAGVALUE: int = 2
 
 
-def f(s):
+def f(s: str) -> str:
     # Instead of f"bar" which requires Python 3.6.
     # Uses globals() in a possibly confusing or dangerous way; be careful!
     return s.format(**globals())
 
-STRING_ERROR_NO_METADATA_BLOCK = f("""No metadata block found. The metadata block must follow this format:
+STRING_ERROR_NO_METADATA_BLOCK: str = f("""No metadata block found. The metadata block must follow this format:
 
     {PREFIX_COMMENT} {BLOCK_START}
     {PREFIX_COMMENT} {PREFIX_TAG}key    value
@@ -54,103 +61,112 @@ It must start with `{PREFIX_COMMENT} {BLOCK_START}` and end with `{PREFIX_COMMEN
 
 """)
 
-STRING_ERROR_MISSING_TAG = Template(f("""The {PREFIX_TAG}$tagName metadata directive is required, but was not found."""))
+STRING_ERROR_MISSING_TAG: Template = Template(f("""The {PREFIX_TAG}$tagName metadata directive is required, but was not found."""))
 
-STRING_ERROR_MISSING_VALUE = Template(f("""The {PREFIX_TAG}$tagName metadata directive requires a value, like so:
+STRING_ERROR_MISSING_VALUE: Template = Template(f("""The {PREFIX_TAG}$tagName metadata directive requires a value, like so:
 
     {PREFIX_COMMENT} {PREFIX_TAG}$tagName    something
 
 """))
 
-STRING_ERROR_PREDICATE_FAILED = Template(f("""Detected a {PREFIX_TAG}$tagName metadata directive with an invalid value, namely:
+STRING_ERROR_PREDICATE_FAILED: Template = Template(f("""Detected a {PREFIX_TAG}$tagName metadata directive with an invalid value, namely:
 
     $tagValue
 
 """))
 
-STRING_WARNING_NO_MATCH = Template(f("""This metadata line did not match the expected pattern and was ignored:
+STRING_WARNING_NO_MATCH: Template = Template(f("""This metadata line did not match the expected pattern and was ignored:
 
     $line
 
 """))
 
 
-def regex_metadataTag(tag):
+def regex_metadataTag(tag: str) -> Pattern:
     return re.compile(PREFIX_TAG + tag + r"\s+[^\n]*")
 
 
 class Metadata(object):
-    def __init__(self, tags):
-        self.METADATA_TAGS = tags
+    def __init__(self, tags: List[TagDeclaration]) -> None:
+        self.METADATA_TAGS: List[TagDeclaration] = tags
 
-    def extract(self, userscriptContent: str): # raises MetadataError
-        match_metadataBlock = REGEX_METADATA_BLOCK.search(userscriptContent)
+    def extract(self, userscriptContent: str) -> str: # raises MetadataError
+        match_metadataBlock: Optional[Match] = REGEX_METADATA_BLOCK.search(userscriptContent)
         if (match_metadataBlock == None):
             raise MetadataError(STRING_ERROR_NO_METADATA_BLOCK)
         return match_metadataBlock.group(1)
 
-    def parse(self, metadataContent: str):
-        def parseLine(line):
-            match = REGEX_METADATA_LINE.search(line)
+    def parse(self, metadataContent: str) -> TMetadata:
+        def parseLine(line: str) -> Optional[Tuple[str, TagValue]]:
+            match: Optional[Match] = REGEX_METADATA_LINE.search(line)
             if match == None:
                 # if not REGEX_EMPTY_LINE_COMMENT.match(line): # TODO: uncomment when we can handle warnings
                 #     warnings.warn(STRING_WARNING_NO_MATCH.substitute(line=line))
                 return None
             else:
-                tagName = match.group(INDEX_GROUP_TAGNAME)
-                tagValue = match.group(INDEX_GROUP_TAGVALUE)
+                tagName: str = match.group(INDEX_GROUP_TAGNAME)
+                tagValue: Optional[str] = match.group(INDEX_GROUP_TAGVALUE)
                 return (tagName, True if tagValue == None else tagValue) # Boolean metadata tags have no explicit value; if they are present, they are true.
 
         return list(filter(isSomething,
             map(parseLine, metadataContent.splitlines())
         ))
 
-    def validate(self, metadata): # raises MetadataError
-        def tagDeclaration(tagName):
-            return next((x for x in self.METADATA_TAGS if x[tag_name] == tagName), None)
+    def validate(self, metadata: TMetadata) -> TMetadata: # raises MetadataError
+        def tagDeclaration(tagName: str) -> Optional[TagDeclaration]:
+            return next((x for x in self.METADATA_TAGS if x.name == tagName), None)
 
-        def handleDuplicate(acc, pair):
+        def handleDuplicate(acc: TMetadata, pair: MetadataItem) -> TMetadata:
             (name, val) = pair
-            tagDec = tagDeclaration(name)
+            tagDec: TagDeclaration = tagDeclaration(name)
             if tagDec == None:
                 # Unrecognized tag. Just let it pass.
                 return acc + [pair]
             else:
                 # Recognized tag! Skip it if it is a duplicate of a unique key.
-                return acc if tagDec[tag_unique] and name in map(first, acc) else acc + [pair]
+                seenTagNames: List[str] = list(map(first, acc))
+                return acc if tagDec.unique and name in seenTagNames else acc + [pair]
 
-        def withoutDuplicates(metadata):
+        def withoutDuplicates(metadata: TMetadata) -> TMetadata:
             return reduce(handleDuplicate, metadata, [])
 
-        def withDefaults(metadata):
-            return metadata + list(map(lambda tagDec: (tagDec[tag_name], tagDec[tag_default]),
-                list(filter(lambda tagDec: tagDec[tag_default] != None and tagDec[tag_name] not in list(map(first, metadata)),
+        def withDefaults(metadata: TMetadata) -> TMetadata:
+            tagNamesThatWeHave: List[str] = list(map(first, metadata))
+            def hasDefaultAndNotAlreadyParsed(tagDec: TagDeclaration) -> bool:
+                return isSomething(tagDec.default) and tagDec.name not in tagNamesThatWeHave
+            neededDefaults: TMetadata = list(map(
+                lambda tagDec: (tagDec.name, tagDec.default),
+                list(filter(
+                    hasDefaultAndNotAlreadyParsed,
                     self.METADATA_TAGS
                 ))
             ))
+            return metadata + neededDefaults
 
-        def validatePair(pair):
+        def validatePair(pair: MetadataItem) -> MetadataItem:
             (tagName, tagValue) = pair
-            tagDec = tagDeclaration(tagName)
+            tagDec: TagDeclaration = tagDeclaration(tagName)
             if tagDec == None:
                 # Unrecognized key.
                 return (tagName, tagValue)
             else:
                 # Recognized key! Check if it has the correct type.
-                tagType = tagDec[tag_type]
-                tagPredicate = tagDec[tag_predicate]
+                tagType: type = tagDec.type
+                tagPredicate: Predicate = tagDec.predicate
                 if type(tagValue) is not tagType:
                     if tagType == str:
                         raise MetadataError(STRING_ERROR_MISSING_VALUE.substitute(tagName=tagName))
-                if isSomething(tagDec[tag_predicate]):
+                if isSomething(tagDec.predicate):
                     if not tagPredicate(tagValue):
-                        raise MetadataError(STRING_ERROR_PREDICATE_FAILED.substitute(tagName=tagName, tagValue=tagValue))
+                        raise MetadataError(STRING_ERROR_PREDICATE_FAILED.substitute(tagName=tagName, tagValue=str(tagValue)))
                 return (tagName, tagValue)
 
-        def assertRequiredPresent(metadata):
-            for tagDec in filter(lambda tagDec: tagDec[tag_required] == True, self.METADATA_TAGS):
-                if (tagDec[tag_name] not in map(first, metadata)):
-                    raise MetadataError(STRING_ERROR_MISSING_TAG.substitute(tagName=tagDec[tag_name]))
+        def assertRequiredPresent(metadata: TMetadata) -> TMetadata:
+            ourTagNames: List[str] = list(map(first, metadata))
+            tagDecls_required: List[TagDeclaration] = list(filter(lambda tagDec: tagDec.required== True, self.METADATA_TAGS))
+            for tagDec in tagDecls_required:
+                if (tagDec.name not in ourTagNames):
+                    raise MetadataError(STRING_ERROR_MISSING_TAG.substitute(tagName=tagDec.name))
             return metadata
 
         return list(map(validatePair,
