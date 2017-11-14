@@ -1,5 +1,6 @@
+from typing import Pattern
 import re
-from utilities import first
+from utilities import first, isSomething
 
 REGEX_MATCH_ALL = r"<all_urls>"
 REGEX_MATCH_SCHEME = r"\*|https?"
@@ -19,19 +20,19 @@ REGEX_INCLUDE_PATTERN = re.compile(
 )
 
 
-def isMatchPattern(pattern):
-	return REGEX_MATCH_PATTERN.match(pattern) != None
+def isMatchPattern(pattern: str) -> bool:
+	return isSomething(REGEX_MATCH_PATTERN.match(pattern))
 
-def isIncludePattern(pattern):
-	return REGEX_INCLUDE_PATTERN.match(pattern) != None
+def isIncludePattern(pattern: str) -> bool:
+	return isSomething(REGEX_INCLUDE_PATTERN.match(pattern))
 
-def isIncludePattern_regex(pattern):
-	return re.compile(REGEX_INCLUDE_REGEX).match(pattern) != None
+def isIncludePattern_regex(pattern: str) -> bool:
+	return isSomething(re.compile(REGEX_INCLUDE_REGEX).match(pattern))
 
-def withoutSurroundingSlashes(s):
+def withoutSurroundingSlashes(s: str) -> str:
 	return first(re.subn(re.compile(r"^\/|\/$"), "", s))
 
-def regexFromIncludePattern(pattern): # raises re.error
+def regexFromIncludePattern(pattern: str) -> Pattern: # raises re.error
 	return (
 		re.compile(withoutSurroundingSlashes(pattern), re.IGNORECASE)
         if isIncludePattern_regex(pattern)
