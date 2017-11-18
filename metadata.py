@@ -201,3 +201,11 @@ def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises Metadata
 
 def validateWith(tags: List[Tag]):
     return lambda metadata: validate(tags, metadata)
+
+
+def valueGetter_all(metadata: Metadata) -> Callable[[Tag], List[TagValue]]:
+    return lambda tag: [second(pair) for pair in metadata if first(pair) == tag.name]
+
+def valueGetter_one(metadata: Metadata) -> Callable[[Tag], Optional[TagValue]]:
+    v = valueGetter_all(metadata)
+    return lambda tag: None if len(v(tag)) == 0 else v(tag)[0]
