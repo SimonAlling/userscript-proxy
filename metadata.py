@@ -39,21 +39,22 @@ PREFIX_TAG: str = "@"
 BLOCK_START: str = "==UserScript=="
 BLOCK_END: str = "==/UserScript=="
 
+REGEXGROUP_CONTENT: str = "content"
 REGEX_EMPTY_LINE_COMMENT: Pattern = re.compile(r"^(?:\/\/)?\s*$")
 REGEX_METADATA_BLOCK: Pattern = re.compile(
     PREFIX_COMMENT + r"\s*" + BLOCK_START + r"\n"
-    + r"(.*)"
+    + r"(?P<" + REGEXGROUP_CONTENT + r">.*)"
     + PREFIX_COMMENT + r"\s*" + BLOCK_END,
     re.DOTALL
 )
-INDEX_GROUP_BLOCK_CONTENT: int = 1
+REGEXGROUP_TAGNAME: str = "tagname"
+REGEXGROUP_TAGVALUE: str = "tagvalue"
 REGEX_METADATA_LINE: Pattern = re.compile(
     r"^\s*" + PREFIX_COMMENT
     + r"\s*" + PREFIX_TAG
-    + r"([^\s]+)(?:\s+?(\S.*)?)?$"
+    + r"(?P<" + REGEXGROUP_TAGNAME + r">[^\s]+)"
+    + r"(?:\s+?(?P<" + REGEXGROUP_TAGVALUE + r">\S.*)?)?$"
 )
-INDEX_GROUP_TAGNAME: int = 1
-INDEX_GROUP_TAGVALUE: int = 2
 
 STRING_ERROR_MISSING_BLOCK: str = f"""No metadata block found. The metadata block must follow this format:
 
@@ -109,7 +110,7 @@ def extract(userscriptContent: str) -> str: # raises MetadataError
     match_metadataBlock: Optional[Match] = REGEX_METADATA_BLOCK.search(userscriptContent)
     if (match_metadataBlock == None):
         raise MetadataError(STRING_ERROR_MISSING_BLOCK)
-    block: str = match_metadataBlock.group(INDEX_GROUP_BLOCK_CONTENT)
+    block: str = match_metadataBlock.group(REGEXGROUP_CONTENT)
     for line in block.splitlines():
         if not isWhitespaceLine(line) and not isCommentLine(line) and not REGEX_METADATA_LINE.match(line):
             raise MetadataError(STRING_ERROR_INVALID_BLOCK.substitute(line=line))
@@ -124,8 +125,8 @@ def parse(metadataContent: str) -> Metadata:
             #     warnings.warn(STRING_WARNING_NO_MATCH.substitute(line=line))
             return None
         else:
-            tagName: str = match.group(INDEX_GROUP_TAGNAME)
-            tagValue: Optional[str] = match.group(INDEX_GROUP_TAGVALUE)
+            tagName: str = match.group(REGEXGROUP_TAGNAME)
+            tagValue: Optional[str] = match.group(REGEXGROUP_TAGVALUE)
             return (tagName, True if tagValue == None else tagValue) # Boolean metadata tags have no explicit value; if they are present, they are true.
 
     return list(filter(isSomething,
