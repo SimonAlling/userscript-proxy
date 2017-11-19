@@ -4,7 +4,7 @@ import metadata
 import warnings
 from string import Template
 from utilities import first, second, isSomething, strs, compose2
-from metadata import Metadata, TagValue, PREFIX_TAG, Tag, Tag_string, Tag_boolean
+from metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
 from urlmatch import urlmatch
 from patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 
@@ -12,17 +12,17 @@ class UserscriptError(Exception):
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
 
-directive_name: str = "name"
-directive_version: str = "version"
-directive_run_at: str = "run-at"
-directive_match: str = "match"
-directive_include: str = "include"
-directive_exclude: str = "exclude"
-directive_noframes: str = "noframes"
+directive_name     : str = "name"
+directive_version  : str = "version"
+directive_run_at   : str = "run-at"
+directive_match    : str = "match"
+directive_include  : str = "include"
+directive_exclude  : str = "exclude"
+directive_noframes : str = "noframes"
 
-document_end: str = "document-end"
-document_start: str = "document-start"
-document_idle: str = "document-idle"
+document_end   : str = "document-end"
+document_start : str = "document-start"
+document_idle  : str = "document-idle"
 
 tag_name: Tag_string = Tag_string(
     name = directive_name,
@@ -83,6 +83,8 @@ METADATA_TAGS: List[Tag] = [
     ),
 ]
 
+validateMetadata: Callable[[Metadata], Metadata] = metadata.validator(METADATA_TAGS)
+
 
 STRING_WARNING_INVALID_REGEX: Template = Template(f"""{PREFIX_TAG}{directive_include}/{PREFIX_TAG}{directive_exclude} patterns starting and ending with `/` are interpreted as regular expressions, and this pattern is not a valid regex:
 
@@ -109,7 +111,7 @@ class Userscript(NamedTuple):
 
 
 def create(content: str) -> Userscript:
-    validMetadata: Metadata = metadata.validate(METADATA_TAGS, metadata.parse(metadata.extract(content)))
+    validMetadata: Metadata = validateMetadata(metadata.parse(metadata.extract(content)))
     valueOf = metadata.valueGetter_one(validMetadata)
     allValuesOf = metadata.valueGetter_all(validMetadata)
     includePatternRegexes: List[Pattern] = list(filter(
