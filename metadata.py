@@ -1,8 +1,9 @@
-from typing import TypeVar, Tuple, List, Iterator, Pattern, Match, Optional, Union, Callable, NamedTuple
+from typing import TypeVar, Tuple, List, Iterator, Iterable, Pattern, Match, Optional, Union, Callable, NamedTuple
 import re
 from string import Template
 from functools import reduce
-from utilities import A, B, first, second, isSomething
+from utilities import first, second, isSomething
+import itertools
 import warnings
 
 class MetadataError(Exception):
@@ -127,9 +128,10 @@ def parse(metadataContent: str) -> Metadata:
         else:
             tagName: str = match.group(REGEXGROUP_TAGNAME)
             tagValue: Optional[str] = match.group(REGEXGROUP_TAGVALUE)
-            return (tagName, True if tagValue == None else tagValue) # Boolean metadata tags have no explicit value; if they are present, they are true.
+            return (tagName, tagValue if isSomething(tagValue) else True) # Boolean tags have no explicit value; if they are present, they are true.
 
-    return list(filter(isSomething,
+    return list(filter(
+        isSomething,
         map(parseLine, metadataContent.splitlines())
     ))
 
@@ -149,8 +151,8 @@ def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
         tagPredicate: Optional[Predicate] = tag.predicate
         if type(tag) is Tag_string and type(tagValue) is not str:
             raise MetadataError(STRING_ERROR_MISSING_VALUE.substitute(tagName=tagName))
-        if type(tag) is Tag_boolean and type(tagValue) is not bool:
-            tagValue = True # because a boolean directive which is present is true no matter what comes after it
+        if type(tag) is Tag_boolean:
+            tagValue = True # This handles cases like `@noframes blabla`; a boolean directive is true no matter what comes after it.
         if isSomething(tagPredicate):
             if not tagPredicate(tagValue):
                 raise MetadataError(STRING_ERROR_PREDICATE_FAILED.substitute(tagName=tagName, tagValue=str(tagValue)))
@@ -158,19 +160,15 @@ def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
 
 
 def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises MetadataError
-    def handleDuplicate(acc: Metadata, pair: MetadataItem) -> Metadata:
-        (name, val) = pair
+    def handleDuplicate(acc: Iterable[MetadataItem], pair: MetadataItem) -> Iterable[MetadataItem]:
+        name: str = first(pair)
         tag: Tag = tagByName(tags, name)
-        if tag == None:
-            # Unrecognized tag. Just let it pass.
-            return acc + [pair]
-        else:
-            # Recognized tag! Skip it if it is a duplicate of a unique key.
-            seenTagNames: Iterator[str] = map(first, acc)
-            return acc if tag.unique and name in seenTagNames else acc + [pair]
+        seenTagNames: Iterator[str] = map(first, acc)
+        # Throw away pair if it has the same tag name as some already seen, known, unique directive:
+        return acc if isSomething(tag) and tag.unique and name in seenTagNames else list(acc) + [pair]
 
     def withoutDuplicates(metadata: Metadata) -> Metadata:
-        return reduce(handleDuplicate, metadata, [])
+        return list(reduce(handleDuplicate, metadata, []))
 
     def withDefaults(metadata: Metadata) -> Metadata:
         tagNamesThatWeHave: List[str] = list(map(first, metadata))
@@ -178,34 +176,33 @@ def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises Metadata
             return isSomething(tag.default) and tag.name not in tagNamesThatWeHave
         neededDefaults: Metadata = list(map(
             lambda tag: (tag.name, tag.default),
-            filter(
-                hasDefaultAndNotAlreadyParsed,
-                tags
-            )
+            filter(hasDefaultAndNotAlreadyParsed, tags)
         ))
         return metadata + neededDefaults
 
     def assertRequiredPresent(metadata: Metadata) -> Metadata:
         ourTagNames: Iterator[str] = map(first, metadata)
-        requiredTags: Iterator[Tag] = filter(lambda tag: tag.required== True, tags)
+        requiredTags: Iterator[Tag] = filter(lambda tag: tag.required, tags)
         for tag in requiredTags:
             if (tag.name not in ourTagNames):
                 raise MetadataError(STRING_ERROR_MISSING_TAG.substitute(tagName=tag.name))
         return metadata
 
-    return list(map(lambda *args: validatePair(tags, *args),
+    return list(map(
+        lambda *args: validatePair(tags, *args),
         withDefaults(withoutDuplicates(
             assertRequiredPresent(metadata)
         ))
     ))
 
 
-def validateWith(tags: List[Tag]):
+def validator(tags: List[Tag]) -> Callable[[Metadata], Metadata]:
     return lambda metadata: validate(tags, metadata)
 
 
 def valueGetter_all(metadata: Metadata) -> Callable[[Tag], List[TagValue]]:
     return lambda tag: [second(pair) for pair in metadata if first(pair) == tag.name]
+
 
 def valueGetter_one(metadata: Metadata) -> Callable[[Tag], Optional[TagValue]]:
     v = valueGetter_all(metadata)

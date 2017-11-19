@@ -1,11 +1,10 @@
 from typing import List, Callable, Pattern
-import glob, os, fnmatch, re
+import glob, os, re
 from bs4 import BeautifulSoup
 from mitmproxy import ctx, http
 from metadata import MetadataError
 import userscript
 from userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from warnings import warn
 from utilities import first, second
 import shlex
 import warnings
@@ -63,7 +62,7 @@ class UserscriptInjector:
 
             for unsafe_filename in glob.glob(PATTERN_USERSCRIPT):
                 filename = shlex.quote(unsafe_filename)
-                logInfo("Found " + filename + ".")
+                logInfo("Loading " + filename + " ...")
                 try:
                     content = open(filename).read()
                 except PermissionError:
@@ -98,7 +97,7 @@ class UserscriptInjector:
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
                     if isApplicable(script):
-                        logInfo("Injecting %s into %s ..." % (script.name, flow.request.url))
+                        logInfo(f"Injecting {script.name} into {flow.request.url} ...")
                         tag = soup.new_tag("script")
                         if script.runAt == document_start:
                             tag.string = script.content
@@ -106,7 +105,7 @@ class UserscriptInjector:
                         elif script.runAt == document_idle:
                             tag.string = userscript.wrapInEventListener("load", script.content)
                             soup.head.append(tag)
-                        elif script.runAt == document_end:
+                        else:
                             tag.string = script.content
                             soup.body.append(tag)
                 flow.response.content = str(soup).encode("utf8")
