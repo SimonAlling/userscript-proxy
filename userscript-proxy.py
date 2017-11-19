@@ -1,42 +1,55 @@
+from typing import List, Callable, Pattern
 import glob, os, fnmatch, re
 from bs4 import BeautifulSoup
 from mitmproxy import ctx, http
 from metadata import MetadataError
+import userscript
 from userscript import Userscript, UserscriptError, document_end, document_start, document_idle
 from warnings import warn
+from utilities import first, second
 import shlex
 import warnings
 
-def stringifyVersion(version):
-    return VERSION_PREFIX + str(version)
+def stringifyVersion(version: str) -> str:
+    return VERSION_PREFIX + version
 
-VERSION = "0.1.0"
-VERSION_PREFIX = "v"
-WELCOME_MESSAGE = "Userscript Proxy " + stringifyVersion(VERSION)
-DIRS_USERSCRIPTS = ["userscripts"]
-PATTERN_USERSCRIPT = "*.user.js"
-RELEVANT_CONTENT_TYPES = ["text/html"]
-REGEX_TEXT_HTML = re.compile(r"text/html")
-TAB = "    "
+VERSION: str = "0.1.0"
+VERSION_PREFIX: str = "v"
+WELCOME_MESSAGE: str = "Userscript Proxy " + stringifyVersion(VERSION)
+DIRS_USERSCRIPTS: List[str] = ["userscripts"]
+PATTERN_USERSCRIPT: str = "*.user.js"
+RELEVANT_CONTENT_TYPES: List[str] = ["text/html"]
+REGEX_TEXT_HTML: Pattern = re.compile(r"text/html")
+TAB: str = "    "
 
-def logInfo(s):
-    ctx.log.info(s)
+def logInfo(s: str) -> None:
+    try:
+        ctx.log.info(s)
+    except Exception:
+        print(s)
 
-def logWarning(s):
-    ctx.log.warn(s)
+def logWarning(s: str) -> None:
+    try:
+        ctx.log.warn(s)
+    except Exception:
+        print(s)
 
-def logError(s):
-    ctx.log.error(s)
+def logError(s: str) -> None:
+    try:
+        ctx.log.error(s)
+    except Exception:
+        print(s)
 
 class UserscriptInjector:
     def __init__(self):
-        self.userscripts = []
+        self.userscripts: List[Userscript] = []
         logInfo("")
         logInfo("╔═" + "═" * len(WELCOME_MESSAGE) + "═╗")
-        logInfo("║ " + WELCOME_MESSAGE            + " ║")
+        logInfo("║ " +           WELCOME_MESSAGE  + " ║")
         logInfo("╚═" + "═" * len(WELCOME_MESSAGE) + "═╝")
         logInfo("")
         logInfo("Loading userscripts ...")
+        loadedUserscripts: List[Tuple[Userscript, str]] = []
         for directory in DIRS_USERSCRIPTS:
             logInfo("Looking for userscripts (`"+PATTERN_USERSCRIPT+"`) in directory `"+directory+"` ...")
             try:
@@ -60,40 +73,41 @@ class UserscriptInjector:
                     logError("Could not read file `"+filename+"`: " + str(e))
                     continue
                 try:
-                    self.userscripts.append(Userscript(filename, content))
+                    loadedUserscripts.append((userscript.create(content), filename))
                 except MetadataError as err:
                     logError("Metadata error:")
-                    logError(err.str())
+                    logError(str(err))
                     continue
                 except UserscriptError as err:
                     logError("Userscript error:")
-                    logError(err.str())
+                    logError(str(err))
                     continue
 
         logInfo("")
-        logInfo(str(len(self.userscripts)) + " userscript(s) loaded:")
-        for s in self.userscripts:
-            logInfo(TAB + "• "+s.getName()+" ("+s.filename+")")
+        logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
+        for s in loadedUserscripts:
+            logInfo(TAB + "• "+first(s).name+" ("+second(s)+")")
         logInfo("")
+        self.userscripts = list(map(first, loadedUserscripts))
 
 
     def response(self, flow: http.HTTPFlow):
         if "Content-Type" in flow.response.headers:
             if REGEX_TEXT_HTML.match(flow.response.headers["Content-Type"]):
                 soup = BeautifulSoup(flow.response.content, "html.parser") # TODO: maybe change parser
+                isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
-                    if script.isApplicable(flow.request.url):
-                        logInfo("Injecting %s into %s ..." % (script.getName(), flow.request.url))
+                    if isApplicable(script):
+                        logInfo("Injecting %s into %s ..." % (script.name, flow.request.url))
                         tag = soup.new_tag("script")
-                        scriptContent = script.getContent()
                         if script.runAt == document_start:
-                            tag.string = scriptContent
+                            tag.string = script.content
                             soup.head.append(tag)
                         elif script.runAt == document_idle:
-                            tag.string = Userscript.wrapInEventListener("load", scriptContent)
+                            tag.string = userscript.wrapInEventListener("load", script.content)
                             soup.head.append(tag)
                         elif script.runAt == document_end:
-                            tag.string = scriptContent
+                            tag.string = script.content
                             soup.body.append(tag)
                 flow.response.content = str(soup).encode("utf8")
 

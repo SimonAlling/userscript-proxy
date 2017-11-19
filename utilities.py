@@ -1,7 +1,8 @@
-from typing import Any, TypeVar, Tuple
+from typing import List, Callable, Any, TypeVar, Tuple
 
 A = TypeVar('A')
 B = TypeVar('B')
+C = TypeVar('C')
 
 def first(tuple: Tuple[A, B]) -> A:
     (a, b) = tuple
@@ -15,3 +16,11 @@ def second(tuple: Tuple[A, B]) -> B:
 
 def isSomething(x: Any) -> bool:
     return x != None
+
+
+def strs(xs: Any) -> List[str]:
+	return list(map(str, xs))
+
+
+def compose2(f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
+    return lambda x: f(g(x))
