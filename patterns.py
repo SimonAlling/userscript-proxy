@@ -4,12 +4,19 @@ from utilities import first, isSomething
 
 REGEX_MATCH_ALL = r"<all_urls>"
 REGEX_MATCH_SCHEME = r"\*|https?"
+REGEXGROUP_MATCH_SCHEME = r"scheme"
 REGEX_MATCH_HOST = r"(\*\.)*[^\/\*]+|\*"
+REGEXGROUP_MATCH_HOST = r"host"
 REGEX_MATCH_PATH = r"\/.*"
+REGEXGROUP_MATCH_PATH = r"path"
 
 # Outer parentheses necessary to enclose `|`:
 REGEX_MATCH_PATTERN = re.compile(
-	r"^(?:" + REGEX_MATCH_ALL + r"|(" + REGEX_MATCH_SCHEME + r"):\/\/(" + REGEX_MATCH_HOST + r")(" + REGEX_MATCH_PATH + r"))$"
+	  r"^(?:" + REGEX_MATCH_ALL + r"|"
+	+ r"(?P<" + REGEXGROUP_MATCH_SCHEME + r">" + REGEX_MATCH_SCHEME + r"):\/\/"
+	+ r"(?P<" + REGEXGROUP_MATCH_HOST   + r">" + REGEX_MATCH_HOST   + r")"
+	+ r"(?P<" + REGEXGROUP_MATCH_PATH   + r">" + REGEX_MATCH_PATH   + r")"
+	+ r")$"
 )
 
 REGEX_INCLUDE_REGULAR = r"^(.+)$"
