@@ -13,41 +13,41 @@ MATCH_PATTERN_ALL_NORMALIZED = "*://*/*"
 
 # Outer parentheses necessary to enclose `|`:
 REGEX_MATCH_PATTERN = re.compile(
-	  r"^(?:" + REGEX_MATCH_ALL + r"|"
-	+ r"(?P<" + REGEXGROUP_MATCH_SCHEME + r">" + REGEX_MATCH_SCHEME + r"):\/\/"
-	+ r"(?P<" + REGEXGROUP_MATCH_HOST   + r">" + REGEX_MATCH_HOST   + r")"
-	+ r"(?P<" + REGEXGROUP_MATCH_PATH   + r">" + REGEX_MATCH_PATH   + r")"
-	+ r")$"
+      r"^(?:" + REGEX_MATCH_ALL + r"|"
+    + r"(?P<" + REGEXGROUP_MATCH_SCHEME + r">" + REGEX_MATCH_SCHEME + r"):\/\/"
+    + r"(?P<" + REGEXGROUP_MATCH_HOST   + r">" + REGEX_MATCH_HOST   + r")"
+    + r"(?P<" + REGEXGROUP_MATCH_PATH   + r">" + REGEX_MATCH_PATH   + r")"
+    + r")$"
 )
 
 REGEX_INCLUDE_REGULAR = r"^(.+)$"
 REGEX_INCLUDE_REGEX = r"^\/(.+)\/$"
 
 REGEX_INCLUDE_PATTERN = re.compile(
-	REGEX_INCLUDE_REGEX + "|" + REGEX_INCLUDE_REGULAR
+    REGEX_INCLUDE_REGEX + "|" + REGEX_INCLUDE_REGULAR
 )
 
 def normalizeMatchPattern(pattern: str) -> str:
     return MATCH_PATTERN_ALL_NORMALIZED if pattern == REGEX_MATCH_ALL else pattern
 
 def isMatchPattern(pattern: str) -> bool:
-	return isSomething(REGEX_MATCH_PATTERN.match(pattern))
+    return isSomething(REGEX_MATCH_PATTERN.match(pattern))
 
 def isIncludePattern(pattern: str) -> bool:
-	return isSomething(REGEX_INCLUDE_PATTERN.match(pattern))
+    return isSomething(REGEX_INCLUDE_PATTERN.match(pattern))
 
 def isIncludePattern_regex(pattern: str) -> bool:
-	return isSomething(re.compile(REGEX_INCLUDE_REGEX).match(pattern))
+    return isSomething(re.compile(REGEX_INCLUDE_REGEX).match(pattern))
 
 def withoutSurroundingSlashes(s: str) -> str:
-	return first(re.subn(re.compile(r"^\/|\/$"), "", s))
+    return first(re.subn(re.compile(r"^\/|\/$"), "", s))
 
 def regexFromIncludePattern(pattern: str) -> Pattern: # raises re.error
-	return (
-		re.compile(withoutSurroundingSlashes(pattern), re.IGNORECASE)
+    return (
+        re.compile(withoutSurroundingSlashes(pattern), re.IGNORECASE)
         if isIncludePattern_regex(pattern)
-		else re.compile(r"^" + regexify(pattern) + r"$", re.IGNORECASE)
-	)
+        else re.compile(r"^" + regexify(pattern) + r"$", re.IGNORECASE)
+    )
 
 def regexify(segment: str) -> str:
     return re.escape(segment).replace(r"\*", ".*")
