@@ -1,4 +1,4 @@
-from typing import List, Callable, Pattern
+from typing import Optional, List, Callable, Pattern, Match
 import glob, os, re
 from bs4 import BeautifulSoup
 from mitmproxy import ctx, http
@@ -18,6 +18,8 @@ WELCOME_MESSAGE: str = "Userscript Proxy " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS: List[str] = ["userscripts"]
 PATTERN_USERSCRIPT: str = "*.user.js"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html"]
+CHARSET_DEFAULT: str = "utf-8"
+REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 REGEX_TEXT_HTML: Pattern = re.compile(r"text/html")
 TAB: str = "    "
 
@@ -92,7 +94,8 @@ class UserscriptInjector:
 
     def response(self, flow: http.HTTPFlow):
         if "Content-Type" in flow.response.headers:
-            if REGEX_TEXT_HTML.match(flow.response.headers["Content-Type"]):
+            contentType: str = flow.response.headers["Content-Type"];
+            if REGEX_TEXT_HTML.match(contentType):
                 soup = BeautifulSoup(flow.response.content, "html.parser") # TODO: maybe change parser
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
@@ -108,7 +111,10 @@ class UserscriptInjector:
                         else:
                             tag.string = script.content
                             soup.body.append(tag)
-                flow.response.content = str(soup).encode("utf8")
+                # Keep character encoding:
+                match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
+                charset: str = CHARSET_DEFAULT if match_charset == None else match_charset.group(1)
+                flow.response.content = str(soup).encode(charset)
 
 
 def start():
