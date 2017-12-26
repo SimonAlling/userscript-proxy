@@ -1,4 +1,4 @@
-from typing import Pattern
+from typing import Optional, Pattern
 import re
 from utilities import first, isSomething
 
@@ -9,6 +9,7 @@ REGEX_MATCH_HOST = r"(\*\.)*[^\/\*]+|\*"
 REGEXGROUP_MATCH_HOST = r"host"
 REGEX_MATCH_PATH = r"\/.*"
 REGEXGROUP_MATCH_PATH = r"path"
+MATCH_PATTERN_ALL_NORMALIZED = "*://*/*"
 
 # Outer parentheses necessary to enclose `|`:
 REGEX_MATCH_PATTERN = re.compile(
@@ -26,6 +27,8 @@ REGEX_INCLUDE_PATTERN = re.compile(
 	REGEX_INCLUDE_REGEX + "|" + REGEX_INCLUDE_REGULAR
 )
 
+def normalizeMatchPattern(pattern: str) -> str:
+    return MATCH_PATTERN_ALL_NORMALIZED if pattern == REGEX_MATCH_ALL else pattern
 
 def isMatchPattern(pattern: str) -> bool:
 	return isSomething(REGEX_MATCH_PATTERN.match(pattern))
@@ -43,5 +46,24 @@ def regexFromIncludePattern(pattern: str) -> Pattern: # raises re.error
 	return (
 		re.compile(withoutSurroundingSlashes(pattern), re.IGNORECASE)
         if isIncludePattern_regex(pattern)
-		else re.compile(r"^" + re.escape(pattern).replace(r"\*", ".*") + r"$", re.IGNORECASE)
+		else re.compile(r"^" + regexify(pattern) + r"$", re.IGNORECASE)
 	)
+
+def regexify(segment: str) -> str:
+    return re.escape(segment).replace(r"\*", ".*")
+
+# Returns None if the pattern is invalid:
+def extractGroup(group: str, matchPattern: str) -> Optional[str]:
+    try:
+        return REGEX_MATCH_PATTERN.search(normalizeMatchPattern(matchPattern)).group(group)
+    except:
+        return None
+
+def schemeIn(matchPattern: str) -> Optional[str]:
+    return extractGroup(REGEXGROUP_MATCH_SCHEME, matchPattern)
+
+def hostIn(matchPattern: str) -> Optional[str]:
+    return extractGroup(REGEXGROUP_MATCH_HOST, matchPattern)
+
+def pathIn(matchPattern: str) -> Optional[str]:
+    return extractGroup(REGEXGROUP_MATCH_PATH, matchPattern)
