@@ -2,12 +2,13 @@ from typing import Optional, Iterable, List, Callable, Pattern, Match
 import glob, os, re
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
+from functools import partial
 import shlex
 import warnings
 from lib.metadata import MetadataError
 import lib.userscript as userscript
 from lib.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from lib.utilities import first, second
+from lib.utilities import first, second, itemList
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
@@ -47,9 +48,6 @@ def logError(s: str) -> None:
     except Exception:
         print(s)
 
-def itemList(strs: Iterable[str]) -> str:
-    return "\n".join(map(lambda s: LIST_ITEM_PREFIX + s, strs))
-
 def indexOfDoctype(soup: BeautifulSoup) -> Optional[int]:
     index: int = 0
     for item in soup.contents:
@@ -57,6 +55,8 @@ def indexOfDoctype(soup: BeautifulSoup) -> Optional[int]:
             return index
         index += 1
     return None
+
+bulletList: Callable[[Iterable[str]], str] = partial(itemList, LIST_ITEM_PREFIX)
 
 class UserscriptInjector:
     def __init__(self):
@@ -103,7 +103,7 @@ class UserscriptInjector:
 
         logInfo("")
         logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
-        logInfo(itemList(map(
+        logInfo(bulletList(map(
             lambda s: f"{first(s).name} ({second(s)})",
             loadedUserscripts
         )))
@@ -139,7 +139,7 @@ class UserscriptInjector:
                 soup.insert(0 if index is None else 1+index, Comment(
                     INFO_COMMENT_PREFIX + (
                         "No matching userscripts for this URL." if insertedScripts == []
-                        else "These scripts were inserted:\n" + itemList(insertedScripts)
+                        else "These scripts were inserted:\n" + bulletList(insertedScripts)
                     ) + "\n"
                 ))
                 # Prevent BS/html.parser from emitting `<!DOCTYPE doctype html>` or similar if "DOCTYPE" is not all uppercase in source HTML:
