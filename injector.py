@@ -1,6 +1,6 @@
-from typing import Optional, List, Callable, Pattern, Match
+from typing import Optional, Iterable, List, Callable, Pattern, Match
 import glob, os, re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
 import shlex
 import warnings
@@ -14,14 +14,19 @@ def stringifyVersion(version: str) -> str:
 
 VERSION: str = "0.2.0"
 VERSION_PREFIX: str = "v"
-WELCOME_MESSAGE: str = "Userscript Proxy " + stringifyVersion(VERSION)
+APP_NAME: str = "Userscript Proxy"
+WELCOME_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS: List[str] = ["userscripts"]
 PATTERN_USERSCRIPT: str = "*.user.js"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
 CHARSET_DEFAULT: str = "utf-8"
 REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 TAB: str = "    "
+LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "html.parser"
+INFO_COMMENT_PREFIX: str = f"""
+[{WELCOME_MESSAGE}]
+"""
 
 def logInfo(s: str) -> None:
     try:
@@ -40,6 +45,17 @@ def logError(s: str) -> None:
         ctx.log.error(s)
     except Exception:
         print(s)
+
+def itemList(strs: Iterable[str]) -> str:
+    return "\n".join(map(lambda s: LIST_ITEM_PREFIX + s, strs))
+
+def indexOfDoctype(soup: BeautifulSoup) -> Optional[int]:
+    index: int = 0
+    for item in soup.contents:
+        if isinstance(item, Doctype):
+            return index
+        index += 1
+    return None
 
 class UserscriptInjector:
     def __init__(self):
@@ -86,8 +102,10 @@ class UserscriptInjector:
 
         logInfo("")
         logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
-        for s in loadedUserscripts:
-            logInfo(TAB + "• "+first(s).name+" ("+second(s)+")")
+        logInfo(itemList(map(
+            lambda s: f"{first(s).name} ({second(s)})",
+            loadedUserscripts
+        )))
         logInfo("")
         self.userscripts = list(map(first, loadedUserscripts))
 
@@ -98,11 +116,13 @@ class UserscriptInjector:
             contentType: str = flow.response.headers[HEADER_CONTENT_TYPE];
             if any(map(lambda t: t in contentType, RELEVANT_CONTENT_TYPES)):
                 # Response is a web page; proceed.
+                insertedScripts: List[str] = []
                 soup = BeautifulSoup(flow.response.content, HTML_PARSER)
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
                     if isApplicable(script):
                         logInfo(f"Injecting {script.name} into {flow.request.url} ...")
+                        insertedScripts.append(script.name)
                         tag = soup.new_tag("script")
                         if script.runAt == document_start:
                             tag.string = script.content
@@ -113,6 +133,14 @@ class UserscriptInjector:
                         else:
                             tag.string = script.content
                             soup.body.append(tag)
+                # Insert information comment:
+                index: Optional[int] = indexOfDoctype(soup)
+                soup.insert(0 if index is None else 1+index, Comment(
+                    INFO_COMMENT_PREFIX + (
+                        "No matching userscripts for this URL." if insertedScripts == []
+                        else "These scripts were inserted:\n" + itemList(insertedScripts)
+                    ) + "\n"
+                ))
                 # Keep character encoding:
                 match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
                 charset: str = CHARSET_DEFAULT if match_charset is None else match_charset.group(1)
