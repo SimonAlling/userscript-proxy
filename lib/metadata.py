@@ -109,7 +109,7 @@ def isCommentLine(s: str) -> bool:
 
 def extract(userscriptContent: str) -> str: # raises MetadataError
     match_metadataBlock: Optional[Match] = REGEX_METADATA_BLOCK.search(userscriptContent)
-    if (match_metadataBlock == None):
+    if (match_metadataBlock is None):
         raise MetadataError(STRING_ERROR_MISSING_BLOCK)
     block: str = match_metadataBlock.group(REGEXGROUP_CONTENT)
     for line in block.splitlines():
@@ -121,7 +121,7 @@ def extract(userscriptContent: str) -> str: # raises MetadataError
 def parse(metadataContent: str) -> Metadata:
     def parseLine(line: str) -> Optional[MetadataItem]:
         match: Optional[Match] = REGEX_METADATA_LINE.search(line)
-        if match == None:
+        if match is None:
             # if not REGEX_EMPTY_LINE_COMMENT.match(line): # TODO: uncomment when we can handle warnings
             #     warnings.warn(STRING_WARNING_NO_MATCH.substitute(line=line))
             return None
@@ -143,7 +143,7 @@ def tagByName(tags: List[Tag], tagName: str) -> Optional[Tag]:
 def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
     (tagName, tagValue) = pair
     tag: Tag = tagByName(tags, tagName)
-    if tag == None:
+    if tag is None:
         # Unrecognized key.
         return (tagName, tagValue)
     else:

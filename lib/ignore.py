@@ -3,18 +3,19 @@ import re
 from lib.utilities import compose2, not_, beginsWith
 from lib.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
-PREFIX_COMMENT: str = "#"
+COMMENT_PREFIX: str = "#"
+PORT_PREFIX: str = ":"
 PIPE: str = "|"
 
 def rulesIn(text: str) -> List[str]:
     return list(filter(
-        compose2(not_, beginsWith(PREFIX_COMMENT)),
+        compose2(not_, beginsWith(COMMENT_PREFIX)),
         filter(lambda s: s != "", text.splitlines())
     ))
 
 
 def withPortSuffix(regex: str) -> str:
-    return regex + r"\:\d+" if re.compile(r":").search(regex) == None else regex
+    return regex if PORT_PREFIX in regex else regex + r"\:\d+"
 
 
 def ignoreRegex(ignoreRule: str) -> str:
