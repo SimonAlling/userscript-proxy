@@ -1,4 +1,4 @@
-from typing import List, Callable, Any, TypeVar, Tuple
+from typing import Optional, List, Callable, Any, TypeVar, Tuple
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -6,7 +6,7 @@ C = TypeVar('C')
 
 
 def not_(x: bool) -> bool:
-	return not x
+    return not x
 
 
 def first(tuple: Tuple[A, B]) -> A:
@@ -19,12 +19,12 @@ def second(tuple: Tuple[A, B]) -> B:
     return b
 
 
-def isSomething(x: Any) -> bool:
-    return x != None
+def isSomething(x: Optional[A]) -> bool:
+    return x is not None
 
 
 def strs(xs: Any) -> List[str]:
-	return list(map(str, xs))
+    return list(map(str, xs))
 
 
 def compose2(f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
@@ -32,4 +32,4 @@ def compose2(f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
 
 
 def beginsWith(prefix: str) -> Callable[[str], bool]:
-	return lambda s: s.startswith(prefix)
+    return lambda s: s.startswith(prefix)

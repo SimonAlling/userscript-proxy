@@ -22,6 +22,7 @@ CHARSET_DEFAULT: str = "utf-8"
 REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 REGEX_TEXT_HTML: Pattern = re.compile(r"text/html")
 TAB: str = "    "
+HTML_PARSER: str = "html.parser"
 
 def logInfo(s: str) -> None:
     try:
@@ -96,7 +97,7 @@ class UserscriptInjector:
         if "Content-Type" in flow.response.headers:
             contentType: str = flow.response.headers["Content-Type"];
             if REGEX_TEXT_HTML.match(contentType):
-                soup = BeautifulSoup(flow.response.content, "html.parser") # TODO: maybe change parser
+                soup = BeautifulSoup(flow.response.content, HTML_PARSER)
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
                     if isApplicable(script):
@@ -113,7 +114,7 @@ class UserscriptInjector:
                             soup.body.append(tag)
                 # Keep character encoding:
                 match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
-                charset: str = CHARSET_DEFAULT if match_charset == None else match_charset.group(1)
+                charset: str = CHARSET_DEFAULT if match_charset is None else match_charset.group(1)
                 flow.response.content = str(soup).encode(charset)
 
 
