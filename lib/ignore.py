@@ -1,17 +1,21 @@
-from typing import List
+from typing import List, Pattern
 import re
-from lib.utilities import compose2, not_, beginsWith
 from lib.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
 COMMENT_PREFIX: str = "#"
 PORT_PREFIX: str = ":"
 PIPE: str = "|"
+REGEX_COMMENT: Pattern = re.compile(r"\#.*$")
 
 def rulesIn(text: str) -> List[str]:
     return list(filter(
-        compose2(not_, beginsWith(COMMENT_PREFIX)),
-        filter(lambda s: s != "", text.splitlines())
+        lambda s: s != "",
+        map(withoutCommentAndTrimmed, text.splitlines())
     ))
+
+
+def withoutCommentAndTrimmed(line: str) -> str:
+    return re.sub(REGEX_COMMENT, "", line).strip()
 
 
 def withPortSuffix(regex: str) -> str:
