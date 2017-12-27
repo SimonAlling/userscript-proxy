@@ -24,6 +24,7 @@ REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "html.parser"
+REGEX_DOCTYPE: Pattern = re.compile(r"doctype\s+", re.I)
 INFO_COMMENT_PREFIX: str = f"""
 [{WELCOME_MESSAGE}]
 """
@@ -141,6 +142,10 @@ class UserscriptInjector:
                         else "These scripts were inserted:\n" + itemList(insertedScripts)
                     ) + "\n"
                 ))
+                # Prevent BS/html.parser from emitting `<!DOCTYPE doctype html>` or similar if "DOCTYPE" is not all uppercase in source HTML:
+                if index is not None and REGEX_DOCTYPE.match(soup.contents[index]):
+                    # There is a DTD and it is invalid, so replace it.
+                    soup.contents[index] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index]))
                 # Keep character encoding:
                 match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
                 charset: str = CHARSET_DEFAULT if match_charset is None else match_charset.group(1)
