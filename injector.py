@@ -17,10 +17,9 @@ VERSION_PREFIX: str = "v"
 WELCOME_MESSAGE: str = "Userscript Proxy " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS: List[str] = ["userscripts"]
 PATTERN_USERSCRIPT: str = "*.user.js"
-RELEVANT_CONTENT_TYPES: List[str] = ["text/html"]
+RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
 CHARSET_DEFAULT: str = "utf-8"
 REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
-REGEX_TEXT_HTML: Pattern = re.compile(r"text/html")
 TAB: str = "    "
 HTML_PARSER: str = "html.parser"
 
@@ -94,9 +93,11 @@ class UserscriptInjector:
 
 
     def response(self, flow: http.HTTPFlow):
-        if "Content-Type" in flow.response.headers:
-            contentType: str = flow.response.headers["Content-Type"];
-            if REGEX_TEXT_HTML.match(contentType):
+        HEADER_CONTENT_TYPE: str = "Content-Type"
+        if HEADER_CONTENT_TYPE in flow.response.headers:
+            contentType: str = flow.response.headers[HEADER_CONTENT_TYPE];
+            if any(map(lambda t: t in contentType, RELEVANT_CONTENT_TYPES)):
+                # Response is a web page; proceed.
                 soup = BeautifulSoup(flow.response.content, HTML_PARSER)
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
