@@ -1,12 +1,12 @@
 from typing import Optional, Tuple, List, NamedTuple, Callable, Pattern
 import re
-import metadata
 import warnings
 from string import Template
-from utilities import first, second, isSomething, strs, compose2
-from metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
 from urlmatch import urlmatch
-from patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
+import lib.metadata as metadata
+from lib.utilities import first, second, isSomething, strs, compose2
+from lib.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
+from lib.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 
 class UserscriptError(Exception):
     def __init__(self,*args,**kwargs):

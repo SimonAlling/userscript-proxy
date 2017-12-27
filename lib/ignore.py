@@ -1,7 +1,7 @@
 from typing import List
 import re
-from utilities import compose2, not_, beginsWith
-from patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
+from lib.utilities import compose2, not_, beginsWith
+from lib.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
 PREFIX_COMMENT: str = "#"
 PIPE: str = "|"

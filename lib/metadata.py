@@ -2,9 +2,9 @@ from typing import TypeVar, Tuple, List, Iterator, Iterable, Pattern, Match, Opt
 import re
 from string import Template
 from functools import reduce
-from utilities import first, second, isSomething
 import itertools
 import warnings
+from lib.utilities import first, second, isSomething
 
 class MetadataError(Exception):
     def __init__(self,*args,**kwargs):
