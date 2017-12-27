@@ -27,20 +27,26 @@ REGEX_INCLUDE_PATTERN = re.compile(
     REGEX_INCLUDE_REGEX + "|" + REGEX_INCLUDE_REGULAR
 )
 
+
 def normalizeMatchPattern(pattern: str) -> str:
     return MATCH_PATTERN_ALL_NORMALIZED if pattern == REGEX_MATCH_ALL else pattern
+
 
 def isMatchPattern(pattern: str) -> bool:
     return isSomething(REGEX_MATCH_PATTERN.match(pattern))
 
+
 def isIncludePattern(pattern: str) -> bool:
     return isSomething(REGEX_INCLUDE_PATTERN.match(pattern))
+
 
 def isIncludePattern_regex(pattern: str) -> bool:
     return isSomething(re.compile(REGEX_INCLUDE_REGEX).match(pattern))
 
+
 def withoutSurroundingSlashes(s: str) -> str:
     return first(re.subn(re.compile(r"^\/|\/$"), "", s))
+
 
 def regexFromIncludePattern(pattern: str) -> Pattern: # raises re.error
     return (
@@ -49,8 +55,10 @@ def regexFromIncludePattern(pattern: str) -> Pattern: # raises re.error
         else re.compile(r"^" + regexify(pattern) + r"$", re.IGNORECASE)
     )
 
+
 def regexify(segment: str) -> str:
     return re.escape(segment).replace(r"\*", ".*")
+
 
 # Returns None if the pattern is invalid:
 def extractGroup(group: str, matchPattern: str) -> Optional[str]:
@@ -59,11 +67,14 @@ def extractGroup(group: str, matchPattern: str) -> Optional[str]:
     except:
         return None
 
+
 def schemeIn(matchPattern: str) -> Optional[str]:
     return extractGroup(REGEXGROUP_MATCH_SCHEME, matchPattern)
 
+
 def hostIn(matchPattern: str) -> Optional[str]:
     return extractGroup(REGEXGROUP_MATCH_HOST, matchPattern)
+
 
 def pathIn(matchPattern: str) -> Optional[str]:
     return extractGroup(REGEXGROUP_MATCH_PATH, matchPattern)
