@@ -26,6 +26,7 @@ TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "html.parser"
 REGEX_DOCTYPE: Pattern = re.compile(r"doctype\s+", re.I)
+ATTRIBUTE_UP_VERSION: str = "data-userscript-proxy-version"
 INFO_COMMENT_PREFIX: str = f"""
 [{WELCOME_MESSAGE}]
 """
@@ -125,6 +126,7 @@ class UserscriptInjector:
                         logInfo(f"Injecting {script.name} into {flow.request.url} ...")
                         insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
                         tag = soup.new_tag("script")
+                        tag[ATTRIBUTE_UP_VERSION] = VERSION
                         if script.runAt == document_start:
                             tag.string = script.content
                             soup.head.append(tag)
