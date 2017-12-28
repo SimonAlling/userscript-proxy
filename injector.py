@@ -92,7 +92,7 @@ class UserscriptInjector:
                     logError("Could not read file `"+filename+"`: " + str(e))
                     continue
                 try:
-                    loadedUserscripts.append((userscript.create("\n" + content + "\n"), filename))
+                    loadedUserscripts.append((userscript.create(content), filename))
                 except MetadataError as err:
                     logError("Metadata error:")
                     logError(str(err))
@@ -127,14 +127,19 @@ class UserscriptInjector:
                         insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
                         tag = soup.new_tag("script")
                         tag[ATTRIBUTE_UP_VERSION] = VERSION
+                        scriptContent: str = (
+                            "\n" +
+                            (userscript.withNoframes(script.content) if script.noframes else script.content) +
+                            "\n"
+                        )
                         if script.runAt == document_start:
-                            tag.string = script.content
+                            tag.string = scriptContent
                             soup.head.append(tag)
                         elif script.runAt == document_idle:
-                            tag.string = userscript.wrapInEventListener("load", script.content)
+                            tag.string = userscript.wrapInEventListener("load", scriptContent)
                             soup.head.append(tag)
                         else:
-                            tag.string = script.content
+                            tag.string = scriptContent
                             soup.body.append(tag)
                 # Insert information comment:
                 index_DTD: Optional[int] = indexOfDTD(soup)
