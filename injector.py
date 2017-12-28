@@ -49,7 +49,7 @@ def logError(s: str) -> None:
     except Exception:
         print(s)
 
-def indexOfDoctype(soup: BeautifulSoup) -> Optional[int]:
+def indexOfDTD(soup: BeautifulSoup) -> Optional[int]:
     index: int = 0
     for item in soup.contents:
         if isinstance(item, Doctype):
@@ -137,17 +137,17 @@ class UserscriptInjector:
                             tag.string = script.content
                             soup.body.append(tag)
                 # Insert information comment:
-                index: Optional[int] = indexOfDoctype(soup)
-                soup.insert(0 if index is None else 1+index, Comment(
+                index_DTD: Optional[int] = indexOfDTD(soup)
+                soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
                     INFO_COMMENT_PREFIX + (
                         "No matching userscripts for this URL." if insertedScripts == []
                         else "These scripts were inserted:\n" + bulletList(insertedScripts)
                     ) + "\n"
                 ))
                 # Prevent BS/html.parser from emitting `<!DOCTYPE doctype html>` or similar if "DOCTYPE" is not all uppercase in source HTML:
-                if index is not None and REGEX_DOCTYPE.match(soup.contents[index]):
+                if index_DTD is not None and REGEX_DOCTYPE.match(soup.contents[index_DTD]):
                     # There is a DTD and it is invalid, so replace it.
-                    soup.contents[index] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index]))
+                    soup.contents[index_DTD] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index_DTD]))
                 # Keep character encoding:
                 match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
                 charset: str = CHARSET_DEFAULT if match_charset is None else match_charset.group(1)
