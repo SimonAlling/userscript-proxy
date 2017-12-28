@@ -92,7 +92,7 @@ class UserscriptInjector:
                     logError("Could not read file `"+filename+"`: " + str(e))
                     continue
                 try:
-                    loadedUserscripts.append((userscript.create(content), filename))
+                    loadedUserscripts.append((userscript.create("\n" + content + "\n"), filename))
                 except MetadataError as err:
                     logError("Metadata error:")
                     logError(str(err))
