@@ -161,6 +161,14 @@ def wrapInEventListener(event: str, scriptContent: str) -> str:
     return f"""window.addEventListener("{event}", function() {{\n{scriptContent}\n}});"""
 
 
+def withNoframes(scriptContent: str) -> str:
+    return f"""if (window.top === window) {{ // {PREFIX_TAG + directive_noframes}
+
+{scriptContent}
+
+}}"""
+
+
 def regexFromIncludePattern_safe(pattern: str) -> Optional[Pattern]:
     try:
         return regexFromIncludePattern(pattern)
