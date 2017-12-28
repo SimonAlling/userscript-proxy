@@ -123,7 +123,7 @@ class UserscriptInjector:
                 for script in self.userscripts:
                     if isApplicable(script):
                         logInfo(f"Injecting {script.name} into {flow.request.url} ...")
-                        insertedScripts.append(script.name)
+                        insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
                         tag = soup.new_tag("script")
                         if script.runAt == document_start:
                             tag.string = script.content

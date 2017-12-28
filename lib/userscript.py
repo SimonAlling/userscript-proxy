@@ -66,6 +66,13 @@ tag_noframes: Tag_boolean = Tag_boolean(
     required = False,
     predicate = None,
 )
+tag_version: Tag_string = Tag_string(
+    name = directive_version,
+    unique = True,
+    default = None,
+    required = False,
+    predicate = None,
+)
 
 METADATA_TAGS: List[Tag] = [
     tag_name,
@@ -74,13 +81,7 @@ METADATA_TAGS: List[Tag] = [
     tag_noframes,
     tag_include,
     tag_exclude,
-    Tag_string(
-        name = directive_version,
-        unique = True,
-        default = "0.0.0",
-        required = False,
-        predicate = None,
-    ),
+    tag_version,
 ]
 
 validateMetadata: Callable[[Metadata], Metadata] = metadata.validator(METADATA_TAGS)
@@ -99,6 +100,7 @@ The regex engine reported this error:
 
 class Userscript(NamedTuple):
     name: str
+    version: Optional[str]
     content: str
     runAt: str
     noframes: bool
@@ -130,6 +132,7 @@ def create(content: str) -> Userscript:
     ))
     return Userscript(
         name = str(valueOf(tag_name)),
+        version = None if valueOf(tag_version) is None else str(valueOf(tag_version)),
         content = content,
         runAt = str(valueOf(tag_run_at)),
         noframes = bool(valueOf(tag_noframes)),
