@@ -156,7 +156,7 @@ class UserscriptInjector:
                 # Keep character encoding:
                 match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
                 charset: str = CHARSET_DEFAULT if match_charset is None else match_charset.group(1)
-                flow.response.content = str(soup).encode(charset)
+                flow.response.content = soup.prettify().encode(charset, "replace")
 
 
 def start():
