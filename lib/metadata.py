@@ -152,7 +152,7 @@ def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
         if type(tag) is Tag_string and type(tagValue) is not str:
             raise MetadataError(STRING_ERROR_MISSING_VALUE.substitute(tagName=tagName))
         if type(tag) is Tag_boolean:
-            tagValue = True # This handles cases like `@noframes blabla`; a boolean directive is true no matter what comes after it.
+            tagValue = tagValue is not False # This handles cases like `@noframes blabla`; a boolean directive is true no matter what comes after it.
         if isSomething(tagPredicate):
             if not tagPredicate(tagValue):
                 raise MetadataError(STRING_ERROR_PREDICATE_FAILED.substitute(tagName=tagName, tagValue=str(tagValue)))
