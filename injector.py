@@ -141,15 +141,23 @@ class UserscriptInjector:
                             (userscript.withNoframes(script.content) if script.noframes else script.content) +
                             "\n"
                         )
-                        if script.runAt == document_start:
-                            tag.string = scriptContent
-                            soup.head.append(tag)
-                        elif script.runAt == document_idle:
-                            tag.string = userscript.wrapInEventListener("load", scriptContent)
-                            soup.head.append(tag)
-                        else:
-                            tag.string = scriptContent
-                            soup.body.append(tag)
+                        try:
+                            if script.runAt == document_end:
+                                tag.string = scriptContent
+                                (soup.body if soup.body is not None else soup).append(tag)
+                            else:
+                                tag.string = scriptContent if script.runAt == document_start else userscript.wrapInEventListener("load", scriptContent)
+                                if soup.head is not None:
+                                    soup.head.append(tag)
+                                elif soup.title is not None:
+                                    soup.title.insert_after(tag)
+                                elif soup.find() is not None:
+                                    soup.find().insert_before(tag) # before first element
+                                else:
+                                    soup.append(tag)
+                        except Exception as e:
+                            logError("Injection failed due to the following error:")
+                            logError(str(e))
                 # Insert information comment:
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
