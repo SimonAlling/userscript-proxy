@@ -7,9 +7,9 @@ Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, inje
 
 ## Security
 
-**UP can (and must be able to) read all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
+**UP can (and must be able to) read and modify all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
 
-Exceptions can be specified by adding ignore rules to `ignore.txt`. (This is even necessary for apps like Facebook Messenger and App Store, which refuse to connect through a MITM proxy.) **Traffic from/to hosts matched by such rules is not decrypted and cannot be read by mitmproxy or Userscript Proxy.**
+Exceptions can be specified by adding ignore rules to `ignore.txt`. (This is even necessary for apps like Facebook Messenger and App Store, which refuse to connect through a MITM proxy.) **Traffic to and from hosts matched by such rules _cannot_ be read or modified by mitmproxy or Userscript Proxy.**
 
 
 ## Data usage
