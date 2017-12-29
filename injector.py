@@ -19,6 +19,7 @@ APP_NAME: str = "Userscript Proxy"
 WELCOME_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS: List[str] = ["userscripts"]
 PATTERN_USERSCRIPT: str = "*.user.js"
+CONTENT_TYPE: str = "Content-Type"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
 CHARSET_DEFAULT: str = "utf-8"
 REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
@@ -58,6 +59,11 @@ def indexOfDTD(soup: BeautifulSoup) -> Optional[int]:
     return None
 
 bulletList: Callable[[Iterable[str]], str] = partial(itemList, LIST_ITEM_PREFIX)
+
+def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
+    httpHeaderValue = response.headers.get(CONTENT_TYPE, "").lower()
+    match = REGEX_CHARSET.search(httpHeaderValue)
+    return match.group(0) if match else None
 
 class UserscriptInjector:
     def __init__(self):
@@ -113,13 +119,16 @@ class UserscriptInjector:
 
 
     def response(self, flow: http.HTTPFlow):
-        HEADER_CONTENT_TYPE: str = "Content-Type"
-        if HEADER_CONTENT_TYPE in flow.response.headers:
-            contentType: str = flow.response.headers[HEADER_CONTENT_TYPE];
-            if any(map(lambda t: t in contentType, RELEVANT_CONTENT_TYPES)):
+        response = flow.response
+        if CONTENT_TYPE in response.headers:
+            if any(map(lambda t: t in response.headers[CONTENT_TYPE], RELEVANT_CONTENT_TYPES)):
                 # Response is a web page; proceed.
                 insertedScripts: List[str] = []
-                soup = BeautifulSoup(flow.response.content, HTML_PARSER)
+                soup = BeautifulSoup(
+                    response.content,
+                    HTML_PARSER,
+                    from_encoding=inferEncoding(response)
+                )
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
                     if isApplicable(script):
@@ -153,10 +162,11 @@ class UserscriptInjector:
                 if index_DTD is not None and REGEX_DOCTYPE.match(soup.contents[index_DTD]):
                     # There is a DTD and it is invalid, so replace it.
                     soup.contents[index_DTD] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index_DTD]))
-                # Keep character encoding:
-                match_charset: Optional[Match] = REGEX_CHARSET.search(contentType)
-                charset: str = CHARSET_DEFAULT if match_charset is None else match_charset.group(1)
-                flow.response.content = soup.prettify().encode(charset, "replace")
+                # Serialize and encode:
+                response.content = soup.prettify().encode(
+                    soup.original_encoding if soup.original_encoding is not None else CHARSET_DEFAULT,
+                    "replace"
+                )
 
 
 def start():
