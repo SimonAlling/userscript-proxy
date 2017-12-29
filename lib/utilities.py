@@ -27,5 +27,9 @@ def compose2(f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
     return lambda x: f(g(x))
 
 
+def fromOptional(value: Optional[A], fallback: A) -> A:
+    return value if value is not None else fallback
+
+
 def itemList(prefix: str, strs: Iterable[str]) -> str:
     return "\n".join(map(lambda s: prefix + s, strs))

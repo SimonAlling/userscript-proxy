@@ -8,7 +8,7 @@ import warnings
 from lib.metadata import MetadataError
 import lib.userscript as userscript
 from lib.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from lib.utilities import first, second, itemList
+from lib.utilities import first, second, itemList, fromOptional
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
@@ -144,7 +144,7 @@ class UserscriptInjector:
                         try:
                             if script.runAt == document_end:
                                 tag.string = scriptContent
-                                (soup.body if soup.body is not None else soup).append(tag)
+                                fromOptional(soup.body, soup).append(tag)
                             else:
                                 tag.string = scriptContent if script.runAt == document_start else userscript.wrapInEventListener("load", scriptContent)
                                 if soup.head is not None:
@@ -172,7 +172,7 @@ class UserscriptInjector:
                     soup.contents[index_DTD] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index_DTD]))
                 # Serialize and encode:
                 response.content = soup.prettify().encode(
-                    soup.original_encoding if soup.original_encoding is not None else CHARSET_DEFAULT,
+                    fromOptional(soup.original_encoding, CHARSET_DEFAULT),
                     "replace"
                 )
 
