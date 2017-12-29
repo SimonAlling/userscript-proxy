@@ -13,7 +13,7 @@ from lib.utilities import first, second, itemList, fromOptional
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
 
-VERSION: str = "0.3.1"
+VERSION: str = "0.4.0"
 VERSION_PREFIX: str = "v"
 APP_NAME: str = "Userscript Proxy"
 WELCOME_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
