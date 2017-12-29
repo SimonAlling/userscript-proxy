@@ -63,7 +63,7 @@ bulletList: Callable[[Iterable[str]], str] = partial(itemList, LIST_ITEM_PREFIX)
 def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     httpHeaderValue = response.headers.get(CONTENT_TYPE, "").lower()
     match = REGEX_CHARSET.search(httpHeaderValue)
-    return match.group(0) if match else None
+    return match.group(1) if match else None
 
 class UserscriptInjector:
     def __init__(self):
@@ -171,7 +171,7 @@ class UserscriptInjector:
                     # There is a DTD and it is invalid, so replace it.
                     soup.contents[index_DTD] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index_DTD]))
                 # Serialize and encode:
-                response.content = soup.prettify().encode(
+                response.content = str(soup).encode(
                     fromOptional(soup.original_encoding, CHARSET_DEFAULT),
                     "replace"
                 )
