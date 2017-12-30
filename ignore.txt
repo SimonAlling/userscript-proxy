@@ -31,6 +31,8 @@
 
 # Traffic irrelevant to Userscript Proxy:
     /cdn\./
+    akamai*.net                # Akamai CDN
+    googleusercontent.com      # Google CDN
     i.ytimg.com                # YouTube thumbnails
     *.googlevideo.com          # YouTube video content
     api.twitch.tv              # Twitch app metadata
