@@ -107,6 +107,7 @@ class UserscriptInjector:
                     logError("Userscript error:")
                     logError(str(err))
                     continue
+            os.chdir("..") # so mitmproxy does not unload the script
 
         logInfo("")
         logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
@@ -177,5 +178,4 @@ class UserscriptInjector:
                 )
 
 
-def start():
-    return UserscriptInjector()
+addons = [ UserscriptInjector() ]
