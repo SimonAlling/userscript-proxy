@@ -128,12 +128,18 @@ def parse(metadataContent: str) -> Metadata:
         else:
             tagName: str = match.group(REGEXGROUP_TAGNAME)
             tagValue: Optional[str] = match.group(REGEXGROUP_TAGVALUE)
-            return (tagName, tagValue if isSomething(tagValue) else True) # Boolean tags have no explicit value; if they are present, they are true.
+            # Boolean tags have no explicit value; if they are present, they are true:
+            if tagValue is None:
+                return (tagName, True)
+            else:
+                return (tagName, tagValue)
 
-    return list(filter(
-        isSomething,
-        map(parseLine, metadataContent.splitlines())
-    ))
+    # filter did not play well with mypy:
+    parsedItems: Metadata = []
+    for item in map(parseLine, metadataContent.splitlines()):
+        if item is not None:
+            parsedItems.append(item)
+    return parsedItems
 
 
 def tagByName(tags: List[Tag], tagName: str) -> Optional[Tag]:
@@ -142,7 +148,7 @@ def tagByName(tags: List[Tag], tagName: str) -> Optional[Tag]:
 
 def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
     (tagName, tagValue) = pair
-    tag: Tag = tagByName(tags, tagName)
+    tag: Optional[Tag] = tagByName(tags, tagName)
     if tag is None:
         # Unrecognized key.
         return (tagName, tagValue)
@@ -153,7 +159,7 @@ def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
             raise MetadataError(STRING_ERROR_MISSING_VALUE.substitute(tagName=tagName))
         if type(tag) is Tag_boolean:
             tagValue = tagValue is not False # This handles cases like `@noframes blabla`; a boolean directive is true no matter what comes after it.
-        if isSomething(tagPredicate):
+        if tagPredicate is not None:
             if not tagPredicate(tagValue):
                 raise MetadataError(STRING_ERROR_PREDICATE_FAILED.substitute(tagName=tagName, tagValue=str(tagValue)))
         return (tagName, tagValue)
@@ -162,22 +168,28 @@ def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
 def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises MetadataError
     def handleDuplicate(acc: Iterable[MetadataItem], pair: MetadataItem) -> Iterable[MetadataItem]:
         name: str = first(pair)
-        tag: Tag = tagByName(tags, name)
+        tag: Optional[Tag] = tagByName(tags, name)
         seenTagNames: Iterator[str] = map(first, acc)
         # Throw away pair if it has the same tag name as some already seen, known, unique directive:
-        return acc if isSomething(tag) and tag.unique and name in seenTagNames else list(acc) + [pair]
+        return acc if tag is not None and tag.unique and name in seenTagNames else list(acc) + [pair]
 
     def withoutDuplicates(metadata: Metadata) -> Metadata:
         return list(reduce(handleDuplicate, metadata, []))
 
+    # Awkwardly written to satisfy mypy:
     def withDefaults(metadata: Metadata) -> Metadata:
         tagNamesThatWeHave: List[str] = list(map(first, metadata))
-        def hasDefaultAndNotAlreadyParsed(tag: Tag) -> bool:
-            return isSomething(tag.default) and tag.name not in tagNamesThatWeHave
-        neededDefaults: Metadata = list(map(
+        unseenItems = map(
             lambda tag: (tag.name, tag.default),
-            filter(hasDefaultAndNotAlreadyParsed, tags)
-        ))
+            filter(
+                lambda tag: tag.name not in tagNamesThatWeHave,
+                tags
+            )
+        )
+        neededDefaults: Metadata = []
+        for (tagName, default) in unseenItems:
+            if default is not None:
+                neededDefaults.append((tagName, default))
         return metadata + neededDefaults
 
     def assertRequiredPresent(metadata: Metadata) -> Metadata:
