@@ -1,4 +1,4 @@
-from typing import Optional, Pattern
+from typing import Optional, Pattern, Match
 import re
 from lib.utilities import first, isSomething
 
@@ -63,7 +63,8 @@ def regexify(segment: str) -> str:
 # Returns None if the pattern is invalid:
 def extractGroup(group: str, matchPattern: str) -> Optional[str]:
     try:
-        return REGEX_MATCH_PATTERN.search(normalizeMatchPattern(matchPattern)).group(group)
+        match: Optional[Match] = REGEX_MATCH_PATTERN.search(normalizeMatchPattern(matchPattern))
+        return None if match is None else match.group(group)
     except:
         return None
 
