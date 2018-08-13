@@ -21,5 +21,3 @@ except KeyboardInterrupt:
     print("Interrupted by user.")
 except PermissionError:
     print("Could not read file `"+FILENAME_IGNORE+"`: Permission denied.")
-except Exception as e:
-    print("Could not read file `"+FILENAME_IGNORE+"`: " + str(e))
