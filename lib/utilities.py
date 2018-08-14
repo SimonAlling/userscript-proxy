@@ -5,6 +5,10 @@ B = TypeVar('B')
 C = TypeVar('C')
 
 
+def idem(x: A) -> A:
+    return x
+
+
 def first(tuple: Tuple[A, B]) -> A:
     (a, b) = tuple
     return a
@@ -33,3 +37,7 @@ def fromOptional(value: Optional[A], fallback: A) -> A:
 
 def itemList(prefix: str, strs: Iterable[str]) -> str:
     return "\n".join(map(lambda s: prefix + s, strs))
+
+
+def stripIndendation(string: str) -> str:
+    return "\n".join(map(lambda line: line.lstrip(), string.split("\n")))
