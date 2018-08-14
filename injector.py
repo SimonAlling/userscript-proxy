@@ -69,12 +69,12 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     return match.group(1) if match else None
 
 def insertEarlyIn(soup: BeautifulSoup, tag: Tag):
-    if soup.head is not None:
-        soup.head.append(tag)
+    if soup.body is not None and soup.body.find() is not None:
+        soup.body.find().insert_before(tag)
     elif soup.title is not None:
         soup.title.insert_after(tag)
     elif soup.find() is not None:
-        soup.find().insert_before(tag) # before first element
+        soup.find().insert_after(tag) # after first element
     else:
         soup.append(tag)
 
