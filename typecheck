@@ -4,7 +4,7 @@ export MYPYPATH=/usr/local/lib/python3.6/dist-packages/
 
 if [ "$1" == "" ]; then
 	mypy *.py --ignore-missing-imports --follow-imports skip
-	mypy lib/*.py --ignore-missing-imports --follow-imports skip
+	mypy modules/*.py --ignore-missing-imports --follow-imports skip
 else
 	mypy $1 --ignore-missing-imports --follow-imports skip
 fi
