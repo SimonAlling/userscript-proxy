@@ -3,10 +3,10 @@ import re
 import warnings
 from string import Template
 from urlmatch import urlmatch
-import lib.metadata as metadata
-from lib.utilities import first, second, isSomething, strs, compose2, stripIndendation
-from lib.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
-from lib.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
+import modules.metadata as metadata
+from modules.utilities import first, second, isSomething, strs, compose2, stripIndendation
+from modules.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
+from modules.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 
 class UserscriptError(Exception):
     def __init__(self,*args,**kwargs):

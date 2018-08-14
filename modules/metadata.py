@@ -4,7 +4,7 @@ from string import Template
 from functools import reduce
 import itertools
 import warnings
-from lib.utilities import first, second, isSomething
+from modules.utilities import first, second, isSomething
 
 class MetadataError(Exception):
     def __init__(self,*args,**kwargs):

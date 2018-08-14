@@ -1,8 +1,8 @@
 from typing import List
 import subprocess
-from lib.utilities import itemList
-import lib.ignore as ignore
-import lib.text as T
+from modules.utilities import itemList
+import modules.ignore as ignore
+import modules.text as T
 from argparse import ArgumentParser
 
 FILENAME_INJECTOR: str = "injector.py"
