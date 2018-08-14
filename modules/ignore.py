@@ -1,6 +1,6 @@
 from typing import List, Pattern
 import re
-from lib.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
+from modules.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
 COMMENT_PREFIX: str = "#"
 PORT_PREFIX: str = ":"

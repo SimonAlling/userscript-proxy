@@ -1,6 +1,6 @@
 from typing import Optional, Pattern, Match
 import re
-from lib.utilities import first, isSomething
+from modules.utilities import first, isSomething
 
 REGEX_MATCH_ALL = r"<all_urls>"
 REGEX_MATCH_SCHEME = r"\*|https?"

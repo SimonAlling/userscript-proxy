@@ -5,11 +5,11 @@ from mitmproxy import ctx, http
 from functools import partial
 import shlex
 import warnings
-from lib.metadata import MetadataError
-import lib.userscript as userscript
-import lib.text as T
-from lib.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from lib.utilities import idem, first, second, itemList, fromOptional, stripIndendation
+from modules.metadata import MetadataError
+import modules.userscript as userscript
+import modules.text as T
+from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
+from modules.utilities import idem, first, second, itemList, fromOptional, stripIndendation
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
