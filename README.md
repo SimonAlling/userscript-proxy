@@ -38,6 +38,7 @@ UP supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adapt
   * `@include` (basic pattern and regex)
   * `@exclude`
   * `@noframes`
+  * `@downloadURL`
 
 
 [mitmproxy]: https://mitmproxy.org
