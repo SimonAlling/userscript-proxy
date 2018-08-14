@@ -2,11 +2,21 @@ from typing import List
 import subprocess
 from lib.utilities import itemList
 import lib.ignore as ignore
+import lib.text as T
+from argparse import ArgumentParser
 
 FILENAME_INJECTOR: str = "injector.py"
 FILENAME_IGNORE: str = "ignore.txt"
 
+argparser = ArgumentParser(description=T.description)
+argparser.add_argument(
+    T.flag_inline,
+    action="store_true",
+    help=T.help_inline,
+)
+
 try:
+    args = argparser.parse_args()
     print("Reading ignore rules ...")
     ignoreFileContent: str = open(FILENAME_IGNORE).read()
     rules: List[str] = ignore.rulesIn(ignoreFileContent)
@@ -15,7 +25,7 @@ try:
     print(itemList("    ", rules))
     print()
     regex: str = ignore.entireIgnoreRegex(ignoreFileContent)
-    subprocess.run(["mitmdump", "--ignore", regex, "-s", FILENAME_INJECTOR])
+    subprocess.run(["mitmdump", "--ignore", regex, "-s", FILENAME_INJECTOR, "--set", f"""inline={str(args.inline).lower()}"""])
 except KeyboardInterrupt:
     print("")
     print("Interrupted by user.")

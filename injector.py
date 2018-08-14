@@ -1,14 +1,15 @@
 from typing import Optional, Iterable, List, Callable, Pattern, Match
 import glob, os, re
-from bs4 import BeautifulSoup, Comment, Doctype
+from bs4 import BeautifulSoup, Comment, Doctype, Tag
 from mitmproxy import ctx, http
 from functools import partial
 import shlex
 import warnings
 from lib.metadata import MetadataError
 import lib.userscript as userscript
+import lib.text as T
 from lib.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from lib.utilities import first, second, itemList, fromOptional
+from lib.utilities import idem, first, second, itemList, fromOptional, stripIndendation
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
@@ -31,6 +32,8 @@ ATTRIBUTE_UP_VERSION: str = "data-userscript-proxy-version"
 INFO_COMMENT_PREFIX: str = f"""
 [{WELCOME_MESSAGE}]
 """
+
+inline = "inline"
 
 def logInfo(s: str) -> None:
     try:
@@ -65,6 +68,19 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     match = REGEX_CHARSET.search(httpHeaderValue)
     return match.group(1) if match else None
 
+def insertEarlyIn(soup: BeautifulSoup, tag: Tag):
+    if soup.head is not None:
+        soup.head.append(tag)
+    elif soup.title is not None:
+        soup.title.insert_after(tag)
+    elif soup.find() is not None:
+        soup.find().insert_before(tag) # before first element
+    else:
+        soup.append(tag)
+
+def insertLateIn(soup: BeautifulSoup, tag: Tag):
+    fromOptional(soup.body, soup).append(tag)
+
 class UserscriptInjector:
     def __init__(self):
         self.userscripts: List[Userscript] = []
@@ -76,7 +92,7 @@ class UserscriptInjector:
         logInfo("Loading userscripts ...")
         loadedUserscripts: List[Tuple[Userscript, str]] = []
         for directory in DIRS_USERSCRIPTS:
-            logInfo("Looking for userscripts (`"+PATTERN_USERSCRIPT+"`) in directory `"+directory+"` ...")
+            logInfo("Looking for userscripts ("+PATTERN_USERSCRIPT+") in directory `"+directory+"` ...")
             try:
                 os.chdir(directory)
             except FileNotFoundError:
@@ -119,6 +135,15 @@ class UserscriptInjector:
         self.userscripts = list(map(first, loadedUserscripts))
 
 
+    def load(self, loader):
+        loader.add_option(inline, bool, False, T.help_inline)
+
+
+    def configure(self, updates):
+        if inline in updates and ctx.options.inline:
+            logWarning(f"""Only inline injection will be used due to {T.flag_inline} flag.""")
+
+
     def response(self, flow: http.HTTPFlow):
         response = flow.response
         if CONTENT_TYPE in response.headers:
@@ -133,29 +158,39 @@ class UserscriptInjector:
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
                 for script in self.userscripts:
                     if isApplicable(script):
-                        logInfo(f"Injecting {script.name} into {flow.request.url} ...")
+                        useInline = ctx.options.inline or script.downloadURL is None
+                        logInfo(f"""Injecting {script.name} into {flow.request.url} ({"inline" if useInline else "linked"}) ...""")
                         insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
                         tag = soup.new_tag("script")
                         tag[ATTRIBUTE_UP_VERSION] = VERSION
-                        scriptContent: str = (
-                            "\n" +
-                            (userscript.withNoframes(script.content) if script.noframes else script.content) +
-                            "\n"
-                        )
+                        withLoadListenerIfRunAtIdle = userscript.withEventListener("load") if script.runAt == document_idle else idem
+                        withNoframesIfNoframes = userscript.withNoframes if script.noframes else idem
                         try:
-                            if script.runAt == document_end:
-                                tag.string = scriptContent
-                                fromOptional(soup.body, soup).append(tag)
-                            else:
-                                tag.string = scriptContent if script.runAt == document_start else userscript.wrapInEventListener("load", scriptContent)
-                                if soup.head is not None:
-                                    soup.head.append(tag)
-                                elif soup.title is not None:
-                                    soup.title.insert_after(tag)
-                                elif soup.find() is not None:
-                                    soup.find().insert_before(tag) # before first element
+                            if useInline:
+                                tag.string = withNoframesIfNoframes(withLoadListenerIfRunAtIdle(script.content))
+                                if script.runAt == document_end:
+                                    insertLateIn(soup, tag)
                                 else:
-                                    soup.append(tag)
+                                    insertEarlyIn(soup, tag)
+                            else:
+                                s = "s" # JS variable name
+                                src = userscript.withVersionSuffix(script.downloadURL, script.version)
+                                JS_insertScriptTag = f"""document.head.appendChild({s});"""
+                                JS_insertionCode = (stripIndendation(f"""
+                                    const {s} = document.createElement("script");
+                                    {s}.setAttribute("{ATTRIBUTE_UP_VERSION}", "{VERSION}");
+                                    {s}.src = "{src}";
+                                    {withLoadListenerIfRunAtIdle(JS_insertScriptTag)}
+                                """))
+                                if script.runAt == document_idle or script.noframes:
+                                    tag.string = withNoframesIfNoframes(JS_insertionCode)
+                                else:
+                                    tag["src"] = src
+                                # Tag prepared. Insert it:
+                                if script.runAt == document_end:
+                                    insertLateIn(soup, tag)
+                                else:
+                                    insertEarlyIn(soup, tag)
                         except Exception as e:
                             logError("Injection failed due to the following error:")
                             logError(str(e))

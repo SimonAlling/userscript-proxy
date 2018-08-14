@@ -4,13 +4,15 @@ import warnings
 from string import Template
 from urlmatch import urlmatch
 import lib.metadata as metadata
-from lib.utilities import first, second, isSomething, strs, compose2
+from lib.utilities import first, second, isSomething, strs, compose2, stripIndendation
 from lib.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
 from lib.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 
 class UserscriptError(Exception):
     def __init__(self,*args,**kwargs):
         Exception.__init__(self,*args,**kwargs)
+
+REGEX_URL: Pattern = re.compile(r"^https?://")
 
 directive_name     : str = "name"
 directive_version  : str = "version"
@@ -19,6 +21,7 @@ directive_match    : str = "match"
 directive_include  : str = "include"
 directive_exclude  : str = "exclude"
 directive_noframes : str = "noframes"
+directive_downloadURL : str = "downloadURL"
 
 document_end   : str = "document-end"
 document_start : str = "document-start"
@@ -73,6 +76,13 @@ tag_version: Tag_string = Tag_string(
     required = False,
     predicate = None,
 )
+tag_downloadURL: Tag_string = Tag_string(
+    name = directive_downloadURL,
+    unique = True,
+    default = None,
+    required = False,
+    predicate = lambda val: isSomething(REGEX_URL.match(val)),
+)
 
 METADATA_TAGS: List[Tag] = [
     tag_name,
@@ -82,6 +92,7 @@ METADATA_TAGS: List[Tag] = [
     tag_include,
     tag_exclude,
     tag_version,
+    tag_downloadURL,
 ]
 
 validateMetadata: Callable[[Metadata], Metadata] = metadata.validator(METADATA_TAGS)
@@ -107,6 +118,7 @@ class Userscript(NamedTuple):
     matchPatterns: List[str]
     includePatternRegexes: List[Pattern]
     excludePatternRegexes: List[Pattern]
+    downloadURL: Optional[str]
 
     def __str__(self) -> str:
         return self.name
@@ -139,6 +151,7 @@ def create(content: str) -> Userscript:
         matchPatterns = strs(allValuesOf(tag_match)),
         includePatternRegexes = includePatternRegexes,
         excludePatternRegexes = excludePatternRegexes,
+        downloadURL = None if valueOf(tag_downloadURL) is None else str(valueOf(tag_downloadURL)),
     )
 
 
@@ -157,16 +170,20 @@ def applicableChecker(url: str) -> Callable[[Userscript], bool]:
     return isApplicable
 
 
-def wrapInEventListener(event: str, scriptContent: str) -> str:
-    return f"""window.addEventListener("{event}", function() {{\n{scriptContent}\n}});"""
+def withEventListener(event: str) -> Callable[[str], str]:
+    return lambda scriptContent: f"""window.addEventListener("{event}", function() {{\n{scriptContent}\n}});"""
 
 
 def withNoframes(scriptContent: str) -> str:
-    return f"""if (window.top === window) {{ // {PREFIX_TAG + directive_noframes}
+    return stripIndendation(f"""
+        if (window.top === window) {{ // {PREFIX_TAG + directive_noframes}
+        {scriptContent}
+        }}
+    """)
 
-{scriptContent}
 
-}}"""
+def withVersionSuffix(url: str, version: Optional[str]) -> str:
+    return url + ("" if version is None else "?v=" + version)
 
 
 def regexFromIncludePattern_safe(pattern: str) -> Optional[Pattern]:
