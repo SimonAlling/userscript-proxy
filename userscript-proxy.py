@@ -14,6 +14,11 @@ argparser.add_argument(
     action="store_true",
     help=T.help_inline,
 )
+argparser.add_argument(
+    T.flag_verbose,
+    action="store_true",
+    help=T.help_verbose,
+)
 
 try:
     args = argparser.parse_args()
@@ -25,7 +30,7 @@ try:
     print(itemList("    ", rules))
     print()
     regex: str = ignore.entireIgnoreRegex(ignoreFileContent)
-    subprocess.run(["mitmdump", "--ignore", regex, "-s", FILENAME_INJECTOR, "--set", f"""inline={str(args.inline).lower()}"""])
+    subprocess.run(["mitmdump", "--ignore", regex, "-s", FILENAME_INJECTOR, "--set", f"""inline={str(args.inline).lower()}""", "--set", f"""verbose={str(args.verbose).lower()}"""])
 except KeyboardInterrupt:
     print("")
     print("Interrupted by user.")
