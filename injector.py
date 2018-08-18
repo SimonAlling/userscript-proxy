@@ -34,6 +34,7 @@ INFO_COMMENT_PREFIX: str = f"""
 """
 
 inline = "inline"
+verbose = "verbose"
 
 def logInfo(s: str) -> None:
     try:
@@ -137,6 +138,7 @@ class UserscriptInjector:
 
     def load(self, loader):
         loader.add_option(inline, bool, False, T.help_inline)
+        loader.add_option(verbose, bool, False, T.help_verbose)
 
 
     def configure(self, updates):
@@ -194,14 +196,15 @@ class UserscriptInjector:
                         except Exception as e:
                             logError("Injection failed due to the following error:")
                             logError(str(e))
-                # Insert information comment:
                 index_DTD: Optional[int] = indexOfDTD(soup)
-                soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
-                    INFO_COMMENT_PREFIX + (
-                        "No matching userscripts for this URL." if insertedScripts == []
-                        else "These scripts were inserted:\n" + bulletList(insertedScripts)
-                    ) + "\n"
-                ))
+                # Insert information comment:
+                if ctx.options.verbose:
+                    soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
+                        INFO_COMMENT_PREFIX + (
+                            "No matching userscripts for this URL." if insertedScripts == []
+                            else "These scripts were inserted:\n" + bulletList(insertedScripts)
+                        ) + "\n"
+                    ))
                 # Prevent BS/html.parser from emitting `<!DOCTYPE doctype html>` or similar if "DOCTYPE" is not all uppercase in source HTML:
                 if index_DTD is not None and REGEX_DOCTYPE.match(soup.contents[index_DTD]):
                     # There is a DTD and it is invalid, so replace it.
