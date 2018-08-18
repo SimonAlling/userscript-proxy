@@ -25,7 +25,7 @@ CHARSET_DEFAULT: str = "utf-8"
 REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
-HTML_PARSER: str = "html.parser"
+HTML_PARSER: str = "lxml"
 REGEX_DOCTYPE: Pattern = re.compile(r"doctype\s+", re.I)
 INFO_COMMENT_PREFIX: str = f"""
 [{WELCOME_MESSAGE}]
