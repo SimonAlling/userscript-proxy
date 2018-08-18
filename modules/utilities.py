@@ -41,3 +41,7 @@ def itemList(prefix: str, strs: Iterable[str]) -> str:
 
 def stripIndendation(string: str) -> str:
     return "\n".join(map(lambda line: line.lstrip(), string.split("\n")))
+
+
+def flag(name: str) -> str:
+    return "--" + name

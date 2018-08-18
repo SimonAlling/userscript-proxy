@@ -9,7 +9,7 @@ from modules.metadata import MetadataError
 import modules.userscript as userscript
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from modules.utilities import idem, first, second, itemList, fromOptional, stripIndendation
+from modules.utilities import idem, first, second, itemList, fromOptional, stripIndendation, flag
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
@@ -33,8 +33,6 @@ INFO_COMMENT_PREFIX: str = f"""
 [{WELCOME_MESSAGE}]
 """
 
-inline = "inline"
-verbose = "verbose"
 
 def logInfo(s: str) -> None:
     try:
@@ -137,13 +135,13 @@ class UserscriptInjector:
 
 
     def load(self, loader):
-        loader.add_option(inline, bool, False, T.help_inline)
-        loader.add_option(verbose, bool, False, T.help_verbose)
+        loader.add_option(T.option_inline, bool, False, T.help_inline)
+        loader.add_option(T.option_verbose, bool, False, T.help_verbose)
 
 
     def configure(self, updates):
-        if inline in updates and ctx.options.inline:
-            logWarning(f"""Only inline injection will be used due to {T.flag_inline} flag.""")
+        if T.option_inline in updates and ctx.options.inline:
+            logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
 
 
     def response(self, flow: http.HTTPFlow):
