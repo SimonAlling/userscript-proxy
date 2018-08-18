@@ -1,6 +1,6 @@
 from typing import Optional, Iterable, List, Callable, Pattern, Match
 import glob, os, re
-from bs4 import BeautifulSoup, Comment, Doctype, Tag
+from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
 from functools import partial
 import shlex
@@ -9,14 +9,13 @@ from modules.metadata import MetadataError
 import modules.userscript as userscript
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from modules.utilities import idem, first, second, itemList, fromOptional, stripIndendation, flag
+from modules.utilities import first, second, itemList, fromOptional, flag
+from modules.constants import VERSION, VERSION_PREFIX, APP_NAME
+from modules.inject import Options, inject
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
 
-VERSION: str = "0.6.0"
-VERSION_PREFIX: str = "v"
-APP_NAME: str = "Userscript Proxy"
 WELCOME_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
 DIRS_USERSCRIPTS: List[str] = ["userscripts"]
 PATTERN_USERSCRIPT: str = "*.user.js"
@@ -28,7 +27,6 @@ TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "html.parser"
 REGEX_DOCTYPE: Pattern = re.compile(r"doctype\s+", re.I)
-ATTRIBUTE_UP_VERSION: str = "data-userscript-proxy-version"
 INFO_COMMENT_PREFIX: str = f"""
 [{WELCOME_MESSAGE}]
 """
@@ -66,19 +64,6 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     httpHeaderValue = response.headers.get(CONTENT_TYPE, "").lower()
     match = REGEX_CHARSET.search(httpHeaderValue)
     return match.group(1) if match else None
-
-def insertEarlyIn(soup: BeautifulSoup, tag: Tag):
-    if soup.body is not None and soup.body.find() is not None:
-        soup.body.find().insert_before(tag)
-    elif soup.title is not None:
-        soup.title.insert_after(tag)
-    elif soup.find() is not None:
-        soup.find().insert_after(tag) # after first element
-    else:
-        soup.append(tag)
-
-def insertLateIn(soup: BeautifulSoup, tag: Tag):
-    fromOptional(soup.body, soup).append(tag)
 
 class UserscriptInjector:
     def __init__(self):
@@ -160,40 +145,17 @@ class UserscriptInjector:
                     if isApplicable(script):
                         useInline = ctx.options.inline or script.downloadURL is None
                         logInfo(f"""Injecting {script.name} into {flow.request.url} ({"inline" if useInline else "linked"}) ...""")
-                        insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
-                        tag = soup.new_tag("script")
-                        tag[ATTRIBUTE_UP_VERSION] = VERSION
-                        withLoadListenerIfRunAtIdle = userscript.withEventListener("load") if script.runAt == document_idle else idem
-                        withNoframesIfNoframes = userscript.withNoframes if script.noframes else idem
-                        try:
-                            if useInline:
-                                tag.string = withNoframesIfNoframes(withLoadListenerIfRunAtIdle(script.content))
-                                if script.runAt == document_end:
-                                    insertLateIn(soup, tag)
-                                else:
-                                    insertEarlyIn(soup, tag)
-                            else:
-                                s = "s" # JS variable name
-                                src = userscript.withVersionSuffix(script.downloadURL, script.version)
-                                JS_insertScriptTag = f"""document.head.appendChild({s});"""
-                                JS_insertionCode = (stripIndendation(f"""
-                                    const {s} = document.createElement("script");
-                                    {s}.setAttribute("{ATTRIBUTE_UP_VERSION}", "{VERSION}");
-                                    {s}.src = "{src}";
-                                    {withLoadListenerIfRunAtIdle(JS_insertScriptTag)}
-                                """))
-                                if script.runAt == document_idle or script.noframes:
-                                    tag.string = withNoframesIfNoframes(JS_insertionCode)
-                                else:
-                                    tag["src"] = src
-                                # Tag prepared. Insert it:
-                                if script.runAt == document_end:
-                                    insertLateIn(soup, tag)
-                                else:
-                                    insertEarlyIn(soup, tag)
-                        except Exception as e:
+                        result = inject(script, soup, Options(
+                            inline = ctx.options.inline,
+                            verbose = ctx.options.verbose,
+                        ))
+                        if type(result) is BeautifulSoup:
+                            soup = result
+                            insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
+                        else:
                             logError("Injection failed due to the following error:")
-                            logError(str(e))
+                            logError(str(result))
+
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 # Insert information comment:
                 if ctx.options.verbose:
