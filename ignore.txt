@@ -24,6 +24,8 @@
 # Applications that cannot connect through mitmproxy:
     itunes.apple.com           # App Store
     xp.apple.com               # App Store
+    *.apps.apple.com           # App Store
+    *.mzstatic.com             # App Store
     graph.facebook.com         # Messenger
     api.facebook.com           # Messenger
     edge-mqtt.facebook.com     # Messenger
