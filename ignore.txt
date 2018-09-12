@@ -33,14 +33,24 @@
     api*.dropbox.com           # Dropbox app
     bolt.dropbox.com           # Dropbox app
     ls.apple.com               # Apple services
+    metrics.icloud.com         # Apple services
     *.crashlytics.com          # Crashlytics error reporting
+    twimg.com                  # Twitter
+    ap.spotify.com             # Spotify app
+    wg.spotify.com             # Spotify app
+    api.branch.io              # Branch™ deep links
 
 # Traffic irrelevant to Userscript Proxy:
     /cdn\./
     akamai*.net                # Akamai CDN
     googleusercontent.com      # Google CDN
+    clients*.google.com        # Google Maps etc
+    googleapis.com             # Google APIs
     i.ytimg.com                # YouTube thumbnails
     *.googlevideo.com          # YouTube video content
+    s.youtube.com              # YouTube stats
     api.twitch.tv              # Twitch app metadata
     ttvnw.net                  # Twitch video content
     /^149\.154\.16[4-7]\.\d+:/ # Telegram Messenger Network
+    audio-fa.spotify.com       # Spotify audio content
+    slack-msgs.com             # Slack app
