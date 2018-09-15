@@ -1,6 +1,7 @@
 from typing import List
 import subprocess
 from modules.utilities import itemList, flag
+from modules.constants import DEFAULT_PORT
 import modules.ignore as ignore
 import modules.text as T
 from argparse import ArgumentParser
@@ -24,6 +25,12 @@ argparser.add_argument(
     action="store_true",
     help=T.help_transparent,
 )
+argparser.add_argument(
+    flag(T.option_port),
+    type=int,
+    default=DEFAULT_PORT,
+    help=T.help_port,
+)
 
 try:
     args = argparser.parse_args()
@@ -37,6 +44,7 @@ try:
     regex: str = ignore.entireIgnoreRegex(ignoreFileContent)
     subprocess.run([
         "mitmdump", "--ignore-hosts", regex,
+        "--listen-port", str(args.port),
         "--mode", "transparent" if args.transparent else "regular",
         "--showhost", # use Host header for URL display
         "-s", FILENAME_INJECTOR,
