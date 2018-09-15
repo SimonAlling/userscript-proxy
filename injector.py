@@ -140,11 +140,12 @@ class UserscriptInjector:
                     HTML_PARSER,
                     from_encoding=inferEncoding(response)
                 )
-                isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(flow.request.url)
+                requestURL = flow.request.pretty_url # should work in transparent mode too, unless the Host header is spoofed
+                isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(requestURL)
                 for script in self.userscripts:
                     if isApplicable(script):
                         useInline = ctx.options.inline or script.downloadURL is None
-                        logInfo(f"""Injecting {script.name} into {flow.request.url} ({"inline" if useInline else "linked"}) ...""")
+                        logInfo(f"""Injecting {script.name} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
                         result = inject(script, soup, Options(
                             inline = ctx.options.inline,
                             verbose = ctx.options.verbose,
