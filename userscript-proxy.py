@@ -19,6 +19,11 @@ argparser.add_argument(
     action="store_true",
     help=T.help_verbose,
 )
+argparser.add_argument(
+    flag(T.option_transparent),
+    action="store_true",
+    help=T.help_transparent,
+)
 
 try:
     args = argparser.parse_args()
@@ -31,10 +36,14 @@ try:
     print()
     regex: str = ignore.entireIgnoreRegex(ignoreFileContent)
     subprocess.run([
-        "mitmdump", "--ignore", regex,
+        "mitmdump", "--ignore-hosts", regex,
+        "--mode", "transparent" if args.transparent else "regular",
+        "--showhost", # use Host header for URL display
         "-s", FILENAME_INJECTOR,
         "--set", f"""{T.option_inline}={str(args.inline).lower()}""",
         "--set", f"""{T.option_verbose}={str(args.verbose).lower()}""",
+        # Empty string breaks the argument chain:
+        "--rawtcp" if args.transparent else "", # for apps like Facebook Messenger
     ])
 except KeyboardInterrupt:
     print("")
