@@ -41,6 +41,26 @@ UP supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adapt
   * `@downloadURL`
 
 
+## Options
+
+### `--inline`
+
+Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`). Useful to test new userscript features without having to re-upload the userscript and clear browser cache.
+
+### `--port PORT`
+
+Make mitmproxy listen to TCP port PORT. Defaults to 8080.
+
+### `--transparent`
+
+Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set a proxy in the client. In such cases, you may have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
+
+### `--verbose`
+
+Inject a comment in each page specifying which userscripts (if any) were injected.
+
+
 [mitmproxy]: https://mitmproxy.org
 [minification]: https://en.wikipedia.org/wiki/Minification_(programming)
 [metadata]: https://wiki.greasespot.net/Metadata_Block
+[transparent-mode]: https://docs.mitmproxy.org/stable/concepts-modes/#transparent-proxy
