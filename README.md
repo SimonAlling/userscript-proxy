@@ -15,7 +15,7 @@ Exceptions can be specified by adding ignore rules to `ignore.txt`. (This is eve
 ## Data usage
 
 UP has no data usage impact when no userscript is injected, i.e. for URLs without any matching userscript.
-When a script _is_ injected, exactly one of the following things happens:
+When a script _is_ injected, **exactly one** of the following things happens:
 
   * The entire userscript is injected as inline JavaScript (potentially dozens or even hundreds of kilobytes).
   * A `<script>` tag referencing the userscript is injected (~100 bytes, depending on the length of the `@downloadURL`).
