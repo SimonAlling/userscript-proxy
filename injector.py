@@ -5,8 +5,9 @@ from mitmproxy import ctx, http
 from functools import partial
 import shlex
 import warnings
-from modules.metadata import MetadataError
+from modules.metadata import MetadataError, PREFIX_TAG
 import modules.userscript as userscript
+import modules.inline as inline
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
 from modules.utilities import first, second, itemList, fromOptional, flag
@@ -60,6 +61,23 @@ def indexOfDTD(soup: BeautifulSoup) -> Optional[int]:
 
 bulletList: Callable[[Iterable[str]], str] = partial(itemList, LIST_ITEM_PREFIX)
 
+def unsafeSequencesMessage(script: Userscript) -> str:
+    sequences = script.unsafeSequences
+    return f"""{script.name} cannot be injected because it contains {"these unsafe sequences" if len(sequences) > 1 else "this unsafe sequence"}:
+
+{itemList(TAB, sequences)}
+
+<script> tags cannot contain any of these sequences (case-insensitive):
+
+{itemList(TAB, inline.DANGEROUS_SEQUENCES)}
+
+Possible solutions:
+""" + bulletList([
+    f"Make sure the userscript does not contain any of the sequences listed above.",
+    f"Make the userscript available online and give it a {PREFIX_TAG}{userscript.directive_downloadURL}",
+    f"Remove the {flag(T.option_inline)} flag.",
+])
+
 def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     httpHeaderValue = response.headers.get(CONTENT_TYPE, "").lower()
     match = REGEX_CHARSET.search(httpHeaderValue)
@@ -98,7 +116,10 @@ class UserscriptInjector:
                     logError("Could not read file `"+filename+"`: " + str(e))
                     continue
                 try:
-                    loadedUserscripts.append((userscript.create(content), filename))
+                    script = userscript.create(content)
+                    loadedUserscripts.append((script, filename))
+                    if script.downloadURL is None and len(script.unsafeSequences) > 0:
+                        logError(unsafeSequencesMessage(script))
                 except MetadataError as err:
                     logError("Metadata error:")
                     logError(str(err))
@@ -145,6 +166,9 @@ class UserscriptInjector:
                 for script in self.userscripts:
                     if isApplicable(script):
                         useInline = ctx.options.inline or script.downloadURL is None
+                        if useInline and len(script.unsafeSequences) > 0:
+                            logError(unsafeSequencesMessage(script))
+                            continue
                         logInfo(f"""Injecting {script.name} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
                         result = inject(script, soup, Options(
                             inline = ctx.options.inline,
