@@ -4,6 +4,7 @@ import warnings
 from string import Template
 from urlmatch import urlmatch
 import modules.metadata as metadata
+import modules.inline as inline
 from modules.utilities import first, second, isSomething, strs, compose2, stripIndendation
 from modules.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
 from modules.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
@@ -119,6 +120,7 @@ class Userscript(NamedTuple):
     includePatternRegexes: List[Pattern]
     excludePatternRegexes: List[Pattern]
     downloadURL: Optional[str]
+    unsafeSequences: List[str] # in <script> tag
 
     def __str__(self) -> str:
         return self.name
@@ -152,6 +154,7 @@ def create(content: str) -> Userscript:
         includePatternRegexes = includePatternRegexes,
         excludePatternRegexes = excludePatternRegexes,
         downloadURL = None if valueOf(tag_downloadURL) is None else str(valueOf(tag_downloadURL)),
+        unsafeSequences = inline.unsafeSequencesIn(content),
     )
 
 
