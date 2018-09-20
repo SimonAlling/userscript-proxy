@@ -39,6 +39,9 @@
     ap.spotify.com             # Spotify app
     wg.spotify.com             # Spotify app
     api.branch.io              # Branch™ deep links
+    ggpht.com                  # Google/Android
+    www.google.com             # Google/Android
+    gvt1.com                   # Google/Android
 
 # Traffic irrelevant to Userscript Proxy:
     /cdn\./
