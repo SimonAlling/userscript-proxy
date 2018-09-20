@@ -33,7 +33,7 @@
     api*.dropbox.com           # Dropbox app
     bolt.dropbox.com           # Dropbox app
     ls.apple.com               # Apple services
-    metrics.icloud.com         # Apple services
+    icloud.com                 # Apple services
     *.crashlytics.com          # Crashlytics error reporting
     twimg.com                  # Twitter
     ap.spotify.com             # Spotify app
