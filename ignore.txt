@@ -24,8 +24,8 @@
 # Applications that cannot connect through mitmproxy:
     itunes.apple.com           # App Store
     xp.apple.com               # App Store
-    *.apps.apple.com           # App Store
-    *.mzstatic.com             # App Store
+    apps.apple.com             # App Store
+    mzstatic.com               # App Store
     graph.facebook.com         # Messenger
     api.facebook.com           # Messenger
     edge-mqtt.facebook.com     # Messenger
@@ -34,7 +34,7 @@
     bolt.dropbox.com           # Dropbox app
     ls.apple.com               # Apple services
     icloud.com                 # Apple services
-    *.crashlytics.com          # Crashlytics error reporting
+    crashlytics.com            # Crashlytics error reporting
     twimg.com                  # Twitter
     ap.spotify.com             # Spotify app
     wg.spotify.com             # Spotify app
@@ -50,7 +50,7 @@
     clients*.google.com        # Google Maps etc
     googleapis.com             # Google APIs
     i.ytimg.com                # YouTube thumbnails
-    *.googlevideo.com          # YouTube video content
+    googlevideo.com            # YouTube video content
     s.youtube.com              # YouTube stats
     api.twitch.tv              # Twitch app metadata
     ttvnw.net                  # Twitch video content
