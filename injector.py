@@ -169,7 +169,7 @@ class UserscriptInjector:
                         if useInline and len(script.unsafeSequences) > 0:
                             logError(unsafeSequencesMessage(script))
                             continue
-                        logInfo(f"""Injecting {script.name} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
+                        logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
                         result = inject(script, soup, Options(
                             inline = ctx.options.inline,
                             verbose = ctx.options.verbose,
