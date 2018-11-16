@@ -1,13 +1,17 @@
 from typing import List
+import glob
 import subprocess
 from modules.utilities import itemList, flag
 from modules.constants import DEFAULT_PORT
 import modules.ignore as ignore
 import modules.text as T
+import shlex
 from argparse import ArgumentParser
+from functools import reduce
 
 FILENAME_INJECTOR: str = "injector.py"
-FILENAME_IGNORE: str = "ignore.txt"
+FILENAME_IGNORE_PREFIX: str = "ignore"
+FILENAME_IGNORE_SUFFIX: str = ".txt"
 
 argparser = ArgumentParser(description=T.description)
 argparser.add_argument(
@@ -35,15 +39,25 @@ argparser.add_argument(
 try:
     args = argparser.parse_args()
     print("Reading ignore rules ...")
-    ignoreFileContent: str = open(FILENAME_IGNORE).read()
-    rules: List[str] = ignore.rulesIn(ignoreFileContent)
+    PATTERN_IGNORE: str = FILENAME_IGNORE_PREFIX + "*" + FILENAME_IGNORE_SUFFIX
+    filenames: List[str] = [ shlex.quote(unsafe_filename) for unsafe_filename in glob.glob(PATTERN_IGNORE) ]
+    def readIgnoreFile(accumulatedContent: str, filename: str) -> str:
+        print("Loading " + filename + " ...")
+        try:
+            ignoreFileContent: str = open(filename).read()
+            return accumulatedContent + ignoreFileContent
+        except Exception as e:
+            print("Could not read file `"+filename+"`: " + str(e))
+            return accumulatedContent
+    ignoreFilesContent: str = reduce(readIgnoreFile, filenames, "")
+    rules: List[str] = ignore.rulesIn(ignoreFilesContent)
+    regex: str = ignore.entireIgnoreRegex(ignoreFilesContent)
     print("Traffic from hosts matching any of these rules will be ignored by mitmproxy:")
     print()
     print(itemList("    ", rules))
     print()
     print("mitmproxy will be run in " + ("transparent" if args.transparent else "regular") + " mode")
     print()
-    regex: str = ignore.entireIgnoreRegex(ignoreFileContent)
     subprocess.run([
         "mitmdump", "--ignore-hosts", regex,
         "--listen-port", str(args.port),
@@ -58,5 +72,3 @@ try:
 except KeyboardInterrupt:
     print("")
     print("Interrupted by user.")
-except PermissionError:
-    print("Could not read file `"+FILENAME_IGNORE+"`: Permission denied.")
