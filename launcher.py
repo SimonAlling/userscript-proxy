@@ -41,6 +41,8 @@ try:
     print()
     print(itemList("    ", rules))
     print()
+    print("mitmproxy will be run in " + ("transparent" if args.transparent else "regular") + " mode")
+    print()
     regex: str = ignore.entireIgnoreRegex(ignoreFileContent)
     subprocess.run([
         "mitmdump", "--ignore-hosts", regex,
