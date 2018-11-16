@@ -29,6 +29,7 @@
     graph.facebook.com         # Messenger
     api.facebook.com           # Messenger
     edge-mqtt.facebook.com     # Messenger
+    edge-chat.facebook.com     # Messenger
     slack.com                  # Slack
     api*.dropbox.com           # Dropbox app
     bolt.dropbox.com           # Dropbox app
