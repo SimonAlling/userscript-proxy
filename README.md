@@ -27,9 +27,9 @@ Userscripts are injected into _every_ response from a matching URL, and the size
 If the `@downloadURL` approach is not possible, for one reason or the other, it is a good idea to be aware of this issue, and to take appropriate action such as [minifying](minification) userscripts and adding suitable ignore rules.
 
 
-## Functionality
+## Userscript compatibility
 
-UP supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adaptation of userscripts should be required. These directives are supported:
+UP supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adaptation of plain JavaScript userscripts should be required. These directives are supported:
 
   * `@name`
   * `@version`
@@ -39,6 +39,8 @@ UP supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adapt
   * `@exclude`
   * `@noframes`
   * `@downloadURL`
+
+The [`GM` API](gm-api) and similar runtime facilities are not supported, because userscripts can only be injected as regular scripts.
 
 
 ## Options
@@ -64,3 +66,4 @@ Inject a comment in each page specifying which userscripts (if any) were injecte
 [minification]: https://en.wikipedia.org/wiki/Minification_(programming)
 [metadata]: https://wiki.greasespot.net/Metadata_Block
 [transparent-mode]: https://docs.mitmproxy.org/stable/concepts-modes/#transparent-proxy
+[gm-api]: https://wiki.greasespot.net/GM.getValue
