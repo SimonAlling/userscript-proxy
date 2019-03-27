@@ -1,25 +1,4 @@
-# Two kinds of rules:
-#
-# 1. @include pattern
-# Asterisk ('*') means any string (including the empty string). '*.' is automatically prepended. ':*' is automatically appended unless the rule contains a colon (':').
-# To block a domain without blocking all its subdomains, use a regex rule (see below).
-#
-# 2. Regular expression
-# If a rule starts and ends with a slash ('/'), it is treated as a (Python) regex.
-# Note that the string to match against contains both a host and a port, e.g. 'example.com:443', and that the regex is used verbatim (i.e. you have to explicitly provide '^' etc if desired). The only exception is that the case-insensitivity flag ('?i') is automatically added.
-# Be careful with '$': '/site.com$/' will never match, because it will only be used to check strings like 'site.com:80'.
-#
-# EXAMPLES:
-#
-# --- RULE ---------- MAKES MITMPROXY IGNORE -----------------------------------
-#     site.com        site.com and x.site.com
-#     api.site.com    api.site.com and x.api.site.com, but not y.site.com
-#     *cdn.net        cdn.net, fbcdn.net and x.fbcdn.net, but not cdn.net.com
-#     site.com:80     site.com:80 and x.site.com:80, but not site.com:443
-#     /cdn\./         fbcdn.net, cdn.site.com, cdn.x.site.com, but not cdna.com
-#     /^site\.com:/   site.com, but not x.site.com, mysite.com or site.com.net
-#
-# Anything from a '#' until the end of the line is ignored, as well as leading and trailing whitespace.
+# See README.md for information about the syntax used in this file.
 
 # Applications that cannot connect through mitmproxy:
     itunes.apple.com           # App Store

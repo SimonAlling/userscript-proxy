@@ -9,7 +9,44 @@ Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, inje
 
 **UP can (and must be able to) read and modify all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
 
-Exceptions can be specified by adding ignore rules to `ignore.txt`. (This is even necessary for apps like Facebook Messenger and App Store, which refuse to connect through a MITM proxy.) **Traffic to and from hosts matched by such rules _cannot_ be read or modified by mitmproxy or Userscript Proxy.**
+
+## Ignoring hosts
+
+Ignore rules can be specified in `ignore*.txt` files (for example `ignore.txt` and `ignore-custom.txt`). This is necessary for apps like App Store and Facebook Messenger, which refuse to connect through a MITM proxy. Ignored traffic is not read or modified by mitmproxy.
+
+Rules can be specified in two ways:
+
+### Basic pattern
+
+Based on the syntax used by userscript `@include` directives. Asterisk (`*`) means any string (including the empty string). `*.` is automatically prepended. `:*` is automatically appended unless the rule contains a colon (`:`).
+
+To ignore a domain without ignoring all of its subdomains, use a regex rule instead (see below).
+
+#### Examples
+
+| Rule           | Ignores                                                         |
+|----------------|-----------------------------------------------------------------|
+| `site.com`     | `site.com` and `x.site.com`                                     |
+| `api.site.com` | `api.site.com` and `x.api.site.com`, but not `www.site.com`     |
+| `*cdn.net`     | `cdn.net`, `fbcdn.net` and `x.fbcdn.net`, but not `cdn.net.com` |
+| `site.com:80`  | `site.com:80` and `x.site.com:80`, but not `site.com:443`       |
+
+### Regular expression
+
+If a rule starts and ends with a slash (`/`), it is treated as a Python regex.
+
+Note that the string to match against contains both a host and a port, e.g. `example.com:443`, and that the regex is used verbatim (i.e. you have to explicitly provide `^` etc if desired). The only exception is that the case-insensitivity flag (`?i`) is automatically added.
+
+Also, be careful with `$`: A regex like `/site.com$/` will never match, because it will only be used to check strings like `site.com:80`.
+
+Anything from a `#` until the end of the line is ignored, as well as leading and trailing whitespace.
+
+#### Examples
+
+| Rule            | Ignores                                                           |
+|-----------------|-------------------------------------------------------------------|
+| `/cdn\./`       | `fbcdn.net`, `cdn.site.com`, `cdn.x.site.com`, but not `cdna.com` |
+| `/^site\.com:/` | `site.com`, but not `x.site.com`, `mysite.com` or `site.com.net`  |
 
 
 ## Data usage
