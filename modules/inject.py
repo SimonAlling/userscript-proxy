@@ -3,7 +3,7 @@ import modules.userscript as userscript
 from bs4 import BeautifulSoup, Tag
 from modules.userscript import Userscript, document_end, document_start, document_idle
 from modules.constants import VERSION, ATTRIBUTE_UP_VERSION
-from modules.utilities import idem, fromOptional, stripIndendation
+from modules.utilities import idem, fromOptional, stripIndentation
 
 class Options(NamedTuple):
     inline: bool
@@ -27,7 +27,7 @@ def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[B
             s = "s" # JS variable name
             src = userscript.withVersionSuffix(script.downloadURL, script.version)
             JS_insertScriptTag = f"""document.head.appendChild({s});"""
-            JS_insertionCode = (stripIndendation(f"""
+            JS_insertionCode = (stripIndentation(f"""
                 const {s} = document.createElement("script");
                 {s}.setAttribute("{ATTRIBUTE_UP_VERSION}", "{VERSION}");
                 {s}.src = "{src}";
