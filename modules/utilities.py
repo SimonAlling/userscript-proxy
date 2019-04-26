@@ -39,7 +39,7 @@ def itemList(prefix: str, strs: Iterable[str]) -> str:
     return "\n".join(map(lambda s: prefix + s, strs))
 
 
-def stripIndendation(string: str) -> str:
+def stripIndentation(string: str) -> str:
     return "\n".join(map(lambda line: line.lstrip(), string.split("\n")))
 
 

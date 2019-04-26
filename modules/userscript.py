@@ -5,7 +5,7 @@ from string import Template
 from urlmatch import urlmatch
 import modules.metadata as metadata
 import modules.inline as inline
-from modules.utilities import first, second, isSomething, strs, compose2, stripIndendation
+from modules.utilities import first, second, isSomething, strs, compose2, stripIndentation
 from modules.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
 from modules.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
 
@@ -178,7 +178,7 @@ def withEventListener(event: str) -> Callable[[str], str]:
 
 
 def withNoframes(scriptContent: str) -> str:
-    return stripIndendation(f"""
+    return stripIndentation(f"""
         if (window.top === window) {{ // {PREFIX_TAG + directive_noframes}
         {scriptContent}
         }}
