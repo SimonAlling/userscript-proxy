@@ -1,0 +1,3 @@
+# See README.md for information about the syntax used in this file.
+
+example.com

@@ -1,7 +1,7 @@
 from typing import List
 import glob
 import subprocess
-from modules.utilities import itemList, flag
+from modules.utilities import itemList, flag, idem
 from modules.constants import DEFAULT_PORT
 import modules.ignore as ignore
 import modules.text as T
@@ -11,7 +11,8 @@ from functools import reduce
 
 FILENAME_INJECTOR: str = "injector.py"
 FILENAME_IGNORE_PREFIX: str = "ignore"
-FILENAME_IGNORE_SUFFIX: str = ".txt"
+FILENAME_INTERCEPT_PREFIX: str = "intercept"
+FILENAME_LIST_SUFFIX: str = ".txt"
 
 argparser = ArgumentParser(description=T.description)
 argparser.add_argument(
@@ -30,6 +31,11 @@ argparser.add_argument(
     help=T.help_transparent,
 )
 argparser.add_argument(
+    flag(T.option_whitelist),
+    action="store_true",
+    help=T.help_whitelist,
+)
+argparser.add_argument(
     flag(T.option_port),
     type=int,
     default=DEFAULT_PORT,
@@ -38,21 +44,24 @@ argparser.add_argument(
 
 try:
     args = argparser.parse_args()
-    print("Reading ignore rules ...")
-    PATTERN_IGNORE: str = FILENAME_IGNORE_PREFIX + "*" + FILENAME_IGNORE_SUFFIX
-    filenames: List[str] = [ shlex.quote(unsafe_filename) for unsafe_filename in glob.glob(PATTERN_IGNORE) ]
-    def readIgnoreFile(accumulatedContent: str, filename: str) -> str:
-        print("Loading " + filename + " ...")
+    useWhitelist: bool = args.whitelist
+    prefix: str = FILENAME_INTERCEPT_PREFIX if useWhitelist else FILENAME_IGNORE_PREFIX
+    print(f"Reading {'intercept' if useWhitelist else 'ignore'} rules ...")
+    globPattern: str = prefix + "*" + FILENAME_LIST_SUFFIX
+    filenames: List[str] = [ shlex.quote(unsafe_filename) for unsafe_filename in glob.glob(globPattern) ]
+    def readRuleFile(accumulatedContent: str, filename: str) -> str:
+        print("Reading " + filename + " ...")
         try:
-            ignoreFileContent: str = open(filename).read()
-            return accumulatedContent + ignoreFileContent
+            fileContent: str = open(filename).read()
+            return accumulatedContent + fileContent
         except Exception as e:
             print("Could not read file `"+filename+"`: " + str(e))
             return accumulatedContent
-    ignoreFilesContent: str = reduce(readIgnoreFile, filenames, "")
-    rules: List[str] = ignore.rulesIn(ignoreFilesContent)
-    regex: str = ignore.entireIgnoreRegex(ignoreFilesContent)
-    print("Traffic from hosts matching any of these rules will be ignored by mitmproxy:")
+    ruleFilesContent: str = reduce(readRuleFile, filenames, "")
+    rules: List[str] = ignore.rulesIn(ruleFilesContent)
+    maybeNegate = ignore.negate if useWhitelist else idem
+    regex: str = maybeNegate(ignore.entireIgnoreRegex(ruleFilesContent))
+    print(f"Traffic from hosts matching any of these rules will be {'INTERCEPTED' if useWhitelist else 'IGNORED'} by mitmproxy:")
     print()
     print(itemList("    ", rules))
     print()
