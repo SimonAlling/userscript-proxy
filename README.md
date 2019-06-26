@@ -7,7 +7,7 @@ Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, inje
 
 ## Security
 
-**UP can (and must be able to) read and modify all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
+**Userscript Proxy can (and must be able to) read and modify all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
 
 
 ## Ignoring hosts
@@ -53,7 +53,7 @@ Anything from a `#` until the end of the line is treated as a comment. Leading a
 
 ## Data usage
 
-UP has no data usage impact when no userscript is injected, i.e. for URLs without any matching userscript.
+Userscript Proxy has no data usage impact when no userscript is injected, i.e. for URLs without any matching userscript.
 When a script _is_ injected, **exactly one** of the following things happens:
 
   * The entire userscript is injected as inline JavaScript (potentially dozens or even hundreds of kilobytes).
@@ -68,7 +68,7 @@ If the `@downloadURL` approach is not possible, for one reason or the other, it 
 
 ## Userscript compatibility
 
-UP supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adaptation of plain JavaScript userscripts should be required. These directives are supported:
+Userscript Proxy supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adaptation of plain JavaScript userscripts should be required. These directives are supported:
 
   * `@name`
   * `@version`
@@ -98,7 +98,7 @@ Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set 
 
 ### `--verbose`
 
-Inject a comment in each page specifying which userscripts (if any) were injected.
+Inject an HTML comment in each page specifying which userscripts (if any) were injected.
 
 ### `--whitelist`
 
