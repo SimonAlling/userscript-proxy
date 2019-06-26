@@ -35,3 +35,8 @@ def entireIgnoreRegex(ignoreFileContent: str) -> str:
         ignoreRegex,
         rulesIn(ignoreFileContent)
     ))
+
+
+# https://stackoverflow.com/a/2637899
+def negate(regex: str) -> str:
+    return "^(?!(?:" + regex + ")$).*$"
