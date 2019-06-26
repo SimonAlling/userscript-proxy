@@ -12,7 +12,9 @@ Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, inje
 
 ## Ignoring hosts
 
-Ignore rules can be specified in `ignore*.txt` files (for example `ignore.txt` and `ignore-custom.txt`). This is necessary for apps like App Store and Facebook Messenger, which refuse to connect through a MITM proxy. Ignored traffic is not read or modified by mitmproxy.
+Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy. By default, ignore rules can be specified in `ignore*.txt` files (for example `ignore.txt` and `ignore-custom.txt`).
+
+It is also possible to run Userscript Proxy in **whitelist mode**, in which case `ignore*.txt` files have no effect. Instead, _only_ traffic matching rules specified in `intercept*.txt` files are intercepted.
 
 Rules can be specified in two ways:
 
@@ -20,11 +22,11 @@ Rules can be specified in two ways:
 
 Based on the syntax used by userscript `@include` directives. Asterisk (`*`) means any string (including the empty string). `*.` is automatically prepended. `:*` is automatically appended unless the rule contains a colon (`:`).
 
-To ignore a domain without ignoring all of its subdomains, use a regex rule instead (see below).
+To match a domain without matching all of its subdomains, use a regex rule instead (see below).
 
 #### Examples
 
-| Rule           | Ignores                                                         |
+| Rule           | Matches                                                         |
 |----------------|-----------------------------------------------------------------|
 | `site.com`     | `site.com` and `x.site.com`                                     |
 | `api.site.com` | `api.site.com` and `x.api.site.com`, but not `www.site.com`     |
@@ -39,11 +41,11 @@ Note that the string to match against contains both a host and a port, e.g. `exa
 
 Also, be careful with `$`: A regex like `/site.com$/` will never match, because it will only be used to check strings like `site.com:80`.
 
-Anything from a `#` until the end of the line is ignored, as well as leading and trailing whitespace.
+Anything from a `#` until the end of the line is treated as a comment. Leading and trailing whitespace have no effect.
 
 #### Examples
 
-| Rule            | Ignores                                                           |
+| Rule            | Matches                                                           |
 |-----------------|-------------------------------------------------------------------|
 | `/cdn\./`       | `fbcdn.net`, `cdn.site.com`, `cdn.x.site.com`, but not `cdna.com` |
 | `/^site\.com:/` | `site.com`, but not `x.site.com`, `mysite.com` or `site.com.net`  |
@@ -97,6 +99,10 @@ Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set 
 ### `--verbose`
 
 Inject a comment in each page specifying which userscripts (if any) were injected.
+
+### `--whitelist`
+
+Run Userscript Proxy in whitelist mode. Useful if you do not want to add exceptions for every single app that uses certificate pinning, but instead requires that you specify what hosts Userscript Proxy _should_ care about.
 
 
 [mitmproxy]: https://mitmproxy.org
