@@ -12,9 +12,20 @@ Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, inje
 
 ## Ignoring hosts
 
-Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy. By default, ignore rules can be specified in `ignore*.txt` files (for example `ignore.txt` and `ignore-custom.txt`).
+Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy. There are two approaches:
 
-It is also possible to run Userscript Proxy in **whitelist mode**, in which case `ignore*.txt` files have no effect. Instead, _only_ traffic matching rules specified in `intercept*.txt` files are intercepted.
+  * Blacklisting hosts that cannot connect through the proxy. Tedious, because you have to add exceptions for apps and such all the time.
+  * Whitelisting hosts where userscripts should be applied. Works well in general, but does not allow universal userscripts that run on all sites, and the whitelist must be updated when a new userscript is added.
+
+Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` flag together with one or more files containing **ignore/intercept rules**. Examples:
+
+```bash
+# Take ignore rules from ignore.txt (included):
+python3.6 launcher.py --ignore "ignore.txt"
+
+# Take intercept rules from all .txt files whose names start with "foo":
+python3.6 launcher.py --intercept "foo*.txt"
+```
 
 Rules can be specified in two ways:
 
@@ -84,6 +95,10 @@ The [`GM` API](gm-api) and similar runtime facilities are not supported, because
 
 ## Options
 
+### `--ignore/--intercept FILE`
+
+Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files. `--ignore` and `--intercept` cannot be used together. See examples above.
+
 ### `--inline`
 
 Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`). Useful to test new userscript features without having to re-upload the userscript and clear browser cache.
@@ -99,10 +114,6 @@ Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set 
 ### `--verbose`
 
 Inject an HTML comment in each page specifying which userscripts (if any) were injected.
-
-### `--whitelist`
-
-Run Userscript Proxy in whitelist mode. Useful if you do not want to add exceptions for every single app that uses certificate pinning, but instead requires that you specify what hosts Userscript Proxy _should_ care about.
 
 
 [mitmproxy]: https://mitmproxy.org
