@@ -15,21 +15,6 @@ FILENAME_INJECTOR: str = "injector.py"
 MATCH_NO_HOSTS = r"^$"
 
 argparser = ArgumentParser(description=T.description)
-argparser.add_argument(
-    flag(T.option_inline),
-    action="store_true",
-    help=T.help_inline,
-)
-argparser.add_argument(
-    flag(T.option_verbose),
-    action="store_true",
-    help=T.help_verbose,
-)
-argparser.add_argument(
-    flag(T.option_transparent),
-    action="store_true",
-    help=T.help_transparent,
-)
 group = argparser.add_mutually_exclusive_group()
 group.add_argument(
     flag(T.option_ignore),
@@ -44,10 +29,25 @@ group.add_argument(
     help=T.help_intercept,
 )
 argparser.add_argument(
+    flag(T.option_inline),
+    action="store_true",
+    help=T.help_inline,
+)
+argparser.add_argument(
     flag(T.option_port),
     type=int,
     default=DEFAULT_PORT,
     help=T.help_port,
+)
+argparser.add_argument(
+    flag(T.option_transparent),
+    action="store_true",
+    help=T.help_transparent,
+)
+argparser.add_argument(
+    flag(T.option_verbose),
+    action="store_true",
+    help=T.help_verbose,
 )
 
 def readRuleFile(accumulatedContent: str, filename: str) -> str:
