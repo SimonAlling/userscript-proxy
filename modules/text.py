@@ -27,8 +27,8 @@ help_transparent = "Transparent mode"
 option_userscripts = "userscripts"
 help_userscripts = f"Load userscripts from directory {metavar_dir}"
 
-option_verbose = "verbose"
-help_verbose = "Insert an HTML comment with a list of injected userscripts"
+option_list_injected = "list-injected"
+help_list_injected = "Insert an HTML comment with a list of injected userscripts"
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version

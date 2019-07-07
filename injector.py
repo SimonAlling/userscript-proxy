@@ -78,16 +78,21 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     match = REGEX_CHARSET.search(httpHeaderValue)
     return match.group(1) if match else None
 
+
+def sanitize(optionName: str) -> str:
+    return optionName.replace("-", "_")
+
+
 class UserscriptInjector:
     def __init__(self):
         self.userscripts: List[Userscript] = []
 
 
     def load(self, loader):
-        loader.add_option(T.option_inline, bool, False, T.help_inline)
-        loader.add_option(T.option_recursive, bool, False, T.help_recursive)
-        loader.add_option(T.option_verbose, bool, False, T.help_verbose)
-        loader.add_option(T.option_userscripts, str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
+        loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
+        loader.add_option(sanitize(T.option_recursive), bool, False, T.help_recursive)
+        loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
+        loader.add_option(sanitize(T.option_userscripts), str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
 
 
     def configure(self, updates):
@@ -174,7 +179,6 @@ class UserscriptInjector:
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
                         result = inject(script, soup, Options(
                             inline = ctx.options.inline,
-                            verbose = ctx.options.verbose,
                         ))
                         if type(result) is BeautifulSoup:
                             soup = result
@@ -185,7 +189,7 @@ class UserscriptInjector:
 
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 # Insert information comment:
-                if ctx.options.verbose:
+                if ctx.options.list_injected:
                     soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
                         HTML_INFO_COMMENT_PREFIX + (
                             "No matching userscripts for this URL." if insertedScripts == []
