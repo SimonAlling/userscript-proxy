@@ -99,27 +99,27 @@ The [`GM` API](gm-api) and similar runtime facilities are not supported, because
 
 Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files. `--ignore` and `--intercept` cannot be used together. See examples above.
 
-### `--inline`
+### `--inline`, `-i`
 
 Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`). Useful to test new userscript features without having to re-upload the userscript and clear browser cache.
 
-### `--list-injected`
+### `--list-injected`, `-l`
 
 Insert an HTML comment in each page specifying which userscripts (if any) were injected.
 
-### `--port PORT`
+### `--port PORT`, `-p PORT`
 
 Make mitmproxy listen to TCP port `PORT`. Defaults to `8080`.
 
-### `--recursive`
+### `--recursive`, `-r`
 
 Recurse into directories when looking for userscripts.
 
-### `--transparent`
+### `--transparent`, `-t`
 
 Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set a proxy in the client. In such cases, you may have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
 
-### `--userscripts DIR`
+### `--userscripts DIR`, `-u DIR`
 
 Load userscripts from directory `DIR`. Defaults to `userscripts`.
 
