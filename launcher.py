@@ -40,6 +40,11 @@ argparser.add_argument(
     help=T.help_port,
 )
 argparser.add_argument(
+    flag(T.option_recursive),
+    action="store_true",
+    help=T.help_recursive,
+)
+argparser.add_argument(
     flag(T.option_transparent),
     action="store_true",
     help=T.help_transparent,
@@ -113,6 +118,7 @@ try:
         "--showhost", # use Host header for URL display
         "-s", FILENAME_INJECTOR,
         "--set", f"""{T.option_inline}={str(args.inline).lower()}""",
+        "--set", f"""{T.option_recursive}={str(args.recursive).lower()}""",
         "--set", f"""{T.option_verbose}={str(args.verbose).lower()}""",
         "--set", f"""{T.option_userscripts}={args.userscripts}""",
         # Empty string breaks the argument chain:

@@ -85,6 +85,7 @@ class UserscriptInjector:
 
     def load(self, loader):
         loader.add_option(T.option_inline, bool, False, T.help_inline)
+        loader.add_option(T.option_recursive, bool, False, T.help_recursive)
         loader.add_option(T.option_verbose, bool, False, T.help_verbose)
         loader.add_option(T.option_userscripts, str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
 
@@ -100,8 +101,11 @@ class UserscriptInjector:
         logInfo("Loading userscripts ...")
         loadedUserscripts: List[Tuple[Userscript, str]] = []
         DIRS_USERSCRIPTS = [ ctx.options.userscripts ]
+        useRecursive = ctx.options.recursive
         for directory in DIRS_USERSCRIPTS:
-            logInfo("Looking for userscripts ("+PATTERN_USERSCRIPT+") in directory `"+directory+"` ...")
+            logInfo(f"""Looking{" recursively" if useRecursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
+            if not useRecursive:
+                logInfo(f"{TAB}(use {flag(T.option_recursive)} to look recursively)")
             try:
                 os.chdir(directory)
             except FileNotFoundError:
@@ -110,7 +114,10 @@ class UserscriptInjector:
             except PermissionError:
                 logError("Permission was denied when trying to read directory `"+DIR_USERSCRIPTS+"`.")
                 continue
-            for unsafe_filename in glob.glob(PATTERN_USERSCRIPT):
+            pattern = ("**/" if useRecursive else "") + PATTERN_USERSCRIPT
+            # recursive=True only affects the meaning of "**".
+            # https://docs.python.org/3/library/glob.html#glob.glob
+            for unsafe_filename in glob.glob(pattern, recursive=True):
                 filename = shlex.quote(unsafe_filename)
                 logInfo("Loading " + filename + " ...")
                 try:

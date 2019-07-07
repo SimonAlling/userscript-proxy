@@ -18,6 +18,9 @@ help_inline = "Always insert userscripts inline, never linked"
 option_port = "port"
 help_port = f"""mitmproxy port (default: {DEFAULT_PORT})"""
 
+option_recursive = "recursive"
+help_recursive = f"""Recurse into directories when looking for userscripts"""
+
 option_transparent = "transparent"
 help_transparent = "Transparent mode"
 
