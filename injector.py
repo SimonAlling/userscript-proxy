@@ -22,7 +22,8 @@ REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "lxml"
-REGEX_DOCTYPE: Pattern = re.compile(r"doctype\s+", re.I)
+# lxml handles non-uppercase DOCTYPE correctly; html.parser does not: It emits
+# <!DOCTYPE doctype html> if the original source code contained <!doctype html>.
 HTML_INFO_COMMENT_PREFIX: str = f"""
 [{T.INFO_MESSAGE}]
 """
@@ -196,10 +197,6 @@ class UserscriptInjector:
                             else "These scripts were inserted:\n" + bulletList(insertedScripts)
                         ) + "\n"
                     ))
-                # Prevent BS/html.parser from emitting `<!DOCTYPE doctype html>` or similar if "DOCTYPE" is not all uppercase in source HTML:
-                if index_DTD is not None and REGEX_DOCTYPE.match(soup.contents[index_DTD]):
-                    # There is a DTD and it is invalid, so replace it.
-                    soup.contents[index_DTD] = Doctype(re.sub(REGEX_DOCTYPE, "", soup.contents[index_DTD]))
                 # Serialize and encode:
                 response.content = str(soup).encode(
                     fromOptional(soup.original_encoding, CHARSET_DEFAULT),
