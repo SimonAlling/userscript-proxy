@@ -45,3 +45,7 @@ def stripIndentation(string: str) -> str:
 
 def flag(name: str) -> str:
     return "--" + name
+
+
+def shortFlag(name: str) -> str:
+    return "-" + name

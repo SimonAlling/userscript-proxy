@@ -12,21 +12,27 @@ help_ignore = "Intercept all traffic except from hosts " + matching
 option_intercept = "intercept"
 help_intercept = "Intercept only traffic from hosts " + matching
 
+option_inline_short = "i"
 option_inline = "inline"
 help_inline = "Always insert userscripts inline, never linked"
 
+option_port_short = "p"
 option_port = "port"
 help_port = f"""mitmproxy port (default: {DEFAULT_PORT})"""
 
+option_recursive_short = "r"
 option_recursive = "recursive"
 help_recursive = f"""Recurse into directories when looking for userscripts"""
 
+option_transparent_short = "t"
 option_transparent = "transparent"
 help_transparent = "Transparent mode"
 
+option_userscripts_short = "u"
 option_userscripts = "userscripts"
 help_userscripts = f"Load userscripts from directory {metavar_dir}"
 
+option_list_injected_short = "l"
 option_list_injected = "list-injected"
 help_list_injected = "Insert an HTML comment with a list of injected userscripts"
 
