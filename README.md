@@ -117,7 +117,7 @@ Recurse into directories when looking for userscripts.
 
 ### `--transparent`, `-t`
 
-Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set a proxy in the client. In such cases, you may have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
+Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set a proxy in the client, e.g. when using OpenVPN Connect on Android to connect to a VPN server on the network where your proxy is running. In such cases, you have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
 
 ### `--userscripts DIR`, `-u DIR`
 
