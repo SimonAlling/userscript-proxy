@@ -11,14 +11,13 @@ import modules.inline as inline
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
 from modules.utilities import first, second, itemList, fromOptional, flag
-from modules.constants import VERSION, VERSION_PREFIX, APP_NAME
+from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR
 from modules.inject import Options, inject
 
 def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
 
 WELCOME_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
-DIRS_USERSCRIPTS: List[str] = ["userscripts"]
 PATTERN_USERSCRIPT: str = "*.user.js"
 CONTENT_TYPE: str = "Content-Type"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
@@ -91,8 +90,25 @@ class UserscriptInjector:
         logInfo("║ " +           WELCOME_MESSAGE  + " ║")
         logInfo("╚═" + "═" * len(WELCOME_MESSAGE) + "═╝")
         logInfo("")
+
+
+    def load(self, loader):
+        loader.add_option(T.option_inline, bool, False, T.help_inline)
+        loader.add_option(T.option_verbose, bool, False, T.help_verbose)
+        loader.add_option(T.option_userscripts, str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
+
+
+    def configure(self, updates):
+        if T.option_inline in updates and ctx.options.inline:
+            logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
+        if T.option_userscripts in updates:
+            self.loadUserscripts()
+
+
+    def loadUserscripts(self):
         logInfo("Loading userscripts ...")
         loadedUserscripts: List[Tuple[Userscript, str]] = []
+        DIRS_USERSCRIPTS = [ ctx.options.userscripts ]
         for directory in DIRS_USERSCRIPTS:
             logInfo("Looking for userscripts ("+PATTERN_USERSCRIPT+") in directory `"+directory+"` ...")
             try:
@@ -103,7 +119,6 @@ class UserscriptInjector:
             except PermissionError:
                 logError("Permission was denied when trying to read directory `"+DIR_USERSCRIPTS+"`.")
                 continue
-
             for unsafe_filename in glob.glob(PATTERN_USERSCRIPT):
                 filename = shlex.quote(unsafe_filename)
                 logInfo("Loading " + filename + " ...")
@@ -129,7 +144,6 @@ class UserscriptInjector:
                     logError(str(err))
                     continue
             os.chdir("..") # so mitmproxy does not unload the script
-
         logInfo("")
         logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
         logInfo(bulletList(map(
@@ -137,17 +151,7 @@ class UserscriptInjector:
             loadedUserscripts
         )))
         logInfo("")
-        self.userscripts = list(map(first, loadedUserscripts))
-
-
-    def load(self, loader):
-        loader.add_option(T.option_inline, bool, False, T.help_inline)
-        loader.add_option(T.option_verbose, bool, False, T.help_verbose)
-
-
-    def configure(self, updates):
-        if T.option_inline in updates and ctx.options.inline:
-            logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
+        self.userscripts = self.userscripts + list(map(first, loadedUserscripts))
 
 
     def response(self, flow: http.HTTPFlow):
