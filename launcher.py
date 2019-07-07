@@ -34,6 +34,11 @@ argparser.add_argument(
     help=T.help_inline,
 )
 argparser.add_argument(
+    flag(T.option_list_injected),
+    action="store_true",
+    help=T.help_list_injected,
+)
+argparser.add_argument(
     flag(T.option_port),
     type=int,
     default=DEFAULT_PORT,
@@ -55,11 +60,6 @@ argparser.add_argument(
     metavar=T.metavar_dir,
     default=DEFAULT_USERSCRIPTS_DIR,
     help=T.help_userscripts,
-)
-argparser.add_argument(
-    flag(T.option_verbose),
-    action="store_true",
-    help=T.help_verbose,
 )
 
 def readRuleFile(accumulatedContent: str, filename: str) -> str:
@@ -119,7 +119,7 @@ try:
         "-s", FILENAME_INJECTOR,
         "--set", f"""{T.option_inline}={str(args.inline).lower()}""",
         "--set", f"""{T.option_recursive}={str(args.recursive).lower()}""",
-        "--set", f"""{T.option_verbose}={str(args.verbose).lower()}""",
+        "--set", f"""{T.option_list_injected}={str(args.list_injected).lower()}""",
         "--set", f"""{T.option_userscripts}={args.userscripts}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger

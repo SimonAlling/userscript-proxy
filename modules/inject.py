@@ -7,7 +7,6 @@ from modules.utilities import idem, fromOptional, stripIndentation
 
 class Options(NamedTuple):
     inline: bool
-    verbose: bool
 
 
 def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[BeautifulSoup, Exception]:
