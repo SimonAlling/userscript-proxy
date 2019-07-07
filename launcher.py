@@ -4,7 +4,7 @@ from typing import List
 import glob
 import subprocess
 from modules.utilities import itemList, flag, idem, isSomething
-from modules.constants import DEFAULT_PORT
+from modules.constants import DEFAULT_PORT, DEFAULT_USERSCRIPTS_DIR
 import modules.ignore as ignore
 import modules.text as T
 import shlex
@@ -43,6 +43,13 @@ argparser.add_argument(
     flag(T.option_transparent),
     action="store_true",
     help=T.help_transparent,
+)
+argparser.add_argument(
+    flag(T.option_userscripts),
+    type=str,
+    metavar=T.metavar_dir,
+    default=DEFAULT_USERSCRIPTS_DIR,
+    help=T.help_userscripts,
 )
 argparser.add_argument(
     flag(T.option_verbose),
@@ -97,6 +104,7 @@ try:
         "-s", FILENAME_INJECTOR,
         "--set", f"""{T.option_inline}={str(args.inline).lower()}""",
         "--set", f"""{T.option_verbose}={str(args.verbose).lower()}""",
+        "--set", f"""{T.option_userscripts}={args.userscripts}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger
     ])
