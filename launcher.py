@@ -66,8 +66,18 @@ def readRuleFile(accumulatedContent: str, filename: str) -> str:
         print("Could not read file `"+filename+"`: " + str(e))
         return accumulatedContent
 
+
+def printWelcomeMessage():
+    print("")
+    print("╔═" + "═" * len(T.INFO_MESSAGE) + "═╗")
+    print("║ " +           T.INFO_MESSAGE  + " ║")
+    print("╚═" + "═" * len(T.INFO_MESSAGE) + "═╝")
+    print("")
+
+
 try:
     args = argparser.parse_args()
+    printWelcomeMessage()
     glob_ignore = args.ignore
     glob_intercept = args.intercept
     globPattern = (

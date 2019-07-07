@@ -14,10 +14,6 @@ from modules.utilities import first, second, itemList, fromOptional, flag
 from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR
 from modules.inject import Options, inject
 
-def stringifyVersion(version: str) -> str:
-    return VERSION_PREFIX + version
-
-WELCOME_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
 PATTERN_USERSCRIPT: str = "*.user.js"
 CONTENT_TYPE: str = "Content-Type"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
@@ -27,8 +23,8 @@ TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "lxml"
 REGEX_DOCTYPE: Pattern = re.compile(r"doctype\s+", re.I)
-INFO_COMMENT_PREFIX: str = f"""
-[{WELCOME_MESSAGE}]
+HTML_INFO_COMMENT_PREFIX: str = f"""
+[{T.INFO_MESSAGE}]
 """
 
 
@@ -85,11 +81,6 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
 class UserscriptInjector:
     def __init__(self):
         self.userscripts: List[Userscript] = []
-        logInfo("")
-        logInfo("╔═" + "═" * len(WELCOME_MESSAGE) + "═╗")
-        logInfo("║ " +           WELCOME_MESSAGE  + " ║")
-        logInfo("╚═" + "═" * len(WELCOME_MESSAGE) + "═╝")
-        logInfo("")
 
 
     def load(self, loader):
@@ -180,7 +171,7 @@ class UserscriptInjector:
                         ))
                         if type(result) is BeautifulSoup:
                             soup = result
-                            insertedScripts.append(script.name + ("" if script.version is None else " " + stringifyVersion(script.version)))
+                            insertedScripts.append(script.name + ("" if script.version is None else " " + T.stringifyVersion(script.version)))
                         else:
                             logError("Injection failed due to the following error:")
                             logError(str(result))
@@ -189,7 +180,7 @@ class UserscriptInjector:
                 # Insert information comment:
                 if ctx.options.verbose:
                     soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
-                        INFO_COMMENT_PREFIX + (
+                        HTML_INFO_COMMENT_PREFIX + (
                             "No matching userscripts for this URL." if insertedScripts == []
                             else "These scripts were inserted:\n" + bulletList(insertedScripts)
                         ) + "\n"
