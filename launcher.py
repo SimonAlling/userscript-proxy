@@ -3,7 +3,7 @@
 from typing import List
 import glob
 import subprocess
-from modules.utilities import itemList, flag, idem, isSomething
+from modules.utilities import itemList, flag, shortFlag, idem, isSomething
 from modules.constants import DEFAULT_PORT, DEFAULT_USERSCRIPTS_DIR
 import modules.ignore as ignore
 import modules.text as T
@@ -29,7 +29,7 @@ group.add_argument(
     help=T.help_intercept,
 )
 argparser.add_argument(
-    flag(T.option_inline),
+    flag(T.option_inline), shortFlag(T.option_inline_short),
     action="store_true",
     help=T.help_inline,
 )
@@ -39,23 +39,23 @@ argparser.add_argument(
     help=T.help_list_injected,
 )
 argparser.add_argument(
-    flag(T.option_port),
+    flag(T.option_port), shortFlag(T.option_port_short),
     type=int,
     default=DEFAULT_PORT,
     help=T.help_port,
 )
 argparser.add_argument(
-    flag(T.option_recursive),
+    flag(T.option_recursive), shortFlag(T.option_recursive_short),
     action="store_true",
     help=T.help_recursive,
 )
 argparser.add_argument(
-    flag(T.option_transparent),
+    flag(T.option_transparent), shortFlag(T.option_transparent_short),
     action="store_true",
     help=T.help_transparent,
 )
 argparser.add_argument(
-    flag(T.option_userscripts),
+    flag(T.option_userscripts), shortFlag(T.option_userscripts_short),
     type=str,
     metavar=T.metavar_dir,
     default=DEFAULT_USERSCRIPTS_DIR,
