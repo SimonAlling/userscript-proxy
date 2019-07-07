@@ -1,8 +1,10 @@
 # Userscript Proxy
 
-Browser extensions on iOS, Android and pretty much any other web browsing device. No jailbreak/root required.
+Browser extensions on iOS, Android and pretty much any other web browsing device.
+No jailbreak/root required.
 
-Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, injecting matching userscripts into web pages as they flow through it. Both HTTP and HTTPS are supported.
+Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, injecting matching userscripts into web pages as they flow through it.
+Both HTTP and HTTPS are supported.
 
 
 ## Security
@@ -12,12 +14,16 @@ Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, inje
 
 ## Ignoring hosts
 
-Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy. There are two approaches:
+Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy.
+There are two approaches:
 
-  * Blacklisting hosts that cannot connect through the proxy. Tedious, because you have to add exceptions for apps and such all the time.
-  * Whitelisting hosts where userscripts should be applied. Works well in general, but does not allow universal userscripts that run on all sites, and the whitelist must be updated when a new userscript is added.
+  * Blacklisting hosts that cannot connect through the proxy.
+    Tedious, because you have to add exceptions for apps and such all the time.
+  * Whitelisting hosts where userscripts should be applied.
+    Works well in general, but does not allow universal userscripts that run on all sites, and the whitelist must be updated when a new userscript is added.
 
-Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` flag together with one or more files containing **ignore/intercept rules**. Examples:
+Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` flag together with one or more files containing **ignore/intercept rules**.
+Examples:
 
 ```bash
 # Take ignore rules from ignore.txt (included):
@@ -31,7 +37,10 @@ Rules can be specified in two ways:
 
 ### Basic pattern
 
-Based on the syntax used by userscript `@include` directives. Asterisk (`*`) means any string (including the empty string). `*.` is automatically prepended. `:*` is automatically appended unless the rule contains a colon (`:`).
+Based on the syntax used by userscript `@include` directives.
+Asterisk (`*`) means any string (including the empty string).
+`*.` is automatically prepended.
+`:*` is automatically appended unless the rule contains a colon (`:`).
 
 To match a domain without matching all of its subdomains, use a regex rule instead (see below).
 
@@ -48,11 +57,13 @@ To match a domain without matching all of its subdomains, use a regex rule inste
 
 If a rule starts and ends with a slash (`/`), it is treated as a Python regex.
 
-Note that the string to match against contains both a host and a port, e.g. `example.com:443`, and that the regex is used verbatim (i.e. you have to explicitly provide `^` etc if desired). The only exception is that the case-insensitivity flag (`?i`) is automatically added.
+Note that the string to match against contains both a host and a port, e.g. `example.com:443`, and that the regex is used verbatim (i.e. you have to explicitly provide `^` etc if desired).
+The only exception is that the case-insensitivity flag (`?i`) is automatically added.
 
 Also, be careful with `$`: A regex like `/site.com$/` will never match, because it will only be used to check strings like `site.com:80`.
 
-Anything from a `#` until the end of the line is treated as a comment. Leading and trailing whitespace have no effect.
+Anything from a `#` until the end of the line is treated as a comment.
+Leading and trailing whitespace have no effect.
 
 #### Examples
 
@@ -79,7 +90,9 @@ If the `@downloadURL` approach is not possible, for one reason or the other, it 
 
 ## Userscript compatibility
 
-Userscript Proxy supports (a subset of) the [Greasemonkey metadata syntax](metadata). No adaptation of plain JavaScript userscripts should be required. These directives are supported:
+Userscript Proxy supports (a subset of) the [Greasemonkey metadata syntax](metadata).
+No adaptation of plain JavaScript userscripts should be required.
+These directives are supported:
 
   * `@name`
   * `@version`
@@ -97,11 +110,14 @@ The [`GM` API](gm-api) and similar runtime facilities are not supported, because
 
 ### `--ignore FILE`/`--intercept FILE`
 
-Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files. `--ignore` and `--intercept` cannot be used together. See examples above.
+Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files.
+`--ignore` and `--intercept` cannot be used together.
+See examples above.
 
 ### `--inline`, `-i`
 
-Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`). Useful to test new userscript features without having to re-upload the userscript and clear browser cache.
+Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`).
+Useful to test new userscript features without having to re-upload the userscript and clear browser cache.
 
 ### `--list-injected`, `-l`
 
@@ -109,7 +125,8 @@ Insert an HTML comment in each page specifying which userscripts (if any) were i
 
 ### `--port PORT`, `-p PORT`
 
-Make mitmproxy listen to TCP port `PORT`. Defaults to `8080`.
+Make mitmproxy listen to TCP port `PORT`.
+Defaults to `8080`.
 
 ### `--recursive`, `-r`
 
@@ -117,11 +134,14 @@ Recurse into directories when looking for userscripts.
 
 ### `--transparent`, `-t`
 
-Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set a proxy in the client, e.g. when using OpenVPN Connect on Android to connect to a VPN server on the network where your proxy is running. In such cases, you have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
+Run mitmproxy in [transparent mode](transparent-mode).
+Useful if you cannot set a proxy in the client, e.g. when using OpenVPN Connect on Android to connect to a VPN server on the network where your proxy is running.
+In such cases, you have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
 
 ### `--userscripts DIR`, `-u DIR`
 
-Load userscripts from directory `DIR`. Defaults to `userscripts`.
+Load userscripts from directory `DIR`.
+Defaults to `userscripts`.
 
 
 [mitmproxy]: https://mitmproxy.org
