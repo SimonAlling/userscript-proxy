@@ -95,7 +95,7 @@ The [`GM` API](gm-api) and similar runtime facilities are not supported, because
 
 ## Options
 
-### `--ignore/--intercept FILE`
+### `--ignore FILE`/`--intercept FILE`
 
 Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files. `--ignore` and `--intercept` cannot be used together. See examples above.
 
@@ -109,11 +109,19 @@ Insert an HTML comment in each page specifying which userscripts (if any) were i
 
 ### `--port PORT`
 
-Make mitmproxy listen to TCP port PORT. Defaults to 8080.
+Make mitmproxy listen to TCP port `PORT`. Defaults to `8080`.
+
+### `--recursive`
+
+Recurse into directories when looking for userscripts.
 
 ### `--transparent`
 
 Run mitmproxy in [transparent mode](transparent-mode). Useful if you cannot set a proxy in the client. In such cases, you may have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
+
+### `--userscripts DIR`
+
+Load userscripts from directory `DIR`. Defaults to `userscripts`.
 
 
 [mitmproxy]: https://mitmproxy.org
