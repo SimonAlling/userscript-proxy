@@ -13,6 +13,7 @@ from modules.userscript import Userscript, UserscriptError, document_end, docume
 from modules.utilities import first, second, itemList, fromOptional, flag
 from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR
 from modules.inject import Options, inject
+from modules.misc import sanitize
 
 PATTERN_USERSCRIPT: str = "*.user.js"
 CONTENT_TYPE: str = "Content-Type"
@@ -80,10 +81,6 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     return match.group(1) if match else None
 
 
-def sanitize(optionName: str) -> str:
-    return optionName.replace("-", "_")
-
-
 class UserscriptInjector:
     def __init__(self):
         self.userscripts: List[Userscript] = []
@@ -97,9 +94,9 @@ class UserscriptInjector:
 
 
     def configure(self, updates):
-        if T.option_inline in updates and ctx.options.inline:
+        if sanitize(T.option_inline) in updates and ctx.options.inline:
             logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
-        if T.option_userscripts in updates:
+        if sanitize(T.option_userscripts) in updates:
             self.loadUserscripts()
 
 

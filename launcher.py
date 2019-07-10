@@ -5,6 +5,7 @@ import glob
 import subprocess
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
 from modules.constants import DEFAULT_PORT, DEFAULT_USERSCRIPTS_DIR
+from modules.misc import sanitize
 import modules.ignore as ignore
 import modules.text as T
 import shlex
@@ -117,10 +118,10 @@ try:
         "--mode", "transparent" if useTransparent else "regular",
         "--showhost", # use Host header for URL display
         "-s", FILENAME_INJECTOR,
-        "--set", f"""{T.option_inline}={str(args.inline).lower()}""",
-        "--set", f"""{T.option_recursive}={str(args.recursive).lower()}""",
-        "--set", f"""{T.option_list_injected}={str(args.list_injected).lower()}""",
-        "--set", f"""{T.option_userscripts}={args.userscripts}""",
+        "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
+        "--set", f"""{sanitize(T.option_recursive)}={str(args.recursive).lower()}""",
+        "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
+        "--set", f"""{sanitize(T.option_userscripts)}={args.userscripts}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger
     ])
