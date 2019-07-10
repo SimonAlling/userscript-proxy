@@ -81,6 +81,12 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     return match.group(1) if match else None
 
 
+# Because ctx.options is not subscriptable and we want to be able to use
+# expressions as keys:
+def option(key: str):
+    return ctx.options.__getattr__(sanitize(key))
+
+
 class UserscriptInjector:
     def __init__(self):
         self.userscripts: List[Userscript] = []
@@ -94,7 +100,7 @@ class UserscriptInjector:
 
 
     def configure(self, updates):
-        if sanitize(T.option_inline) in updates and ctx.options.inline:
+        if sanitize(T.option_inline) in updates and option(T.option_inline):
             logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
         if sanitize(T.option_userscripts) in updates:
             self.loadUserscripts()
@@ -103,8 +109,8 @@ class UserscriptInjector:
     def loadUserscripts(self):
         logInfo("Loading userscripts ...")
         loadedUserscripts: List[Tuple[Userscript, str]] = []
-        DIRS_USERSCRIPTS = [ ctx.options.userscripts ]
-        useRecursive = ctx.options.recursive
+        DIRS_USERSCRIPTS = [ option(T.option_userscripts) ]
+        useRecursive = option(T.option_recursive)
         for directory in DIRS_USERSCRIPTS:
             logInfo(f"""Looking{" recursively" if useRecursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
             if not useRecursive:
@@ -170,13 +176,13 @@ class UserscriptInjector:
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(requestURL)
                 for script in self.userscripts:
                     if isApplicable(script):
-                        useInline = ctx.options.inline or script.downloadURL is None
+                        useInline = option(T.option_inline) or script.downloadURL is None
                         if useInline and len(script.unsafeSequences) > 0:
                             logError(unsafeSequencesMessage(script))
                             continue
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
                         result = inject(script, soup, Options(
-                            inline = ctx.options.inline,
+                            inline = option(T.option_inline),
                         ))
                         if type(result) is BeautifulSoup:
                             soup = result
@@ -187,7 +193,7 @@ class UserscriptInjector:
 
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 # Insert information comment:
-                if ctx.options.list_injected:
+                if option(T.option_list_injected):
                     soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
                         HTML_INFO_COMMENT_PREFIX + (
                             "No matching userscripts for this URL." if insertedScripts == []
