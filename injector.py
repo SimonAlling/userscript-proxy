@@ -1,5 +1,5 @@
 from typing import Optional, Iterable, List, Callable, Pattern, Match
-import glob, os, re
+import glob, os
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
 from functools import partial
@@ -14,13 +14,11 @@ from modules.utilities import first, second, itemList, fromOptional, flag, idem
 from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
 from modules.inject import Options, inject
 from modules.misc import sanitize
-from modules.requests import requestContainsQueryParam
+from modules.requests import CONTENT_TYPE, inferEncoding, requestContainsQueryParam
 
 PATTERN_USERSCRIPT: str = "*.user.js"
-CONTENT_TYPE: str = "Content-Type"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
 CHARSET_DEFAULT: str = "utf-8"
-REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
 TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
 HTML_PARSER: str = "lxml"
@@ -75,11 +73,6 @@ Possible solutions:
     f"Make the userscript available online and give it a {PREFIX_TAG}{userscript.directive_downloadURL}",
     f"Remove the {flag(T.option_inline)} flag.",
 ])
-
-def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
-    httpHeaderValue = response.headers.get(CONTENT_TYPE, "").lower()
-    match = REGEX_CHARSET.search(httpHeaderValue)
-    return match.group(1) if match else None
 
 
 # Because ctx.options is not subscriptable and we want to be able to use
