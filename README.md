@@ -128,6 +128,12 @@ Insert an HTML comment in each page specifying which userscripts (if any) were i
 Make mitmproxy listen to TCP port `PORT`.
 Defaults to `8080`.
 
+### `--query-param-to-disable PARAM`, `-q PARAM`
+
+Disable userscripts when the request URL contains `PARAM` as a query parameter.
+For example, use `-q foo` to disable userscripts for `http://example.com?foo`.
+Defaults to `nouserscripts`.
+
 ### `--recursive`, `-r`
 
 Recurse into directories when looking for userscripts.

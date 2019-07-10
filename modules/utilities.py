@@ -9,6 +9,10 @@ def idem(x: A) -> A:
     return x
 
 
+def equals(x: A) -> Callable[[A], bool]:
+    return lambda y: x == y
+
+
 def first(tuple: Tuple[A, B]) -> A:
     (a, b) = tuple
     return a

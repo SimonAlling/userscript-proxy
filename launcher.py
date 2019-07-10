@@ -4,7 +4,7 @@ from typing import List
 import glob
 import subprocess
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
-from modules.constants import DEFAULT_PORT, DEFAULT_USERSCRIPTS_DIR
+from modules.constants import DEFAULT_PORT, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
 from modules.misc import sanitize
 import modules.ignore as ignore
 import modules.text as T
@@ -44,6 +44,13 @@ argparser.add_argument(
     type=int,
     default=DEFAULT_PORT,
     help=T.help_port,
+)
+argparser.add_argument(
+    flag(T.option_query_param_to_disable), shortFlag(T.option_query_param_to_disable_short),
+    type=str,
+    metavar=T.metavar_param,
+    default=DEFAULT_QUERY_PARAM_TO_DISABLE,
+    help=T.help_query_param_to_disable,
 )
 argparser.add_argument(
     flag(T.option_recursive), shortFlag(T.option_recursive_short),
@@ -122,6 +129,7 @@ try:
         "--set", f"""{sanitize(T.option_recursive)}={str(args.recursive).lower()}""",
         "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
         "--set", f"""{sanitize(T.option_userscripts)}={args.userscripts}""",
+        "--set", f"""{sanitize(T.option_query_param_to_disable)}={args.query_param_to_disable}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger
     ])
