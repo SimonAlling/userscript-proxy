@@ -10,10 +10,11 @@ import modules.userscript as userscript
 import modules.inline as inline
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from modules.utilities import first, second, itemList, fromOptional, flag
-from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR
+from modules.utilities import first, second, itemList, fromOptional, flag, idem
+from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
 from modules.inject import Options, inject
 from modules.misc import sanitize
+from modules.requests import requestContainsQueryParam
 
 PATTERN_USERSCRIPT: str = "*.user.js"
 CONTENT_TYPE: str = "Content-Type"
@@ -97,11 +98,14 @@ class UserscriptInjector:
         loader.add_option(sanitize(T.option_recursive), bool, False, T.help_recursive)
         loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
         loader.add_option(sanitize(T.option_userscripts), str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
+        loader.add_option(sanitize(T.option_query_param_to_disable), str, DEFAULT_QUERY_PARAM_TO_DISABLE, T.help_query_param_to_disable)
 
 
     def configure(self, updates):
         if sanitize(T.option_inline) in updates and option(T.option_inline):
             logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
+        if sanitize(T.option_query_param_to_disable) in updates:
+            logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
         if sanitize(T.option_userscripts) in updates:
             self.loadUserscripts()
 
@@ -173,6 +177,9 @@ class UserscriptInjector:
                     from_encoding=inferEncoding(response)
                 )
                 requestURL = flow.request.pretty_url # should work in transparent mode too, unless the Host header is spoofed
+                if requestContainsQueryParam(option(T.option_query_param_to_disable), flow.request):
+                    logInfo(f"""Not injecting any userscripts into {requestURL} because it contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
+                    return
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(requestURL)
                 for script in self.userscripts:
                     if isApplicable(script):
