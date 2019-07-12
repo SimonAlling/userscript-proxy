@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, List, Callable, Pattern, Match
+from typing import Optional, Iterable, List, Callable, Pattern, Match, Tuple
 import glob, os
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
@@ -100,17 +100,18 @@ class UserscriptInjector:
         if sanitize(T.option_query_param_to_disable) in updates:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
         if sanitize(T.option_userscripts) in updates:
-            self.loadUserscripts()
+            self.userscripts = self.loadUserscripts(
+                directories = [ option(T.option_userscripts) ],
+                recursive = option(T.option_recursive),
+            )
 
 
-    def loadUserscripts(self):
+    def loadUserscripts(self, directories: Iterable[str], recursive: bool) -> List[Userscript]:
         logInfo("Loading userscripts ...")
         loadedUserscripts: List[Tuple[Userscript, str]] = []
-        DIRS_USERSCRIPTS = [ option(T.option_userscripts) ]
-        useRecursive = option(T.option_recursive)
-        for directory in DIRS_USERSCRIPTS:
-            logInfo(f"""Looking{" recursively" if useRecursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
-            if not useRecursive:
+        for directory in directories:
+            logInfo(f"""Looking{" recursively" if recursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
+            if not recursive:
                 logInfo(f"{TAB}(use {flag(T.option_recursive)} to look recursively)")
             try:
                 os.chdir(directory)
@@ -118,9 +119,9 @@ class UserscriptInjector:
                 logWarning("Directory `"+directory+"` does not exist.")
                 continue
             except PermissionError:
-                logError("Permission was denied when trying to read directory `"+DIR_USERSCRIPTS+"`.")
+                logError("Permission was denied when trying to read directory `"+directory+"`.")
                 continue
-            pattern = ("**/" if useRecursive else "") + PATTERN_USERSCRIPT
+            pattern = ("**/" if recursive else "") + PATTERN_USERSCRIPT
             # recursive=True only affects the meaning of "**".
             # https://docs.python.org/3/library/glob.html#glob.glob
             for unsafe_filename in glob.glob(pattern, recursive=True):
@@ -155,7 +156,7 @@ class UserscriptInjector:
             loadedUserscripts
         )))
         logInfo("")
-        self.userscripts = self.userscripts + list(map(first, loadedUserscripts))
+        return list(map(first, loadedUserscripts))
 
 
     def response(self, flow: http.HTTPFlow):
