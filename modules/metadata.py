@@ -3,7 +3,6 @@ import re
 from string import Template
 from functools import reduce
 import itertools
-import warnings
 from modules.utilities import first, second, isSomething
 
 class MetadataError(Exception):
@@ -41,7 +40,6 @@ BLOCK_START: str = "==UserScript=="
 BLOCK_END: str = "==/UserScript=="
 
 REGEXGROUP_CONTENT: str = "content"
-REGEX_EMPTY_LINE_COMMENT: Pattern = re.compile(r"^(?:\/\/)?\s*$")
 REGEX_METADATA_BLOCK: Pattern = re.compile(
     PREFIX_COMMENT + r"\s*" + BLOCK_START + r"\n"
     + r"(?P<" + REGEXGROUP_CONTENT + r">.*)"
@@ -94,12 +92,6 @@ STRING_ERROR_PREDICATE_FAILED: Template = Template(f"""Detected a {PREFIX_TAG}$t
 
 """)
 
-STRING_WARNING_NO_MATCH: Template = Template(f"""This metadata line did not match the expected pattern and was ignored:
-
-    $line
-
-""")
-
 
 def isWhitespaceLine(s: str) -> bool:
     return isSomething(re.compile(r"^\s*$").match(s))
@@ -122,8 +114,6 @@ def parse(metadataContent: str) -> Metadata:
     def parseLine(line: str) -> Optional[MetadataItem]:
         match: Optional[Match] = REGEX_METADATA_LINE.search(line)
         if match is None:
-            # if not REGEX_EMPTY_LINE_COMMENT.match(line): # TODO: uncomment when we can handle warnings
-            #     warnings.warn(STRING_WARNING_NO_MATCH.substitute(line=line))
             return None
         else:
             tagName: str = match.group(REGEXGROUP_TAGNAME)
