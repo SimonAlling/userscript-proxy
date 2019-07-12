@@ -174,7 +174,8 @@ def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises Metadata
         return acc if tag is not None and tag.unique and name in seenTagNames else list(acc) + [pair]
 
     def withoutDuplicates(metadata: Metadata) -> Metadata:
-        return list(reduce(handleDuplicate, metadata, []))
+        empty: Iterable[Tuple[str, Union[str, bool]]] = [] # to satisfy mypy
+        return list(reduce(handleDuplicate, metadata, empty))
 
     # Awkwardly written to satisfy mypy:
     def withDefaults(metadata: Metadata) -> Metadata:
