@@ -109,6 +109,7 @@ class UserscriptInjector:
     def loadUserscripts(self, directories: Iterable[str], recursive: bool) -> List[Userscript]:
         logInfo("Loading userscripts ...")
         loadedUserscripts: List[Tuple[Userscript, str]] = []
+        workingDirectory = os.getcwd()
         for directory in directories:
             logInfo(f"""Looking{" recursively" if recursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
             if not recursive:
@@ -148,7 +149,7 @@ class UserscriptInjector:
                     logError("Userscript error:")
                     logError(str(err))
                     continue
-            os.chdir("..") # so mitmproxy does not unload the script
+            os.chdir(workingDirectory) # so mitmproxy does not unload the script
         logInfo("")
         logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
         logInfo(bulletList(map(
