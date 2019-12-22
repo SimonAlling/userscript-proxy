@@ -81,6 +81,60 @@ def option(key: str):
     return ctx.options.__getattr__(sanitize(key))
 
 
+def loadUserscripts(directories: Iterable[str], recursive: bool) -> List[Userscript]:
+    logInfo("Loading userscripts ...")
+    loadedUserscripts: List[Tuple[Userscript, str]] = []
+    workingDirectory = os.getcwd()
+    for directory in directories:
+        logInfo(f"""Looking{" recursively" if recursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
+        if not recursive:
+            logInfo(f"{TAB}(use {flag(T.option_recursive)} to look recursively)")
+        try:
+            os.chdir(directory)
+        except FileNotFoundError:
+            logWarning("Directory `"+directory+"` does not exist.")
+            continue
+        except PermissionError:
+            logError("Permission was denied when trying to read directory `"+directory+"`.")
+            continue
+        pattern = ("**/" if recursive else "") + PATTERN_USERSCRIPT
+        # recursive=True only affects the meaning of "**".
+        # https://docs.python.org/3/library/glob.html#glob.glob
+        for unsafe_filename in glob.glob(pattern, recursive=True):
+            filename = shlex.quote(unsafe_filename)
+            logInfo("Loading " + filename + " ...")
+            try:
+                content = open(filename).read()
+            except PermissionError:
+                logError("Could not read file `"+filename+"`: Permission denied.")
+                continue
+            except Exception as e:
+                logError("Could not read file `"+filename+"`: " + str(e))
+                continue
+            try:
+                script = userscript.create(content)
+                loadedUserscripts.append((script, filename))
+                if script.downloadURL is None and len(script.unsafeSequences) > 0:
+                    logError(unsafeSequencesMessage(script))
+            except MetadataError as err:
+                logError("Metadata error:")
+                logError(str(err))
+                continue
+            except UserscriptError as err:
+                logError("Userscript error:")
+                logError(str(err))
+                continue
+        os.chdir(workingDirectory) # so mitmproxy does not unload the script
+    logInfo("")
+    logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
+    logInfo(bulletList(map(
+        lambda s: f"{first(s).name} ({second(s)})",
+        loadedUserscripts
+    )))
+    logInfo("")
+    return list(map(first, loadedUserscripts))
+
+
 class UserscriptInjector:
     def __init__(self):
         self.userscripts: List[Userscript] = []
@@ -100,64 +154,10 @@ class UserscriptInjector:
         if sanitize(T.option_query_param_to_disable) in updates:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
         if sanitize(T.option_userscripts) in updates:
-            self.userscripts = self.loadUserscripts(
+            self.userscripts = loadUserscripts(
                 directories = [ option(T.option_userscripts) ],
                 recursive = option(T.option_recursive),
             )
-
-
-    def loadUserscripts(self, directories: Iterable[str], recursive: bool) -> List[Userscript]:
-        logInfo("Loading userscripts ...")
-        loadedUserscripts: List[Tuple[Userscript, str]] = []
-        workingDirectory = os.getcwd()
-        for directory in directories:
-            logInfo(f"""Looking{" recursively" if recursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
-            if not recursive:
-                logInfo(f"{TAB}(use {flag(T.option_recursive)} to look recursively)")
-            try:
-                os.chdir(directory)
-            except FileNotFoundError:
-                logWarning("Directory `"+directory+"` does not exist.")
-                continue
-            except PermissionError:
-                logError("Permission was denied when trying to read directory `"+directory+"`.")
-                continue
-            pattern = ("**/" if recursive else "") + PATTERN_USERSCRIPT
-            # recursive=True only affects the meaning of "**".
-            # https://docs.python.org/3/library/glob.html#glob.glob
-            for unsafe_filename in glob.glob(pattern, recursive=True):
-                filename = shlex.quote(unsafe_filename)
-                logInfo("Loading " + filename + " ...")
-                try:
-                    content = open(filename).read()
-                except PermissionError:
-                    logError("Could not read file `"+filename+"`: Permission denied.")
-                    continue
-                except Exception as e:
-                    logError("Could not read file `"+filename+"`: " + str(e))
-                    continue
-                try:
-                    script = userscript.create(content)
-                    loadedUserscripts.append((script, filename))
-                    if script.downloadURL is None and len(script.unsafeSequences) > 0:
-                        logError(unsafeSequencesMessage(script))
-                except MetadataError as err:
-                    logError("Metadata error:")
-                    logError(str(err))
-                    continue
-                except UserscriptError as err:
-                    logError("Userscript error:")
-                    logError(str(err))
-                    continue
-            os.chdir(workingDirectory) # so mitmproxy does not unload the script
-        logInfo("")
-        logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
-        logInfo(bulletList(map(
-            lambda s: f"{first(s).name} ({second(s)})",
-            loadedUserscripts
-        )))
-        logInfo("")
-        return list(map(first, loadedUserscripts))
 
 
     def response(self, flow: http.HTTPFlow):
