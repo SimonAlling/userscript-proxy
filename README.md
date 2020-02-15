@@ -3,7 +3,7 @@
 Browser extensions on iOS, Android and pretty much any other web browsing device.
 No jailbreak/root required.
 
-Userscript Proxy is built around [mitmproxy](mitmproxy) and acts as a MITM, injecting matching userscripts into web pages as they flow through it.
+Userscript Proxy is built around [mitmproxy] and acts as a MITM, injecting matching userscripts into web pages as they flow through it.
 Both HTTP and HTTPS are supported.
 
 
@@ -85,12 +85,12 @@ A userscript is injected by reference if and only if it has a specified `@downlo
 (This can be overridden using the `--inline` flag, in which case all userscripts are injected inline.)
 
 Userscripts are injected into _every_ response from a matching URL, and the size of a userscript can be anything from a few hundred bytes for the most basic ones to hundreds of kilobytes in extreme cases, so there are _massive_ data usage reductions to be gained from making the userscript accessible by URL and including a `@downloadURL`.
-If the `@downloadURL` approach is not possible, for one reason or the other, it is a good idea to be aware of this issue, and to take appropriate action such as [minifying](minification) userscripts and adding suitable ignore rules.
+If the `@downloadURL` approach is not possible, for one reason or the other, it is a good idea to be aware of this issue, and to take appropriate action such as [minifying][minification] userscripts and adding suitable ignore rules.
 
 
 ## Userscript compatibility
 
-Userscript Proxy supports (a subset of) the [Greasemonkey metadata syntax](metadata).
+Userscript Proxy supports (a subset of) the [Greasemonkey metadata syntax][metadata].
 No adaptation of plain JavaScript userscripts should be required.
 These directives are supported:
 
@@ -103,7 +103,7 @@ These directives are supported:
   * `@noframes`
   * `@downloadURL`
 
-The [`GM` API](gm-api) and similar runtime facilities are not supported, because userscripts can only be injected as regular scripts.
+The [`GM` API][gm-api] and similar runtime facilities are not supported, because userscripts can only be injected as regular scripts.
 
 
 ## Options
@@ -140,7 +140,7 @@ Recurse into directories when looking for userscripts.
 
 ### `--transparent`, `-t`
 
-Run mitmproxy in [transparent mode](transparent-mode).
+Run mitmproxy in [transparent mode][transparent-mode].
 Useful if you cannot set a proxy in the client, e.g. when using OpenVPN Connect on Android to connect to a VPN server on the network where your proxy is running.
 In such cases, you have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
 
