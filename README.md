@@ -7,6 +7,14 @@ Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, inje
 Both HTTP and HTTPS are supported.
 
 
+## Getting started
+
+```bash
+$ docker build -t userscript-proxy:latest .
+$ docker run -p 8080:8080 userscript-proxy
+```
+
+
 ## Security
 
 **Userscript Proxy can (and must be able to) read and modify all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
