@@ -23,6 +23,9 @@ There are two approaches:
     Works well in general, but does not allow universal userscripts that run on all sites, and the whitelist must be updated when a new userscript is added.
 
 Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` flag together with one or more files containing **ignore/intercept rules**.
+
+**NOTE:** With `--transparent`, mitmproxy may not be able to see the hostname of responses without intercepting them. In that case, you can only ignore/intercept based on IP address, not hostname.
+
 Examples:
 
 ```bash
@@ -143,6 +146,8 @@ Recurse into directories when looking for userscripts.
 Run mitmproxy in [transparent mode][transparent-mode].
 Useful if you cannot set a proxy in the client, e.g. when using OpenVPN Connect on Android to connect to a VPN server on the network where your proxy is running.
 In such cases, you have to route traffic from the client to the proxy at the network layer instead, making transparent mode necessary.
+
+**NOTE:** In transparent mode, ignore/intercept rules based on hostname (rather than IP address) may not work, because mitmproxy may not be able to see the hostname of responses without intercepting them.
 
 ### `--userscripts DIR`, `-u DIR`
 

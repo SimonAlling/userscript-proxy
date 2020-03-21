@@ -1,4 +1,5 @@
 # See README.md for information about the syntax used in this file.
+# NOTE: Ignoring based on hostname may not work with the --transparent flag.
 
 # Applications that cannot connect through mitmproxy:
     itunes.apple.com           # App Store
