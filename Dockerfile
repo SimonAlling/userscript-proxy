@@ -1,18 +1,19 @@
-FROM python:3.7-alpine as base
+FROM python:3.7-slim AS base
 
-RUN apk add -U --no-cache \
-    gcc \
-    build-base \
-    linux-headers \
-    ca-certificates \
-    python3-dev \
-    libffi-dev \
-    openssl-dev \
-    libxslt-dev
-WORKDIR /app
-RUN pip install mitmproxy
+FROM base AS builder
+
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+# We're not going to run anything in the build container, so we'll suppress the script location warnings.
+RUN pip install --user --no-warn-script-location -r requirements.txt
+
+
+FROM base
+
+WORKDIR /app
+
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
 COPY . ./
+
 EXPOSE 8080
 ENTRYPOINT [ "python", "-u", "launcher.py" ]

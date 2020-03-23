@@ -1,3 +1,4 @@
+mitmproxy
 beautifulsoup4
 urlmatch
 lxml
