@@ -12,7 +12,7 @@ import shlex
 from argparse import ArgumentParser
 from functools import reduce
 
-FILENAME_INJECTOR: str = "injector.py"
+FILENAME_INJECTOR: str = "src/injector.py"
 MATCH_NO_HOSTS = r"^$"
 
 argparser = ArgumentParser(description=T.description)
