@@ -36,13 +36,14 @@ Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` f
 
 Examples:
 
-```bash
-# Take ignore rules from ignore.txt (included):
-python3.6 launcher.py --ignore "ignore.txt"
-
-# Take intercept rules from all .txt files whose names start with "foo":
-python3.6 launcher.py --intercept "foo*.txt"
-```
+  * Take ignore rules from `rules/ignore.txt` (included):
+    ```bash
+    docker run -p 8080:8080 userscript-proxy --ignore "rules/ignore.txt"
+    ```
+  * Take intercept rules from all `.txt` files in the `rules` directory whose names start with `foo`:
+    ```bash
+    docker run -p 8080:8080 userscript-proxy --intercept "rules/foo*.txt"
+    ```
 
 Rules can be specified in two ways:
 
@@ -119,6 +120,14 @@ The [`GM` API][gm-api] and similar runtime facilities are not supported, because
 
 ## Options
 
+Options are specified by simply appending them to the `docker run` command, for example:
+
+```bash
+docker run -p 8080:8080 userscript-proxy --transparent
+#          ^^^^^^^^^^^^                  ^^^^^^^^^^^^^
+#          args to `docker run`          args to Userscript Proxy
+```
+
 ### `--ignore FILE`/`--intercept FILE`
 
 Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files.
@@ -138,6 +147,18 @@ Insert an HTML comment in each page specifying which userscripts (if any) were i
 
 Make mitmproxy listen to TCP port `PORT`.
 Defaults to `8080`.
+
+**Note:** Be careful when running Userscript Proxy in Docker! If you want to use e.g. port 1337 on the host machine, do this instead:
+
+```bash
+docker run -p 1337:8080 userscript-proxy
+```
+
+If you really want Userscript Proxy to use a certain port _inside_ the Docker container, e.g. 5555, don't forget to publish that port:
+
+```bash
+docker run -p 1337:5555 userscript-proxy -p 5555
+```
 
 ### `--query-param-to-disable PARAM`, `-q PARAM`
 
