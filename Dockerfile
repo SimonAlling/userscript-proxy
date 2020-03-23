@@ -15,4 +15,4 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . ./
 EXPOSE 8080
-ENTRYPOINT [ "./launcher.py" ]
+ENTRYPOINT [ "python", "-u", "launcher.py" ]
