@@ -13,4 +13,3 @@
   d.head.appendChild(d.createElement("style")).textContent = CSS;
   d.addEventListener("DOMContentLoaded", _ => (d.querySelector("h1") || d.body).textContent = T);
 })(document);
-
