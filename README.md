@@ -119,6 +119,22 @@ Otherwise, read on.
 
 1.  You should now be able to browse via HTTPS as usual.
 
+### Deploying userscripts
+
+Userscript Proxy comes with one single userscript, useful only for testing that the proxy is up and running.
+To use userscripts you've downloaded or written yourself, you need to tell Userscript Proxy where they are.
+
+1.  You need the **absolute path** to a directory containing your userscripts.
+    This could be something like `/home/alling/userscripts`.
+
+1.  Run Userscript Proxy with your userscripts directory mounted at `/usr/share/userscripts` inside the Docker container:
+
+    ```
+    docker run -p 8080:8080 -v "/home/alling/userscripts:/usr/share/userscripts" userscript-proxy
+    ```
+
+**Note:** This will replace the test userscript with your userscripts, so [`http://example.com`](http://example.com) won't be green anymore.
+
 
 ## Security
 
