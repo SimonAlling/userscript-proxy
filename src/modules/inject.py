@@ -17,7 +17,7 @@ def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[B
     withNoframesIfNoframes = userscript.withNoframes if script.noframes else idem
     try:
         if useInline:
-            tag.string = withNoframesIfNoframes(withLoadListenerIfRunAtIdle(script.content))
+            tag.string = "\n" + withNoframesIfNoframes(withLoadListenerIfRunAtIdle(script.content))
             if script.runAt == document_end:
                 insertLateIn(soup, tag)
             else:
