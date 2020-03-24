@@ -181,7 +181,7 @@ In such cases, you have to route traffic from the client to the proxy at the net
 ### `--userscripts DIR`, `-u DIR`
 
 Load userscripts from directory `DIR`.
-Defaults to `userscripts`.
+Defaults to `/usr/share/userscripts`.
 
 
 [mitmproxy]: https://mitmproxy.org

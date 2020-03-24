@@ -15,7 +15,7 @@ COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 COPY src src
 COPY rules rules
-COPY userscripts userscripts
+COPY userscripts /usr/share/userscripts
 
 EXPOSE 8080
 ENTRYPOINT [ "python", "-u", "src/launcher.py" ]
