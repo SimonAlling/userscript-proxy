@@ -9,10 +9,115 @@ Both HTTP and HTTPS are supported.
 
 ## Getting started
 
-```bash
-$ docker build -t userscript-proxy:latest .
-$ docker run -p 8080:8080 userscript-proxy
-```
+1.  Make sure you have [Docker](https://www.docker.com) installed.
+    This should work:
+
+    ```
+    docker --version
+    ```
+
+1.  If you have [Git](https://git-scm.com) installed, clone the repo:
+
+    ```
+    git clone https://github.com/SimonAlling/userscript-proxy
+    cd userscript-proxy
+    ```
+
+    Otherwise, you can [download the code as a ZIP file](https://github.com/SimonAlling/userscript-proxy/archive/master.zip), extract it and `cd` into the extracted `userscript-proxy` directory.
+
+1.  Build:
+
+    ```
+    docker build -t userscript-proxy .
+    ```
+
+1.  Start Userscript Proxy:
+
+    ```
+    docker run -p 8080:8080 userscript-proxy
+    ```
+
+    When you see _Proxy server listening at http://*:8080_, the proxy is up and running.
+
+1.  Check that the proxy is working.
+    There are two ways of doing this:
+
+    *   On the command line (in a new terminal):
+
+        ```
+        curl --proxy localhost:8080 http://example.com
+        ```
+
+    The output should contain a `<script>` element whose first line is `// ==UserScript==`.
+
+    *   In a web browser:
+
+        1.  Go to the preferences menu in your web browser, search for _proxy_ and set `localhost` with port `8080` as HTTP proxy.
+
+        1.  Visit [`http://example.com`](http://example.com).
+            You should see a green page and a message saying that Userscript Proxy is working.
+
+### On a mobile device
+
+1.  You need to know the local IP address of the machine running Userscript Proxy (i.e. where you ran `docker run` above).
+    This is usually something like `192.168.1.67`.
+    There are [plenty of guides online](https://google.com/search?q=find+local+IP+address) if you're unsure.
+
+    If your local IP address is `192.168.1.67`, and the proxy is running (see above), this should work:
+
+    ```
+    curl --proxy 192.168.1.67:8080 http://example.com
+    ```
+
+1.  Your mobile device needs to be on the same LAN as your proxy.
+    This usually means they should be connected to the same router, so make sure your mobile device is connected to your Wi-Fi.
+
+1.  On your mobile device, go to the settings for the currently active Wi-Fi connection.
+    Find the proxy settings, select **Manual proxy** or similar, and set `192.168.1.67` with port `8080`.
+
+1.  Visit [`http://example.com`](http://example.com) on your mobile device.
+    You should see the same green page as above.
+
+### HTTPS
+
+When you've set up Userscript Proxy on your mobile device as described above, you'll notice that you can't visit sites via HTTPS anymore.
+This is because your device thinks you're being [MITM'd](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (which, technically, you are – but that's exactly what we want).
+
+To make HTTPS connections work, you need to tell your device that it should trust your proxy.
+This is accomplished by installing a certificate.
+
+**In general, installing a certificate might pose a security risk. If you don't trust me and mitmproxy, stop here.**
+Otherwise, read on.
+
+1.  Make sure your mobile device is configured to use the proxy as decribed above.
+
+1.  On your mobile device, go to [http://mitm.it](http://mitm.it).
+    You should see icons for Apple, Windows, Android, etc.
+
+1.  Click the icon matching your device, i.e. **Apple** for Apple devices, **Android** for Android devices etc.
+
+1.  Install the certificate.
+
+    #### Android
+
+    Follow the on-screen instructions.
+    If you're asked to choose between **VPN and apps** and **Wi-Fi**, choose **VPN and apps**.
+
+    #### iOS
+
+    1.  Tap **Allow** when asked if you want to download a configuration profile.
+
+    1.  Open the Settings app and go to **General** ▶ **Profiles**.
+
+    1.  Under _Downloaded profile_, tap the **mitmproxy** profile.
+
+    1.  Tap **Install** three times.
+
+    1.  Go back to the main screen in Settings and go to **About** ▶ **Certificate Trust Settings**.
+
+    1.  Under _Enable full trust for root certificates_, enable **mitmproxy**, confirming the action if prompted.
+
+1.  You should now be able to browse via HTTPS as usual.
 
 
 ## Security
