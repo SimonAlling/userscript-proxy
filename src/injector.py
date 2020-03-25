@@ -81,14 +81,12 @@ def option(key: str):
     return ctx.options.__getattr__(sanitize(key))
 
 
-def loadUserscripts(directories: Iterable[str], recursive: bool) -> List[Userscript]:
+def loadUserscripts(directories: Iterable[str]) -> List[Userscript]:
     logInfo("Loading userscripts ...")
     loadedUserscripts: List[Tuple[Userscript, str]] = []
     workingDirectory = os.getcwd()
     for directory in directories:
-        logInfo(f"""Looking{" recursively" if recursive else ""} for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
-        if not recursive:
-            logInfo(f"{TAB}(use {flag(T.option_recursive)} to look recursively)")
+        logInfo(f"""Looking recursively for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
         try:
             os.chdir(directory)
         except FileNotFoundError:
@@ -97,7 +95,7 @@ def loadUserscripts(directories: Iterable[str], recursive: bool) -> List[Userscr
         except PermissionError:
             logError("Permission was denied when trying to read directory `"+directory+"`.")
             continue
-        pattern = ("**/" if recursive else "") + PATTERN_USERSCRIPT
+        pattern = "**/" + PATTERN_USERSCRIPT
         # recursive=True only affects the meaning of "**".
         # https://docs.python.org/3/library/glob.html#glob.glob
         for unsafe_filename in glob.glob(pattern, recursive=True):
@@ -142,7 +140,6 @@ class UserscriptInjector:
 
     def load(self, loader):
         loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
-        loader.add_option(sanitize(T.option_recursive), bool, False, T.help_recursive)
         loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
         loader.add_option(sanitize(T.option_userscripts), str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
         loader.add_option(sanitize(T.option_query_param_to_disable), str, DEFAULT_QUERY_PARAM_TO_DISABLE, T.help_query_param_to_disable)
@@ -156,7 +153,6 @@ class UserscriptInjector:
         if sanitize(T.option_userscripts) in updates:
             self.userscripts = loadUserscripts(
                 directories = [ option(T.option_userscripts) ],
-                recursive = option(T.option_recursive),
             )
 
 

@@ -53,11 +53,6 @@ argparser.add_argument(
     help=T.help_query_param_to_disable,
 )
 argparser.add_argument(
-    flag(T.option_recursive), shortFlag(T.option_recursive_short),
-    action="store_true",
-    help=T.help_recursive,
-)
-argparser.add_argument(
     flag(T.option_transparent), shortFlag(T.option_transparent_short),
     action="store_true",
     help=T.help_transparent,
@@ -126,7 +121,6 @@ try:
         "--showhost", # use Host header for URL display
         "-s", FILENAME_INJECTOR,
         "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
-        "--set", f"""{sanitize(T.option_recursive)}={str(args.recursive).lower()}""",
         "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
         "--set", f"""{sanitize(T.option_userscripts)}={args.userscripts}""",
         "--set", f"""{sanitize(T.option_query_param_to_disable)}={args.query_param_to_disable}""",

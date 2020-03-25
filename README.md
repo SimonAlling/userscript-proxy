@@ -292,10 +292,6 @@ Disable userscripts when the request URL contains `PARAM` as a query parameter.
 For example, use `-q foo` to disable userscripts for `http://example.com?foo`.
 Defaults to `nouserscripts`.
 
-### `--recursive`, `-r`
-
-Recurse into directories when looking for userscripts.
-
 ### `--transparent`, `-t`
 
 Run mitmproxy in [transparent mode][transparent-mode].

@@ -25,10 +25,6 @@ option_query_param_to_disable_short = "q"
 option_query_param_to_disable = "query-param-to-disable"
 help_query_param_to_disable = f"""Disable userscripts when the request URL contains a PARAM query parameter, for example "foo" to disable userscripts for http://example.com?foo (default: {DEFAULT_QUERY_PARAM_TO_DISABLE})"""
 
-option_recursive_short = "r"
-option_recursive = "recursive"
-help_recursive = f"""Recurse into directories when looking for userscripts"""
-
 option_transparent_short = "t"
 option_transparent = "transparent"
 help_transparent = "Transparent mode"
