@@ -2,6 +2,7 @@
 
 export MYPYPATH=/usr/local/lib/python3.6/dist-packages/
 
+cd src
 if [ "$1" == "" ]; then
 	mypy *.py --ignore-missing-imports --follow-imports skip
 	mypy modules/*.py --ignore-missing-imports --follow-imports skip
