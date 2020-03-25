@@ -246,7 +246,7 @@ Options are specified by simply appending them to the `docker run` command, for 
 ```bash
 docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --transparent
 #          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                  ^^^^^^^^^^^^^
-#          args to `docker run`                                       args to Userscript Proxy
+#          flags to `docker run`                                      flags to Userscript Proxy
 ```
 
 ### `--ignore FILE`/`--intercept FILE`
