@@ -34,7 +34,7 @@ Both HTTP and HTTPS are supported.
 1.  Start Userscript Proxy:
 
     ```
-    docker run --rm -p 8080:8080 userscript-proxy
+    docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy
     ```
 
     When you see _Proxy server listening at http://*:8080_, the proxy is up and running.
@@ -130,7 +130,7 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
 1.  Run Userscript Proxy with your userscripts directory mounted at `/usr/share/userscripts` inside the Docker container:
 
     ```
-    docker run --rm -p 8080:8080 -v "/home/alling/userscripts:/usr/share/userscripts" userscript-proxy
+    docker run --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/usr/share/userscripts" userscript-proxy
     ```
 
 **Note:** This will replace the test userscript with your userscripts, so [`http://example.com`](http://example.com) won't be green anymore.
@@ -159,11 +159,11 @@ Examples:
 
   * Take ignore rules from `rules/ignore.txt` (included):
     ```bash
-    docker run --rm -p 8080:8080 userscript-proxy --ignore "rules/ignore.txt"
+    docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --ignore "rules/ignore.txt"
     ```
   * Take intercept rules from all `.txt` files in the `rules` directory whose names start with `foo`:
     ```bash
-    docker run --rm -p 8080:8080 userscript-proxy --intercept "rules/foo*.txt"
+    docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --intercept "rules/foo*.txt"
     ```
 
 Rules can be specified in two ways:
@@ -244,9 +244,9 @@ The [`GM` API][gm-api] and similar runtime facilities are not supported, because
 Options are specified by simply appending them to the `docker run` command, for example:
 
 ```bash
-docker run --rm -p 8080:8080 userscript-proxy --transparent
-#          ^^^^^^^^^^^^^^^^^                  ^^^^^^^^^^^^^
-#          args to `docker run`               args to Userscript Proxy
+docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --transparent
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                  ^^^^^^^^^^^^^
+#          args to `docker run`                                       args to Userscript Proxy
 ```
 
 ### `--ignore FILE`/`--intercept FILE`
@@ -272,13 +272,13 @@ Defaults to `8080`.
 **Note:** Be careful when running Userscript Proxy in Docker! If you want to use e.g. port 1337 on the host machine, do this instead:
 
 ```bash
-docker run --rm -p 1337:8080 userscript-proxy
+docker run --rm --name userscript-proxy -p 1337:8080 userscript-proxy
 ```
 
 If you really want Userscript Proxy to use a certain port _inside_ the Docker container, e.g. 5555, don't forget to publish that port:
 
 ```bash
-docker run --rm -p 1337:5555 userscript-proxy -p 5555
+docker run --rm --name userscript-proxy -p 1337:5555 userscript-proxy -p 5555
 ```
 
 ### `--query-param-to-disable PARAM`, `-q PARAM`
