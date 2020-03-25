@@ -7,7 +7,17 @@ Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, inje
 Both HTTP and HTTPS are supported.
 
 
-## Getting started
+## How to use it
+
+### Security notice
+
+Make sure you understand these security aspects before using Userscript Proxy:
+
+  * Userscript Proxy can read and modify all HTTP(S) traffic sent through it, so the only reasonably secure way to use it is to run it on your own server.
+  * I don't recommend exposing the proxy to the Internet (i.e. outside your LAN), because then anyone can connect to it and use your Internet connection.
+    In practice, this means that you should _not_ add a port-forward for Userscript Proxy in your router.
+
+### Getting started
 
 1.  Make sure you have [Docker](https://www.docker.com) installed.
     This should work:
@@ -134,11 +144,6 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
     ```
 
 **Note:** This will replace the test userscript with your userscripts, so [`http://example.com`](http://example.com) won't be green anymore.
-
-
-## Security
-
-**Userscript Proxy can (and must be able to) read and modify all HTTP(S) traffic** sent to and from the device in question, so the only reasonably secure way to use it is to run it on a server controlled by oneself.
 
 
 ## Ignoring hosts
