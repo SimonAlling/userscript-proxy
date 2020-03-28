@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import List
+import os
 import glob
 import subprocess
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
@@ -12,7 +13,7 @@ import shlex
 from argparse import ArgumentParser
 from functools import reduce
 
-FILENAME_INJECTOR: str = "src/injector.py"
+FILENAME_INJECTOR: str = "injector.py"
 MATCH_NO_HOSTS = r"^$"
 
 argparser = ArgumentParser(description=T.description)
@@ -124,12 +125,13 @@ try:
     if useFiltering and useTransparent:
         print(f"Please note that ignore/intercept rules based on hostnames may not work in transparent mode; it may be necessary to use IP addresses instead.")
     print()
+    script = os.path.join(os.path.dirname(__file__), FILENAME_INJECTOR)
     subprocess.run([
         "mitmdump", "--ignore-hosts", regex,
         "--listen-port", str(args.port),
         "--mode", "transparent" if useTransparent else "regular",
         "--showhost", # use Host header for URL display
-        "-s", FILENAME_INJECTOR,
+        "-s", script,
         "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
         "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
         "--set", f"""{sanitize(T.option_userscripts_dir)}={args.userscripts_dir}""",
