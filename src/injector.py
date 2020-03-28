@@ -81,48 +81,39 @@ def option(key: str):
     return ctx.options.__getattr__(sanitize(key))
 
 
-def loadUserscripts(directories: Iterable[str]) -> List[Userscript]:
-    logInfo("Loading userscripts ...")
+def loadUserscripts(directory: str) -> List[Userscript]:
     loadedUserscripts: List[Tuple[Userscript, str]] = []
     workingDirectory = os.getcwd()
-    for directory in directories:
-        logInfo(f"""Looking recursively for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
+    logInfo(f"""Looking recursively for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
+    os.chdir(directory)
+    pattern = "**/" + PATTERN_USERSCRIPT
+    # recursive=True only affects the meaning of "**".
+    # https://docs.python.org/3/library/glob.html#glob.glob
+    for unsafe_filename in glob.glob(pattern, recursive=True):
+        filename = shlex.quote(unsafe_filename)
+        logInfo("Loading " + filename + " ...")
         try:
-            os.chdir(directory)
-        except FileNotFoundError:
-            logWarning("Directory `"+directory+"` does not exist.")
-            continue
+            content = open(filename).read()
         except PermissionError:
-            logError("Permission was denied when trying to read directory `"+directory+"`.")
+            logError("Could not read file `"+filename+"`: Permission denied.")
             continue
-        pattern = "**/" + PATTERN_USERSCRIPT
-        # recursive=True only affects the meaning of "**".
-        # https://docs.python.org/3/library/glob.html#glob.glob
-        for unsafe_filename in glob.glob(pattern, recursive=True):
-            filename = shlex.quote(unsafe_filename)
-            logInfo("Loading " + filename + " ...")
-            try:
-                content = open(filename).read()
-            except PermissionError:
-                logError("Could not read file `"+filename+"`: Permission denied.")
-                continue
-            except Exception as e:
-                logError("Could not read file `"+filename+"`: " + str(e))
-                continue
-            try:
-                script = userscript.create(content)
-                loadedUserscripts.append((script, filename))
-                if script.downloadURL is None and len(script.unsafeSequences) > 0:
-                    logError(unsafeSequencesMessage(script))
-            except MetadataError as err:
-                logError("Metadata error:")
-                logError(str(err))
-                continue
-            except UserscriptError as err:
-                logError("Userscript error:")
-                logError(str(err))
-                continue
-        os.chdir(workingDirectory) # so mitmproxy does not unload the script
+        except Exception as e:
+            logError("Could not read file `"+filename+"`: " + str(e))
+            continue
+        try:
+            script = userscript.create(content)
+            loadedUserscripts.append((script, filename))
+            if script.downloadURL is None and len(script.unsafeSequences) > 0:
+                logError(unsafeSequencesMessage(script))
+        except MetadataError as err:
+            logError("Metadata error:")
+            logError(str(err))
+            continue
+        except UserscriptError as err:
+            logError("Userscript error:")
+            logError(str(err))
+            continue
+    os.chdir(workingDirectory) # so mitmproxy does not unload the script
     logInfo("")
     logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
     logInfo(bulletList(map(
@@ -151,9 +142,7 @@ class UserscriptInjector:
         if sanitize(T.option_query_param_to_disable) in updates:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
         if sanitize(T.option_userscripts_dir) in updates:
-            self.userscripts = loadUserscripts(
-                directories = [ option(T.option_userscripts_dir) ],
-            )
+            self.userscripts = loadUserscripts(option(T.option_userscripts_dir))
 
 
     def response(self, flow: http.HTTPFlow):

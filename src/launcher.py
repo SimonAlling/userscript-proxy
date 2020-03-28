@@ -92,6 +92,7 @@ def printWelcomeMessage():
 
 
 try:
+    workingDirectory = os.getcwd()
     args = argparser.parse_args()
     printWelcomeMessage()
     glob_ignore = args.ignore
@@ -104,7 +105,6 @@ try:
     useFiltering = globPattern is not None
     regex: str = MATCH_NO_HOSTS
     if useFiltering:
-        workingDirectory = os.getcwd()
         os.chdir(args.rules_dir)
         useIntercept = isSomething(glob_intercept)
         print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
@@ -117,6 +117,17 @@ try:
         print(itemList("    ", ignore.rulesIn(ruleFilesContent)))
         print()
         os.chdir(workingDirectory)
+    # Check that userscripts directory exists and can be read:
+    userscriptsDirectory = args.userscripts_dir
+    try:
+        os.chdir(userscriptsDirectory)
+        os.chdir(workingDirectory)
+    except FileNotFoundError:
+        print(f"Directory `{userscriptsDirectory}` does not exist. Use {flag(T.option_userscripts_dir)} to specify a custom userscripts directory. Exiting.")
+        exit(1)
+    except PermissionError:
+        print("Permission was denied when trying to read directory `"+userscriptsDirectory+"`. Exiting.")
+        exit(1)
     useTransparent = args.transparent
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
     print()
