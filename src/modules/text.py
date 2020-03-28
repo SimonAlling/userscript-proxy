@@ -29,9 +29,9 @@ option_transparent_short = "t"
 option_transparent = "transparent"
 help_transparent = "Transparent mode"
 
-option_userscripts_short = "u"
-option_userscripts = "userscripts"
-help_userscripts = f"Load userscripts from directory {metavar_dir}"
+option_userscripts_dir_short = "u"
+option_userscripts_dir = "userscripts-dir"
+help_userscripts_dir = f"Load userscripts from directory {metavar_dir}"
 
 option_list_injected_short = "l"
 option_list_injected = "list-injected"

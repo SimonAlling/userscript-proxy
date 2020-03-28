@@ -141,7 +141,7 @@ class UserscriptInjector:
     def load(self, loader):
         loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
         loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
-        loader.add_option(sanitize(T.option_userscripts), str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts)
+        loader.add_option(sanitize(T.option_userscripts_dir), str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts_dir)
         loader.add_option(sanitize(T.option_query_param_to_disable), str, DEFAULT_QUERY_PARAM_TO_DISABLE, T.help_query_param_to_disable)
 
 
@@ -150,9 +150,9 @@ class UserscriptInjector:
             logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
         if sanitize(T.option_query_param_to_disable) in updates:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
-        if sanitize(T.option_userscripts) in updates:
+        if sanitize(T.option_userscripts_dir) in updates:
             self.userscripts = loadUserscripts(
-                directories = [ option(T.option_userscripts) ],
+                directories = [ option(T.option_userscripts_dir) ],
             )
 
 

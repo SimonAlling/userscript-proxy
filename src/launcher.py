@@ -58,11 +58,11 @@ argparser.add_argument(
     help=T.help_transparent,
 )
 argparser.add_argument(
-    flag(T.option_userscripts), shortFlag(T.option_userscripts_short),
+    flag(T.option_userscripts_dir), shortFlag(T.option_userscripts_dir_short),
     type=str,
     metavar=T.metavar_dir,
     default=DEFAULT_USERSCRIPTS_DIR,
-    help=T.help_userscripts,
+    help=T.help_userscripts_dir,
 )
 
 def readRuleFile(accumulatedContent: str, filename: str) -> str:
@@ -122,7 +122,7 @@ try:
         "-s", FILENAME_INJECTOR,
         "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
         "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
-        "--set", f"""{sanitize(T.option_userscripts)}={args.userscripts}""",
+        "--set", f"""{sanitize(T.option_userscripts_dir)}={args.userscripts_dir}""",
         "--set", f"""{sanitize(T.option_query_param_to_disable)}={args.query_param_to_disable}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger
