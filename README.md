@@ -137,10 +137,10 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
 1.  You need the **absolute path** to a directory containing your userscripts.
     This could be something like `/home/alling/userscripts`.
 
-1.  Run Userscript Proxy with your userscripts directory mounted at `/usr/share/userscripts` inside the Docker container:
+1.  Run Userscript Proxy with your userscripts directory mounted at `/usr/share/userscript-proxy/userscripts` inside the Docker container:
 
     ```
-    docker run --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/usr/share/userscripts" userscript-proxy
+    docker run --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/usr/share/userscript-proxy/userscripts" userscript-proxy
     ```
 
 **Note:** This will replace the test userscript with your userscripts, so [`http://example.com`](http://example.com) won't be green anymore.
@@ -303,7 +303,7 @@ In such cases, you have to route traffic from the client to the proxy at the net
 ### `--userscripts DIR`, `-u DIR`
 
 Load userscripts from directory `DIR`.
-Defaults to `/usr/share/userscripts`.
+Defaults to `/usr/share/userscript-proxy/userscripts`.
 
 
 [mitmproxy]: https://mitmproxy.org

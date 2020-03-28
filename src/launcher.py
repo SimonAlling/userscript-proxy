@@ -4,7 +4,7 @@ from typing import List
 import glob
 import subprocess
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
-from modules.constants import DEFAULT_PORT, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
+from modules.constants import DEFAULT_PORT, DEFAULT_RULES_DIR, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
 from modules.misc import sanitize
 import modules.ignore as ignore
 import modules.text as T
@@ -53,6 +53,13 @@ argparser.add_argument(
     help=T.help_query_param_to_disable,
 )
 argparser.add_argument(
+    flag(T.option_rules_dir), shortFlag(T.option_rules_dir_short),
+    type=str,
+    metavar=T.metavar_dir,
+    default=DEFAULT_RULES_DIR,
+    help=T.help_rules_dir,
+)
+argparser.add_argument(
     flag(T.option_transparent), shortFlag(T.option_transparent_short),
     action="store_true",
     help=T.help_transparent,
@@ -96,6 +103,8 @@ try:
     useFiltering = globPattern is not None
     regex: str = MATCH_NO_HOSTS
     if useFiltering:
+        workingDirectory = os.getcwd()
+        os.chdir(args.rules_dir)
         useIntercept = isSomething(glob_intercept)
         print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
         filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
@@ -106,6 +115,7 @@ try:
         print()
         print(itemList("    ", ignore.rulesIn(ruleFilesContent)))
         print()
+        os.chdir(workingDirectory)
     useTransparent = args.transparent
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
     print()

@@ -1,9 +1,11 @@
-from modules.constants import DEFAULT_PORT, APP_NAME, VERSION, VERSION_PREFIX, DEFAULT_QUERY_PARAM_TO_DISABLE
+from modules.constants import DEFAULT_PORT, APP_NAME, VERSION, VERSION_PREFIX, DEFAULT_QUERY_PARAM_TO_DISABLE, DEFAULT_RULES_DIR, DEFAULT_USERSCRIPTS_DIR
+from modules.utilities import flag
 
 metavar_file = "FILE"
 metavar_dir = "DIR"
 metavar_param = "PARAM"
-matching = f"matching any of the rules specified in {metavar_file} (file name or glob pattern)"
+RULES_DIR = "rules-dir"
+matching = f"matching any of the rules specified in {metavar_file} (file name or glob pattern, relative to {flag(RULES_DIR)})"
 
 description = "Inject userscripts using mitmproxy."
 
@@ -29,9 +31,13 @@ option_transparent_short = "t"
 option_transparent = "transparent"
 help_transparent = "Transparent mode"
 
+option_rules_dir_short = "r"
+option_rules_dir = RULES_DIR
+help_rules_dir = f"Load ignore/intercept rules from directory {metavar_dir} (default: {DEFAULT_RULES_DIR})"
+
 option_userscripts_dir_short = "u"
 option_userscripts_dir = "userscripts-dir"
-help_userscripts_dir = f"Load userscripts from directory {metavar_dir}"
+help_userscripts_dir = f"Load userscripts from directory {metavar_dir} (default: {DEFAULT_USERSCRIPTS_DIR})"
 
 option_list_injected_short = "l"
 option_list_injected = "list-injected"
