@@ -21,6 +21,12 @@ option_inline_short = "i"
 option_inline = "inline"
 help_inline = "Always insert userscripts inline, never linked"
 
+option_no_default_rules = "no-default-rules"
+help_no_default_rules = f"Skip built-in default ignore/intercept rules"
+
+option_no_default_userscripts = "no-default-userscripts"
+help_no_default_userscripts = f"""Skip built-in default userscripts"""
+
 option_port_short = "p"
 option_port = "port"
 option_port_default = 8080

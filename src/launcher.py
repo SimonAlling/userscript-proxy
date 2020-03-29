@@ -4,6 +4,7 @@ from typing import List
 import os
 import glob
 import subprocess
+from modules.constants import DEFAULT_IGNORE_RULES
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
 from modules.misc import sanitize
 import modules.ignore as ignore
@@ -28,6 +29,16 @@ group.add_argument(
     type=str,
     metavar=T.metavar_file,
     help=T.help_intercept,
+)
+argparser.add_argument(
+    flag(T.option_no_default_rules),
+    action="store_true",
+    help=T.help_no_default_rules,
+)
+argparser.add_argument(
+    flag(T.option_no_default_userscripts),
+    action="store_true",
+    help=T.help_no_default_userscripts,
 )
 argparser.add_argument(
     flag(T.option_inline), shortFlag(T.option_inline_short),
@@ -95,39 +106,57 @@ try:
         else glob_ignore if isSomething(glob_ignore)
         else None
     )
-    useFiltering = globPattern is not None
-    regex: str = MATCH_NO_HOSTS
+    useCustomFiltering = globPattern is not None
+    useDefaultRules = not args.no_default_rules
+    useFiltering = useCustomFiltering or useDefaultRules
+    useIntercept = isSomething(glob_intercept)
+    def ruleFilesContent_default():
+        if useDefaultRules:
+            globPattern = DEFAULT_INTERCEPT_RULES if useIntercept else DEFAULT_IGNORE_RULES
+            filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
+            acc = ""
+            for filename in filenames:
+                print("Reading " + filename + " ...")
+                acc += open(filename).read()
+            return acc
+        else:
+            return ""
+    def ruleFilesContent_custom():
+        if useCustomFiltering:
+            # Check that rules directory exists:
+            rulesDirectory = args.rules_dir
+            if not os.path.isdir(rulesDirectory):
+                print(directoryDoesNotExist(what="rules", dir=rulesDirectory, flagName=T.option_rules_dir))
+                exit(1)
+            print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
+            os.chdir(rulesDirectory)
+            filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
+            acc = ""
+            for filename in filenames:
+                print("Reading " + filename + " ...")
+                acc += open(filename).read()
+            os.chdir(workingDirectory)
+            return acc
+        else:
+            return ""
+    ruleFilesContent = ruleFilesContent_default() + "\n" + ruleFilesContent_custom()
     if useFiltering:
-        # Check that rules directory exists:
-        rulesDirectory = args.rules_dir
-        if not os.path.isdir(rulesDirectory):
-            print(directoryDoesNotExist(what="rules", dir=rulesDirectory, flagName=T.option_rules_dir))
-            exit(1)
-        os.chdir(args.rules_dir)
-        useIntercept = isSomething(glob_intercept)
-        print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
-        filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
-        ruleFilesContent = ""
-        for filename in filenames:
-            print("Reading " + filename + " ...")
-            ruleFilesContent += open(filename).read()
-        maybeNegate = ignore.negate if useIntercept else idem
-        regex = maybeNegate(ignore.entireIgnoreRegex(ruleFilesContent))
         print(f"Traffic from hosts matching any of these rules will be {'INTERCEPTED' if useIntercept else 'IGNORED'} by mitmproxy:")
         print()
         print(itemList("    ", ignore.rulesIn(ruleFilesContent)))
         print()
-        os.chdir(workingDirectory)
     # Check that userscripts directory exists:
     userscriptsDirectory = args.userscripts_dir
     if not os.path.isdir(userscriptsDirectory):
         print(directoryDoesNotExist(what="userscripts", dir=userscriptsDirectory, flagName=T.option_userscripts_dir))
         exit(1)
+    maybeNegate = ignore.negate if useIntercept else idem
+    regex = maybeNegate(ignore.entireIgnoreRegex(ruleFilesContent)) if useFiltering else MATCH_NO_HOSTS
     useTransparent = args.transparent
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
     print()
     if not useFiltering:
-        print(f"Since neither {flag(T.option_ignore)} nor {flag(T.option_intercept)} was given, ALL traffic will be intercepted.")
+        print(f"Since {flag(T.option_no_default_rules)} and neither {flag(T.option_ignore)} nor {flag(T.option_intercept)} was given, ALL traffic will be intercepted.")
     if useFiltering and useTransparent:
         print(f"Please note that ignore/intercept rules based on hostnames may not work in transparent mode; it may be necessary to use IP addresses instead.")
     print()
@@ -140,6 +169,7 @@ try:
         "-s", script,
         "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
         "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
+        "--set", f"""{sanitize(T.option_no_default_userscripts)}={str(args.no_default_userscripts).lower()}""",
         "--set", f"""{sanitize(T.option_userscripts_dir)}={args.userscripts_dir}""",
         "--set", f"""{sanitize(T.option_query_param_to_disable)}={args.query_param_to_disable}""",
         # Empty string breaks the argument chain:

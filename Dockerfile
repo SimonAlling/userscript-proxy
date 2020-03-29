@@ -14,7 +14,8 @@ WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 COPY src src
-COPY userscripts /usr/share/userscript-proxy/userscripts
+COPY default-rules default-rules
+COPY default-userscripts default-userscripts
 
 EXPOSE 8080
 ENTRYPOINT [ "python", "-u", "src/launcher.py" ]

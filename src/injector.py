@@ -11,7 +11,7 @@ import modules.inline as inline
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
 from modules.utilities import first, second, itemList, fromOptional, flag, idem
-from modules.constants import VERSION, VERSION_PREFIX, APP_NAME
+from modules.constants import VERSION, VERSION_PREFIX, DEFAULT_USERSCRIPTS_DIR
 from modules.inject import Options, inject
 from modules.misc import sanitize
 from modules.requests import CONTENT_TYPE, inferEncoding, requestContainsQueryParam
@@ -131,18 +131,25 @@ class UserscriptInjector:
 
     def load(self, loader):
         loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
+        loader.add_option(sanitize(T.option_no_default_userscripts), bool, False, T.help_no_default_userscripts)
         loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
         loader.add_option(sanitize(T.option_userscripts_dir), str, T.option_userscripts_dir_default, T.help_userscripts_dir)
         loader.add_option(sanitize(T.option_query_param_to_disable), str, T.option_query_param_to_disable_default, T.help_query_param_to_disable)
 
 
     def configure(self, updates):
+        useDefaultUserscripts = True
+        if sanitize(T.option_no_default_userscripts) in updates and option(T.option_no_default_userscripts):
+            logInfo(f"""Built-in default userscripts will be skipped due to {flag(T.option_no_default_userscripts)} flag.""")
+            useDefaultUserscripts = False
         if sanitize(T.option_inline) in updates and option(T.option_inline):
             logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
         if sanitize(T.option_query_param_to_disable) in updates:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
         if sanitize(T.option_userscripts_dir) in updates:
-            self.userscripts = loadUserscripts(option(T.option_userscripts_dir))
+            userscripts = loadUserscripts(DEFAULT_USERSCRIPTS_DIR) if useDefaultUserscripts else []
+            userscripts.append(loadUserscripts(option(T.option_userscripts_dir)))
+            self.userscripts = userscripts
 
 
     def response(self, flow: http.HTTPFlow):
