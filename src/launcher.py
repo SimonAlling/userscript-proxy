@@ -83,7 +83,7 @@ def printWelcomeMessage():
 
 
 def directoryDoesNotExist(what: str, dir: str, flagName: str) -> str:
-    return f"Directory `{dir}` does not exist. Use {flag(flagName)} to specify a custom {what} directory. Exiting."
+    return f"Directory `{dir}` does not exist. Use {flag(flagName)} to specify a custom {what} directory. If you're using Docker, you need to use -v to mount a directory from the host inside the container. Exiting."
 
 try:
     workingDirectory = os.getcwd()
