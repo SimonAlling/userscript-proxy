@@ -116,16 +116,10 @@ try:
         print(itemList("    ", ignore.rulesIn(ruleFilesContent)))
         print()
         os.chdir(workingDirectory)
-    # Check that userscripts directory exists and can be read:
+    # Check that userscripts directory exists:
     userscriptsDirectory = args.userscripts_dir
-    try:
-        os.chdir(userscriptsDirectory)
-        os.chdir(workingDirectory)
-    except FileNotFoundError:
+    if not os.path.isdir(userscriptsDirectory):
         print(f"Directory `{userscriptsDirectory}` does not exist. Use {flag(T.option_userscripts_dir)} to specify a custom userscripts directory. Exiting.")
-        exit(1)
-    except PermissionError:
-        print("Permission was denied when trying to read directory `"+userscriptsDirectory+"`. Exiting.")
         exit(1)
     useTransparent = args.transparent
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
@@ -152,3 +146,6 @@ try:
 except KeyboardInterrupt:
     print("")
     print("Interrupted by user.")
+except Exception as e:
+    print(e)
+    exit(1)
