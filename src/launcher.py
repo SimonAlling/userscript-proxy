@@ -73,15 +73,6 @@ argparser.add_argument(
     help=T.help_userscripts_dir,
 )
 
-def readRuleFile(accumulatedContent: str, filename: str) -> str:
-    print("Reading " + filename + " ...")
-    try:
-        fileContent: str = open(filename).read()
-        return accumulatedContent + fileContent
-    except Exception as e:
-        print("Could not read file `"+filename+"`: " + str(e))
-        return accumulatedContent
-
 
 def printWelcomeMessage():
     print("")
@@ -105,11 +96,19 @@ try:
     useFiltering = globPattern is not None
     regex: str = MATCH_NO_HOSTS
     if useFiltering:
+        # Check that rules directory exists:
+        rulesDirectory = args.rules_dir
+        if not os.path.isdir(rulesDirectory):
+            print(f"Directory `{rulesDirectory}` does not exist. Use {flag(T.option_rules_dir)} to specify a custom rules directory. Exiting.")
+            exit(1)
         os.chdir(args.rules_dir)
         useIntercept = isSomething(glob_intercept)
         print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
         filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
-        ruleFilesContent: str = reduce(readRuleFile, filenames, "")
+        ruleFilesContent = ""
+        for filename in filenames:
+            print("Reading " + filename + " ...")
+            ruleFilesContent += open(filename).read()
         maybeNegate = ignore.negate if useIntercept else idem
         regex = maybeNegate(ignore.entireIgnoreRegex(ruleFilesContent))
         print(f"Traffic from hosts matching any of these rules will be {'INTERCEPTED' if useIntercept else 'IGNORED'} by mitmproxy:")
