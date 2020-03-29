@@ -82,6 +82,9 @@ def printWelcomeMessage():
     print("")
 
 
+def directoryDoesNotExist(what: str, dir: str, flagName: str) -> str:
+    return f"Directory `{dir}` does not exist. Use {flag(flagName)} to specify a custom {what} directory. Exiting."
+
 try:
     workingDirectory = os.getcwd()
     args = argparser.parse_args()
@@ -99,7 +102,7 @@ try:
         # Check that rules directory exists:
         rulesDirectory = args.rules_dir
         if not os.path.isdir(rulesDirectory):
-            print(f"Directory `{rulesDirectory}` does not exist. Use {flag(T.option_rules_dir)} to specify a custom rules directory. Exiting.")
+            print(directoryDoesNotExist(what="rules", dir=rulesDirectory, flagName=T.option_rules_dir))
             exit(1)
         os.chdir(args.rules_dir)
         useIntercept = isSomething(glob_intercept)
@@ -119,7 +122,7 @@ try:
     # Check that userscripts directory exists:
     userscriptsDirectory = args.userscripts_dir
     if not os.path.isdir(userscriptsDirectory):
-        print(f"Directory `{userscriptsDirectory}` does not exist. Use {flag(T.option_userscripts_dir)} to specify a custom userscripts directory. Exiting.")
+        print(directoryDoesNotExist(what="userscripts", dir=userscriptsDirectory, flagName=T.option_userscripts_dir))
         exit(1)
     useTransparent = args.transparent
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
