@@ -133,7 +133,7 @@ class UserscriptInjector:
         loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
         loader.add_option(sanitize(T.option_no_default_userscripts), bool, False, T.help_no_default_userscripts)
         loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
-        loader.add_option(sanitize(T.option_userscripts_dir), str, T.option_userscripts_dir_default, T.help_userscripts_dir)
+        loader.add_option(sanitize(T.option_userscripts_dir), Optional[str], T.option_userscripts_dir_default, T.help_userscripts_dir)
         loader.add_option(sanitize(T.option_query_param_to_disable), str, T.option_query_param_to_disable_default, T.help_query_param_to_disable)
 
 
@@ -148,7 +148,11 @@ class UserscriptInjector:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
         if sanitize(T.option_userscripts_dir) in updates:
             userscripts = loadUserscripts(DEFAULT_USERSCRIPTS_DIR) if useDefaultUserscripts else []
-            userscripts.append(loadUserscripts(option(T.option_userscripts_dir)))
+            userscriptsDirectory = option(T.option_userscripts_dir)
+            if userscriptsDirectory is None:
+                logWarning(f"No custom userscripts will be loaded, because {flag(T.option_userscripts_dir)} was not provided.")
+            else:
+                userscripts.append(loadUserscripts(userscriptsDirectory))
             self.userscripts = userscripts
 
 

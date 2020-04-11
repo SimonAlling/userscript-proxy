@@ -147,7 +147,7 @@ try:
         print()
     # Check that userscripts directory exists:
     userscriptsDirectory = args.userscripts_dir
-    if not os.path.isdir(userscriptsDirectory):
+    if userscriptsDirectory is not None and not os.path.isdir(userscriptsDirectory):
         print(directoryDoesNotExist(what="userscripts", dir=userscriptsDirectory, flagName=T.option_userscripts_dir))
         exit(1)
     maybeNegate = ignore.negate if useIntercept else idem
@@ -170,7 +170,7 @@ try:
         "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
         "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
         "--set", f"""{sanitize(T.option_no_default_userscripts)}={str(args.no_default_userscripts).lower()}""",
-        "--set", f"""{sanitize(T.option_userscripts_dir)}={args.userscripts_dir}""",
+        "--set", "" if userscriptsDirectory is None else f"""{sanitize(T.option_userscripts_dir)}={userscriptsDirectory}""",
         "--set", f"""{sanitize(T.option_query_param_to_disable)}={args.query_param_to_disable}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger

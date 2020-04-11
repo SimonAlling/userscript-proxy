@@ -48,8 +48,8 @@ help_rules_dir = f"Load ignore/intercept rules from directory {metavar_dir} (def
 
 option_userscripts_dir_short = "u"
 option_userscripts_dir = "userscripts-dir"
-option_userscripts_dir_default = ROOT_DIR + "userscripts"
-help_userscripts_dir = f"Load userscripts from directory {metavar_dir} (default: {option_userscripts_dir_default})"
+option_userscripts_dir_default = None
+help_userscripts_dir = f"Load userscripts from directory {metavar_dir}"
 
 option_list_injected_short = "l"
 option_list_injected = "list-injected"
