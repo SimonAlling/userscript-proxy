@@ -106,8 +106,8 @@ try:
     def ruleFilesContent_default():
         if useDefaultRules:
             print(f"Reading default {'intercept' if useIntercept else 'ignore'} rules ...")
-            globPattern = DEFAULT_INTERCEPT_RULES if useIntercept else DEFAULT_IGNORE_RULES
-            filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
+            globPatternForDefaultRules = DEFAULT_INTERCEPT_RULES if useIntercept else DEFAULT_IGNORE_RULES
+            filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPatternForDefaultRules) ]
             acc = ""
             for filename in filenames:
                 print("Reading " + filename + " ...")
