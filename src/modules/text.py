@@ -1,5 +1,7 @@
-from modules.constants import DEFAULT_PORT, APP_NAME, VERSION, VERSION_PREFIX, DEFAULT_QUERY_PARAM_TO_DISABLE, DEFAULT_RULES_DIR, DEFAULT_USERSCRIPTS_DIR
+from modules.constants import APP_NAME, VERSION, VERSION_PREFIX
 from modules.utilities import flag
+
+ROOT_DIR: str = "/usr/share/userscript-proxy/"
 
 metavar_file = "FILE"
 metavar_dir = "DIR"
@@ -21,11 +23,13 @@ help_inline = "Always insert userscripts inline, never linked"
 
 option_port_short = "p"
 option_port = "port"
-help_port = f"""mitmproxy port (default: {DEFAULT_PORT})"""
+option_port_default = 8080
+help_port = f"""mitmproxy port (default: {option_port_default})"""
 
 option_query_param_to_disable_short = "q"
 option_query_param_to_disable = "query-param-to-disable"
-help_query_param_to_disable = f"""Disable userscripts when the request URL contains a PARAM query parameter, for example "foo" to disable userscripts for http://example.com?foo (default: {DEFAULT_QUERY_PARAM_TO_DISABLE})"""
+option_query_param_to_disable_default = "nouserscripts"
+help_query_param_to_disable = f"""Disable userscripts when the request URL contains a PARAM query parameter, for example "foo" to disable userscripts for http://example.com?foo (default: {option_query_param_to_disable_default})"""
 
 option_transparent_short = "t"
 option_transparent = "transparent"
@@ -33,11 +37,13 @@ help_transparent = "Transparent mode"
 
 option_rules_dir_short = "r"
 option_rules_dir = RULES_DIR
-help_rules_dir = f"Load ignore/intercept rules from directory {metavar_dir} (default: {DEFAULT_RULES_DIR})"
+option_rules_dir_default = ROOT_DIR + "rules"
+help_rules_dir = f"Load ignore/intercept rules from directory {metavar_dir} (default: {option_rules_dir_default})"
 
 option_userscripts_dir_short = "u"
 option_userscripts_dir = "userscripts-dir"
-help_userscripts_dir = f"Load userscripts from directory {metavar_dir} (default: {DEFAULT_USERSCRIPTS_DIR})"
+option_userscripts_dir_default = ROOT_DIR + "userscripts"
+help_userscripts_dir = f"Load userscripts from directory {metavar_dir} (default: {option_userscripts_dir_default})"
 
 option_list_injected_short = "l"
 option_list_injected = "list-injected"

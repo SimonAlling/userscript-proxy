@@ -11,7 +11,7 @@ import modules.inline as inline
 import modules.text as T
 from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
 from modules.utilities import first, second, itemList, fromOptional, flag, idem
-from modules.constants import VERSION, VERSION_PREFIX, APP_NAME, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
+from modules.constants import VERSION, VERSION_PREFIX, APP_NAME
 from modules.inject import Options, inject
 from modules.misc import sanitize
 from modules.requests import CONTENT_TYPE, inferEncoding, requestContainsQueryParam
@@ -132,8 +132,8 @@ class UserscriptInjector:
     def load(self, loader):
         loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
         loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
-        loader.add_option(sanitize(T.option_userscripts_dir), str, DEFAULT_USERSCRIPTS_DIR, T.help_userscripts_dir)
-        loader.add_option(sanitize(T.option_query_param_to_disable), str, DEFAULT_QUERY_PARAM_TO_DISABLE, T.help_query_param_to_disable)
+        loader.add_option(sanitize(T.option_userscripts_dir), str, T.option_userscripts_dir_default, T.help_userscripts_dir)
+        loader.add_option(sanitize(T.option_query_param_to_disable), str, T.option_query_param_to_disable_default, T.help_query_param_to_disable)
 
 
     def configure(self, updates):

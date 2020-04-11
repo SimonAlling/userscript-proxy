@@ -5,7 +5,6 @@ import os
 import glob
 import subprocess
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
-from modules.constants import DEFAULT_PORT, DEFAULT_RULES_DIR, DEFAULT_USERSCRIPTS_DIR, DEFAULT_QUERY_PARAM_TO_DISABLE
 from modules.misc import sanitize
 import modules.ignore as ignore
 import modules.text as T
@@ -43,21 +42,21 @@ argparser.add_argument(
 argparser.add_argument(
     flag(T.option_port), shortFlag(T.option_port_short),
     type=int,
-    default=DEFAULT_PORT,
+    default=T.option_port_default,
     help=T.help_port,
 )
 argparser.add_argument(
     flag(T.option_query_param_to_disable), shortFlag(T.option_query_param_to_disable_short),
     type=str,
     metavar=T.metavar_param,
-    default=DEFAULT_QUERY_PARAM_TO_DISABLE,
+    default=T.option_query_param_to_disable_default,
     help=T.help_query_param_to_disable,
 )
 argparser.add_argument(
     flag(T.option_rules_dir), shortFlag(T.option_rules_dir_short),
     type=str,
     metavar=T.metavar_dir,
-    default=DEFAULT_RULES_DIR,
+    default=T.option_rules_dir_default,
     help=T.help_rules_dir,
 )
 argparser.add_argument(
@@ -69,7 +68,7 @@ argparser.add_argument(
     flag(T.option_userscripts_dir), shortFlag(T.option_userscripts_dir_short),
     type=str,
     metavar=T.metavar_dir,
-    default=DEFAULT_USERSCRIPTS_DIR,
+    default=T.option_userscripts_dir_default,
     help=T.help_userscripts_dir,
 )
 
