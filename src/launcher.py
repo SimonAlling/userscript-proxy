@@ -64,13 +64,6 @@ argparser.add_argument(
     help=T.help_query_param_to_disable,
 )
 argparser.add_argument(
-    flag(T.option_rules_dir), shortFlag(T.option_rules_dir_short),
-    type=str,
-    metavar=T.metavar_dir,
-    default=T.option_rules_dir_default,
-    help=T.help_rules_dir,
-)
-argparser.add_argument(
     flag(T.option_transparent), shortFlag(T.option_transparent_short),
     action="store_true",
     help=T.help_transparent,
@@ -123,13 +116,7 @@ try:
             return ""
     def ruleFilesContent_custom():
         if useCustomFiltering:
-            # Check that rules directory exists:
-            rulesDirectory = args.rules_dir
-            if not os.path.isdir(rulesDirectory):
-                print(directoryDoesNotExist(what="rules", dir=rulesDirectory, flagName=T.option_rules_dir))
-                exit(1)
             print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
-            os.chdir(rulesDirectory)
             filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
             acc = ""
             for filename in filenames:

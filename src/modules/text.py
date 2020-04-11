@@ -1,13 +1,10 @@
 from modules.constants import APP_NAME, VERSION, VERSION_PREFIX
 from modules.utilities import flag
 
-ROOT_DIR: str = "/usr/share/userscript-proxy/"
-
 metavar_file = "FILE"
 metavar_dir = "DIR"
 metavar_param = "PARAM"
-RULES_DIR = "rules-dir"
-matching = f"matching any of the rules specified in {metavar_file} (file name or glob pattern, relative to {flag(RULES_DIR)})"
+matching = f"matching any of the rules specified in {metavar_file} (file name or glob pattern)"
 
 description = "Inject userscripts using mitmproxy."
 
@@ -40,11 +37,6 @@ help_query_param_to_disable = f"""Disable userscripts when the request URL conta
 option_transparent_short = "t"
 option_transparent = "transparent"
 help_transparent = "Transparent mode"
-
-option_rules_dir_short = "r"
-option_rules_dir = RULES_DIR
-option_rules_dir_default = ROOT_DIR + "rules"
-help_rules_dir = f"Load ignore/intercept rules from directory {metavar_dir} (default: {option_rules_dir_default})"
 
 option_userscripts_dir_short = "u"
 option_userscripts_dir = "userscripts-dir"
