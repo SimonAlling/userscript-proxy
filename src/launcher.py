@@ -105,6 +105,7 @@ try:
     useIntercept = isSomething(glob_intercept)
     def ruleFilesContent_default():
         if useDefaultRules:
+            print(f"Reading default {'intercept' if useIntercept else 'ignore'} rules ...")
             globPattern = DEFAULT_INTERCEPT_RULES if useIntercept else DEFAULT_IGNORE_RULES
             filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
             acc = ""
@@ -116,7 +117,7 @@ try:
             return ""
     def ruleFilesContent_custom():
         if useCustomFiltering:
-            print(f"Reading {'intercept' if useIntercept else 'ignore'} rules ...")
+            print(f"Reading custom {'intercept' if useIntercept else 'ignore'} rules ({globPattern}) ...")
             filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
             acc = ""
             for filename in filenames:
