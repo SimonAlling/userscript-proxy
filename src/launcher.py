@@ -105,8 +105,12 @@ def printInfo(
         print(f"Since {flag(T.option_no_default_rules)} and neither {flag(T.option_ignore)} nor {flag(T.option_intercept)} was given, ALL traffic will be intercepted.")
     print()
 
-def directoryDoesNotExist(what: str, dir: str, flagName: str) -> str:
-    return f"Directory `{dir}` does not exist. Use {flag(flagName)} to specify a custom {what} directory. If you're using Docker, you need to use -v to mount a directory from the host inside the container. Exiting."
+
+def checkThatUserscriptsDirectoryExistsIfSpecified(directory: str):
+    if directory is not None and not os.path.isdir(directory):
+        print(f"Directory `{directory}` does not exist. If you're using Docker, you need to use -v to mount a directory from the host inside the container. Exiting.")
+        exit(1)
+
 
 try:
     workingDirectory = os.getcwd()
@@ -124,6 +128,8 @@ try:
     useTransparent = args.transparent
     useFiltering = useCustomFiltering or useDefaultRules
     useIntercept = isSomething(glob_intercept)
+    userscriptsDirectory = args.userscripts_dir
+    checkThatUserscriptsDirectoryExistsIfSpecified(userscriptsDirectory)
     def ruleFilesContent_default():
         if useDefaultRules:
             print(f"Reading default {'intercept' if useIntercept else 'ignore'} rules ...")
@@ -156,11 +162,6 @@ try:
         useTransparent=useTransparent,
         filterRules=filterRules,
     )
-    # Check that userscripts directory exists:
-    userscriptsDirectory = args.userscripts_dir
-    if userscriptsDirectory is not None and not os.path.isdir(userscriptsDirectory):
-        print(directoryDoesNotExist(what="userscripts", dir=userscriptsDirectory, flagName=T.option_userscripts_dir))
-        exit(1)
     maybeNegate = ignore.negate if useIntercept else idem
     regex = maybeNegate(ignore.entireIgnoreRegex(ruleFilesContent)) if useFiltering else MATCH_NO_HOSTS
     script = os.path.join(os.path.dirname(__file__), FILENAME_INJECTOR)
