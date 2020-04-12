@@ -99,6 +99,19 @@ This is accomplished by installing a certificate.
 **In general, installing a certificate might pose a security risk. If you don't trust me and mitmproxy, stop here.**
 Otherwise, read on.
 
+1.  Stop the proxy by pressing `Ctrl` + `C` in the terminal where it's running.
+    Then start it again, this time with the `-v` flag as shown below:
+
+    ```
+    docker run --rm --name userscript-proxy -p 8080:8080 -v "mitmproxy-ca:/root/.mitmproxy" userscript-proxy
+    ```
+
+    This creates a new Docker volume and mounts it at `/root/.mitmproxy`, where mitmproxy stores its certificate authority files.
+    This is necessary so that you can restart the proxy later without having to perform all these steps again.
+
+    In this example, `mitmproxy-ca` is the name of the new Docker volume.
+    You can choose any name you want, as long as it's not already in use.
+
 1.  Make sure your mobile device is configured to use the proxy as decribed above.
 
 1.  On your mobile device, go to [http://mitm.it](http://mitm.it).
