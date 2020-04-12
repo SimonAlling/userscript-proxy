@@ -4,6 +4,7 @@ from typing import List
 import os
 import glob
 import subprocess
+import modules.arguments as A
 from modules.argparser import getArgparser
 from modules.constants import DEFAULT_IGNORE_RULES, DEFAULT_INTERCEPT_RULES
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
@@ -34,7 +35,7 @@ def printInfo(
         if useTransparent:
             print(f"Please note that ignore/intercept rules based on hostnames may not work in transparent mode; it may be necessary to use IP addresses instead.")
     else:
-        print(f"Since {flag(T.option_no_default_rules)} and neither {flag(T.option_ignore)} nor {flag(T.option_intercept)} was given, ALL traffic will be intercepted.")
+        print(f"Since {flag(A.no_default_rules)} and neither {flag(A.ignore)} nor {flag(A.intercept)} was given, ALL traffic will be intercepted.")
     print()
 
 
@@ -103,11 +104,11 @@ try:
         "--mode", "transparent" if useTransparent else "regular",
         "--showhost", # use Host header for URL display
         "-s", script,
-        "--set", f"""{sanitize(T.option_inline)}={str(args.inline).lower()}""",
-        "--set", f"""{sanitize(T.option_list_injected)}={str(args.list_injected).lower()}""",
-        "--set", f"""{sanitize(T.option_no_default_userscripts)}={str(args.no_default_userscripts).lower()}""",
-        "--set", "" if userscriptsDirectory is None else f"""{sanitize(T.option_userscripts_dir)}={userscriptsDirectory}""",
-        "--set", f"""{sanitize(T.option_query_param_to_disable)}={args.query_param_to_disable}""",
+        "--set", f"""{sanitize(A.inline)}={str(args.inline).lower()}""",
+        "--set", f"""{sanitize(A.list_injected)}={str(args.list_injected).lower()}""",
+        "--set", f"""{sanitize(A.no_default_userscripts)}={str(args.no_default_userscripts).lower()}""",
+        "--set", "" if userscriptsDirectory is None else f"""{sanitize(A.userscripts_dir)}={userscriptsDirectory}""",
+        "--set", f"""{sanitize(A.query_param_to_disable)}={args.query_param_to_disable}""",
         # Empty string breaks the argument chain:
         "--rawtcp" if useTransparent else "", # for apps like Facebook Messenger
     ])

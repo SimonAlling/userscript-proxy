@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import modules.arguments as A
 import modules.text as T
 from modules.utilities import flag, shortFlag
 
@@ -6,60 +7,60 @@ def getArgparser():
     argparser = ArgumentParser(description=T.description)
     eitherIgnoreOrIntercept = argparser.add_mutually_exclusive_group()
     eitherIgnoreOrIntercept.add_argument(
-        flag(T.option_ignore),
+        flag(A.ignore),
         type=str,
-        metavar=T.metavar_file,
-        help=T.help_ignore,
+        metavar=A.metavar_file,
+        help=A.ignore_help,
     )
     eitherIgnoreOrIntercept.add_argument(
-        flag(T.option_intercept),
+        flag(A.intercept),
         type=str,
-        metavar=T.metavar_file,
-        help=T.help_intercept,
+        metavar=A.metavar_file,
+        help=A.intercept_help,
     )
     argparser.add_argument(
-        flag(T.option_no_default_rules),
+        flag(A.no_default_rules),
         action="store_true",
-        help=T.help_no_default_rules,
+        help=A.no_default_rules_help,
     )
     argparser.add_argument(
-        flag(T.option_no_default_userscripts),
+        flag(A.no_default_userscripts),
         action="store_true",
-        help=T.help_no_default_userscripts,
+        help=A.no_default_userscripts_help,
     )
     argparser.add_argument(
-        flag(T.option_inline), shortFlag(T.option_inline_short),
+        flag(A.inline), shortFlag(A.inline_short),
         action="store_true",
-        help=T.help_inline,
+        help=A.inline_help,
     )
     argparser.add_argument(
-        flag(T.option_list_injected),
+        flag(A.list_injected),
         action="store_true",
-        help=T.help_list_injected,
+        help=A.list_injected_help,
     )
     argparser.add_argument(
-        flag(T.option_port), shortFlag(T.option_port_short),
+        flag(A.port), shortFlag(A.port_short),
         type=int,
-        default=T.option_port_default,
-        help=T.help_port,
+        default=A.port_default,
+        help=A.port_help,
     )
     argparser.add_argument(
-        flag(T.option_query_param_to_disable), shortFlag(T.option_query_param_to_disable_short),
+        flag(A.query_param_to_disable), shortFlag(A.query_param_to_disable_short),
         type=str,
-        metavar=T.metavar_param,
-        default=T.option_query_param_to_disable_default,
-        help=T.help_query_param_to_disable,
+        metavar=A.metavar_param,
+        default=A.query_param_to_disable_default,
+        help=A.query_param_to_disable_help,
     )
     argparser.add_argument(
-        flag(T.option_transparent), shortFlag(T.option_transparent_short),
+        flag(A.transparent), shortFlag(A.transparent_short),
         action="store_true",
-        help=T.help_transparent,
+        help=A.transparent_help,
     )
     argparser.add_argument(
-        flag(T.option_userscripts_dir), shortFlag(T.option_userscripts_dir_short),
+        flag(A.userscripts_dir), shortFlag(A.userscripts_dir_short),
         type=str,
-        metavar=T.metavar_dir,
-        default=T.option_userscripts_dir_default,
-        help=T.help_userscripts_dir,
+        metavar=A.metavar_dir,
+        default=A.userscripts_dir_default,
+        help=A.userscripts_dir_help,
     )
     return argparser

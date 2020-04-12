@@ -5,6 +5,7 @@ from mitmproxy import ctx, http
 from functools import partial
 import shlex
 import warnings
+import modules.arguments as A
 from modules.metadata import MetadataError, PREFIX_TAG
 import modules.userscript as userscript
 import modules.inline as inline
@@ -71,7 +72,7 @@ Possible solutions:
 """ + bulletList([
     f"Make sure the userscript does not contain any of the sequences listed above.",
     f"Make the userscript available online and give it a {PREFIX_TAG}{userscript.directive_downloadURL}",
-    f"Remove the {flag(T.option_inline)} flag.",
+    f"Remove the {flag(A.inline)} flag.",
 ])
 
 
@@ -130,27 +131,27 @@ class UserscriptInjector:
 
 
     def load(self, loader):
-        loader.add_option(sanitize(T.option_inline), bool, False, T.help_inline)
-        loader.add_option(sanitize(T.option_no_default_userscripts), bool, False, T.help_no_default_userscripts)
-        loader.add_option(sanitize(T.option_list_injected), bool, False, T.help_list_injected)
-        loader.add_option(sanitize(T.option_userscripts_dir), Optional[str], T.option_userscripts_dir_default, T.help_userscripts_dir)
-        loader.add_option(sanitize(T.option_query_param_to_disable), str, T.option_query_param_to_disable_default, T.help_query_param_to_disable)
+        loader.add_option(sanitize(A.inline), bool, False, A.inline_help)
+        loader.add_option(sanitize(A.no_default_userscripts), bool, False, A.no_default_userscripts_help)
+        loader.add_option(sanitize(A.list_injected), bool, False, A.list_injected_help)
+        loader.add_option(sanitize(A.userscripts_dir), Optional[str], A.userscripts_dir_default, A.userscripts_dir_help)
+        loader.add_option(sanitize(A.query_param_to_disable), str, A.query_param_to_disable_default, A.query_param_to_disable_help)
 
 
     def configure(self, updates):
         useDefaultUserscripts = True
-        if sanitize(T.option_no_default_userscripts) in updates and option(T.option_no_default_userscripts):
-            logInfo(f"""Built-in default userscripts will be skipped due to {flag(T.option_no_default_userscripts)} flag.""")
+        if sanitize(A.no_default_userscripts) in updates and option(A.no_default_userscripts):
+            logInfo(f"""Built-in default userscripts will be skipped due to {flag(A.no_default_userscripts)} flag.""")
             useDefaultUserscripts = False
-        if sanitize(T.option_inline) in updates and option(T.option_inline):
-            logWarning(f"""Only inline injection will be used due to {flag(T.option_inline)} flag.""")
-        if sanitize(T.option_query_param_to_disable) in updates:
-            logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
-        if sanitize(T.option_userscripts_dir) in updates:
+        if sanitize(A.inline) in updates and option(A.inline):
+            logWarning(f"""Only inline injection will be used due to {flag(A.inline)} flag.""")
+        if sanitize(A.query_param_to_disable) in updates:
+            logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(A.query_param_to_disable)}` query parameter.""")
+        if sanitize(A.userscripts_dir) in updates:
             userscripts = loadUserscripts(DEFAULT_USERSCRIPTS_DIR) if useDefaultUserscripts else []
-            userscriptsDirectory = option(T.option_userscripts_dir)
+            userscriptsDirectory = option(A.userscripts_dir)
             if userscriptsDirectory is None:
-                logWarning(f"No custom userscripts will be loaded, because {flag(T.option_userscripts_dir)} was not provided.")
+                logWarning(f"No custom userscripts will be loaded, because {flag(A.userscripts_dir)} was not provided.")
             else:
                 userscripts.append(loadUserscripts(userscriptsDirectory))
             self.userscripts = userscripts
@@ -168,19 +169,19 @@ class UserscriptInjector:
                     from_encoding=inferEncoding(response)
                 )
                 requestURL = flow.request.pretty_url # should work in transparent mode too, unless the Host header is spoofed
-                if requestContainsQueryParam(option(T.option_query_param_to_disable), flow.request):
-                    logInfo(f"""Not injecting any userscripts into {requestURL} because it contains a `{option(T.option_query_param_to_disable)}` query parameter.""")
+                if requestContainsQueryParam(option(A.query_param_to_disable), flow.request):
+                    logInfo(f"""Not injecting any userscripts into {requestURL} because it contains a `{option(A.query_param_to_disable)}` query parameter.""")
                     return
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(requestURL)
                 for script in self.userscripts:
                     if isApplicable(script):
-                        useInline = option(T.option_inline) or script.downloadURL is None
+                        useInline = option(A.inline) or script.downloadURL is None
                         if useInline and len(script.unsafeSequences) > 0:
                             logError(unsafeSequencesMessage(script))
                             continue
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
                         result = inject(script, soup, Options(
-                            inline = option(T.option_inline),
+                            inline = option(A.inline),
                         ))
                         if type(result) is BeautifulSoup:
                             soup = result
@@ -191,7 +192,7 @@ class UserscriptInjector:
 
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 # Insert information comment:
-                if option(T.option_list_injected):
+                if option(A.list_injected):
                     soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
                         HTML_INFO_COMMENT_PREFIX + (
                             "No matching userscripts for this URL." if insertedScripts == []
