@@ -85,6 +85,26 @@ def printWelcomeMessage():
     print("")
 
 
+def printInfo(
+    useFiltering: bool,
+    useIntercept: bool,
+    useTransparent: bool,
+    filterRules: List[str],
+):
+    print()
+    print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
+    print()
+    if useFiltering:
+        print(f"Traffic from hosts matching any of these rules will be {'INTERCEPTED' if useIntercept else 'IGNORED'} by mitmproxy:")
+        print()
+        print(itemList("    ", filterRules))
+        print()
+        if useTransparent:
+            print(f"Please note that ignore/intercept rules based on hostnames may not work in transparent mode; it may be necessary to use IP addresses instead.")
+    else:
+        print(f"Since {flag(T.option_no_default_rules)} and neither {flag(T.option_ignore)} nor {flag(T.option_intercept)} was given, ALL traffic will be intercepted.")
+    print()
+
 def directoryDoesNotExist(what: str, dir: str, flagName: str) -> str:
     return f"Directory `{dir}` does not exist. Use {flag(flagName)} to specify a custom {what} directory. If you're using Docker, you need to use -v to mount a directory from the host inside the container. Exiting."
 
@@ -101,6 +121,7 @@ try:
     )
     useCustomFiltering = globPattern is not None
     useDefaultRules = not args.no_default_rules
+    useTransparent = args.transparent
     useFiltering = useCustomFiltering or useDefaultRules
     useIntercept = isSomething(glob_intercept)
     def ruleFilesContent_default():
@@ -128,11 +149,13 @@ try:
         else:
             return ""
     ruleFilesContent = ruleFilesContent_default() + "\n" + ruleFilesContent_custom()
-    if useFiltering:
-        print(f"Traffic from hosts matching any of these rules will be {'INTERCEPTED' if useIntercept else 'IGNORED'} by mitmproxy:")
-        print()
-        print(itemList("    ", ignore.rulesIn(ruleFilesContent)))
-        print()
+    filterRules = ignore.rulesIn(ruleFilesContent)
+    printInfo(
+        useFiltering=useFiltering,
+        useIntercept=useIntercept,
+        useTransparent=useTransparent,
+        filterRules=filterRules,
+    )
     # Check that userscripts directory exists:
     userscriptsDirectory = args.userscripts_dir
     if userscriptsDirectory is not None and not os.path.isdir(userscriptsDirectory):
@@ -140,14 +163,6 @@ try:
         exit(1)
     maybeNegate = ignore.negate if useIntercept else idem
     regex = maybeNegate(ignore.entireIgnoreRegex(ruleFilesContent)) if useFiltering else MATCH_NO_HOSTS
-    useTransparent = args.transparent
-    print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
-    print()
-    if not useFiltering:
-        print(f"Since {flag(T.option_no_default_rules)} and neither {flag(T.option_ignore)} nor {flag(T.option_intercept)} was given, ALL traffic will be intercepted.")
-    if useFiltering and useTransparent:
-        print(f"Please note that ignore/intercept rules based on hostnames may not work in transparent mode; it may be necessary to use IP addresses instead.")
-    print()
     script = os.path.join(os.path.dirname(__file__), FILENAME_INJECTOR)
     subprocess.run([
         "mitmdump", "--ignore-hosts", regex,
