@@ -338,7 +338,7 @@ How to build and run from source:
 ```
 git clone https://github.com/SimonAlling/userscript-proxy
 cd userscript-proxy
-docker build -t userscript-proxy .
+make image
 docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy
 ```
 
