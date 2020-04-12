@@ -137,13 +137,12 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
 1.  You need the **absolute path** to a directory containing your userscripts.
     This could be something like `/home/alling/userscripts`.
 
-1.  Run Userscript Proxy with your userscripts directory mounted at `/usr/share/userscript-proxy/userscripts` inside the Docker container:
+1.  Run Userscript Proxy with your userscripts directory mounted at some location (e.g. `/userscripts`) inside the Docker container, and tell Userscript Proxy to read userscripts from that directory:
 
     ```
-    docker run --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/usr/share/userscript-proxy/userscripts" userscript-proxy
+    docker run --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/userscripts" userscript-proxy --userscripts-dir "/userscripts"
     ```
 
-**Note:** This will replace the test userscript with your userscripts, so [`http://example.com`](http://example.com) won't be green anymore.
 
 
 ## Ignoring hosts
@@ -300,10 +299,9 @@ In such cases, you have to route traffic from the client to the proxy at the net
 
 **NOTE:** In transparent mode, ignore/intercept rules based on hostname (rather than IP address) may not work, because mitmproxy may not be able to see the hostname of responses without intercepting them.
 
-### `--userscripts DIR`, `-u DIR`
+### `--userscripts-dir DIR`, `-u DIR`
 
 Load userscripts from directory `DIR`.
-Defaults to `/usr/share/userscript-proxy/userscripts`.
 
 
 [mitmproxy]: https://mitmproxy.org
