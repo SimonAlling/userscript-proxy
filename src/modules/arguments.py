@@ -1,19 +1,18 @@
+from modules.utilities import flag
+
 # Helpers/utilities:
 metavar_file = "FILE"
 metavar_dir = "DIR"
 metavar_param = "PARAM"
-matching = f"matching any of the rules specified in {metavar_file} (file name or glob pattern)"
 
-
-ignore = "ignore"
-ignore_help = "Intercept all traffic except from hosts " + matching
+RULES = "rules"
 
 inline = "inline"
 inline_short = "i"
 inline_help = "Always insert userscripts inline, never linked"
 
 intercept = "intercept"
-intercept_help = "Intercept only traffic from hosts " + matching
+intercept_help = f"Invert the meaning of {flag(RULES)} so that traffic from matched hosts is intercepted instead of ignored"
 
 list_injected = "list-injected"
 list_injected_short = "l"
@@ -34,6 +33,10 @@ query_param_to_disable = "query-param-to-disable"
 query_param_to_disable_short = "q"
 query_param_to_disable_default = "nouserscripts"
 query_param_to_disable_help = f"""Disable userscripts when the request URL contains a PARAM query parameter, for example "foo" to disable userscripts for http://example.com?foo (default: {query_param_to_disable_default})"""
+
+rules = RULES
+rules_short = "r"
+rules_help = f"Ignore (or, with {flag(intercept)}, intercept) traffic from hosts matching any of the rules specified in {metavar_file} (file name or glob pattern)"
 
 transparent = "transparent"
 transparent_short = "t"

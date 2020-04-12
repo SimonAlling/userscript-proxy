@@ -35,7 +35,7 @@ def printInfo(
         if useTransparent:
             print(f"Please note that ignore/intercept rules based on hostnames may not work in transparent mode; it may be necessary to use IP addresses instead.")
     else:
-        print(f"Since {flag(A.no_default_rules)} and neither {flag(A.ignore)} nor {flag(A.intercept)} was given, ALL traffic will be intercepted.")
+        print(f"Since {flag(A.no_default_rules)} was given and {flag(A.rules)} was not, ALL traffic will be intercepted.")
     print()
 
 
@@ -49,18 +49,12 @@ try:
     workingDirectory = os.getcwd()
     args = getArgparser().parse_args()
     print(T.WELCOME_MESSAGE)
-    glob_ignore = args.ignore
-    glob_intercept = args.intercept
-    globPattern = (
-        glob_intercept if isSomething(glob_intercept)
-        else glob_ignore if isSomething(glob_ignore)
-        else None
-    )
+    globPattern = args.rules
     useCustomFiltering = globPattern is not None
     useDefaultRules = not args.no_default_rules
     useTransparent = args.transparent
     useFiltering = useCustomFiltering or useDefaultRules
-    useIntercept = isSomething(glob_intercept)
+    useIntercept = args.intercept is True
     userscriptsDirectory = args.userscripts_dir
     checkThatUserscriptsDirectoryExistsIfSpecified(userscriptsDirectory)
     def ruleFilesContent_default():

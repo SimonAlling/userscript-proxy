@@ -167,7 +167,8 @@ There are two approaches:
   * Whitelisting hosts where userscripts should be applied.
     Works well in general, but does not allow universal userscripts that run on all sites, and the whitelist must be updated when a new userscript is added.
 
-Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` flag together with one or more files containing **ignore/intercept rules**.
+Blacklisting or whitelisting is done by giving the `--rules` flag together with one or more files containing **rules**.
+By default, all traffic from hosts matching those rules is ignored (blacklisting); if `--intercept` is given, matching traffic is instead intercepted (whitelisting).
 
 **NOTE:** With `--transparent`, mitmproxy may not be able to see the hostname of responses without intercepting them. In that case, you can only ignore/intercept based on IP address, not hostname.
 
@@ -175,11 +176,11 @@ Examples:
 
   * Take ignore rules from `/home/alling/rules/ignore.txt`:
     ```bash
-    docker run --rm -v "/home/alling/rules:/rules" userscript-proxy --ignore "/rules/ignore.txt"
+    docker run --rm -v "/home/alling/rules:/rules" userscript-proxy --rules "/rules/ignore.txt"
     ```
   * Take intercept rules from all `.txt` files in the `/home/alling/rules` directory whose names start with `foo`:
     ```bash
-    docker run --rm -v "/home/alling/rules:/rules" userscript-proxy --intercept "/rules/foo*.txt"
+    docker run --rm -v "/home/alling/rules:/rules" userscript-proxy --rules "/rules/foo*.txt" --intercept
     ```
 
 Rules can be specified in two ways:
@@ -265,12 +266,6 @@ docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --transpar
 #          flags to `docker run`                                      flags to Userscript Proxy
 ```
 
-### `--ignore FILE`/`--intercept FILE`
-
-Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files.
-`--ignore` and `--intercept` cannot be used together.
-See examples above.
-
 ### `--inline`, `-i`
 
 Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`).
@@ -316,6 +311,12 @@ docker run --rm --network host --name userscript-proxy userscript-proxy -p 5555
 Disable userscripts when the request URL contains `PARAM` as a query parameter.
 For example, use `-q foo` to disable userscripts for `http://example.com?foo`.
 Defaults to `nouserscripts`.
+
+### `--rules FILE`
+
+Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files.
+By default, matching traffic is ignored; use `--intercept` to invert this behavior.
+See examples above.
 
 ### `--transparent`, `-t`
 

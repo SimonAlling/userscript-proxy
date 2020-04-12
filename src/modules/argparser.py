@@ -6,17 +6,9 @@ from modules.utilities import flag, shortFlag
 
 def getArgparser():
     argparser = ArgumentParser(description=T.description)
-    eitherIgnoreOrIntercept = argparser.add_mutually_exclusive_group()
-    eitherIgnoreOrIntercept.add_argument(
-        flag(A.ignore),
-        type=str,
-        metavar=A.metavar_file,
-        help=A.ignore_help,
-    )
-    eitherIgnoreOrIntercept.add_argument(
+    argparser.add_argument(
         flag(A.intercept),
-        type=str,
-        metavar=A.metavar_file,
+        action="store_true",
         help=A.intercept_help,
     )
     argparser.add_argument(
@@ -51,6 +43,12 @@ def getArgparser():
         metavar=A.metavar_param,
         default=A.query_param_to_disable_default,
         help=A.query_param_to_disable_help,
+    )
+    argparser.add_argument(
+        flag(A.rules),
+        type=str,
+        metavar=A.metavar_file,
+        help=A.rules_help,
     )
     argparser.add_argument(
         flag(A.transparent), shortFlag(A.transparent_short),
