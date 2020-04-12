@@ -280,6 +280,14 @@ Useful to test new userscript features without having to re-upload the userscrip
 
 Insert an HTML comment in each page specifying which userscripts (if any) were injected.
 
+### `--no-default-rules`
+
+Skip built-in default rules, which are otherwise automatically applied so that common apps like App Store and Facebook Messenger work out of the box.
+
+### `--no-default-userscripts`
+
+Skip loading built-in default userscripts intended for sanity checks and similar purposes, e.g. Example Userscript.
+
 ### `--port PORT`, `-p PORT`
 
 Make mitmproxy listen to TCP port `PORT`.
