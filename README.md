@@ -144,8 +144,7 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
     ```
 
 
-
-## Ignoring hosts
+## Apps with certificate pinning
 
 Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy.
 There are two approaches:
@@ -161,13 +160,13 @@ Blacklisting or whitelisting is done by giving the `--ignore` or `--intercept` f
 
 Examples:
 
-  * Take ignore rules from `rules/ignore.txt` (included):
+  * Take ignore rules from `/home/alling/rules/ignore.txt`:
     ```bash
-    docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --ignore "rules/ignore.txt"
+    docker run --rm -v "/home/alling/rules:/rules" userscript-proxy --ignore "/rules/ignore.txt"
     ```
-  * Take intercept rules from all `.txt` files in the `rules` directory whose names start with `foo`:
+  * Take intercept rules from all `.txt` files in the `/home/alling/rules` directory whose names start with `foo`:
     ```bash
-    docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --intercept "rules/foo*.txt"
+    docker run --rm -v "/home/alling/rules:/rules" userscript-proxy --intercept "/rules/foo*.txt"
     ```
 
 Rules can be specified in two ways:
