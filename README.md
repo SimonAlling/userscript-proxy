@@ -331,6 +331,18 @@ In such cases, you have to route traffic from the client to the proxy at the net
 Load userscripts from directory `DIR`.
 
 
+## Contribute
+
+How to build and run from source:
+
+```
+git clone https://github.com/SimonAlling/userscript-proxy
+cd userscript-proxy
+docker build -t userscript-proxy .
+docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy
+```
+
+
 [mitmproxy]: https://mitmproxy.org
 [minification]: https://en.wikipedia.org/wiki/Minification_(programming)
 [metadata]: https://wiki.greasespot.net/Metadata_Block
