@@ -4,77 +4,17 @@ from typing import List
 import os
 import glob
 import subprocess
+from modules.argparser import getArgparser
 from modules.constants import DEFAULT_IGNORE_RULES, DEFAULT_INTERCEPT_RULES
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
 from modules.misc import sanitize
 import modules.ignore as ignore
 import modules.text as T
 import shlex
-from argparse import ArgumentParser
 from functools import reduce
 
 FILENAME_INJECTOR: str = "injector.py"
 MATCH_NO_HOSTS = r"^$"
-
-argparser = ArgumentParser(description=T.description)
-group = argparser.add_mutually_exclusive_group()
-group.add_argument(
-    flag(T.option_ignore),
-    type=str,
-    metavar=T.metavar_file,
-    help=T.help_ignore,
-)
-group.add_argument(
-    flag(T.option_intercept),
-    type=str,
-    metavar=T.metavar_file,
-    help=T.help_intercept,
-)
-argparser.add_argument(
-    flag(T.option_no_default_rules),
-    action="store_true",
-    help=T.help_no_default_rules,
-)
-argparser.add_argument(
-    flag(T.option_no_default_userscripts),
-    action="store_true",
-    help=T.help_no_default_userscripts,
-)
-argparser.add_argument(
-    flag(T.option_inline), shortFlag(T.option_inline_short),
-    action="store_true",
-    help=T.help_inline,
-)
-argparser.add_argument(
-    flag(T.option_list_injected),
-    action="store_true",
-    help=T.help_list_injected,
-)
-argparser.add_argument(
-    flag(T.option_port), shortFlag(T.option_port_short),
-    type=int,
-    default=T.option_port_default,
-    help=T.help_port,
-)
-argparser.add_argument(
-    flag(T.option_query_param_to_disable), shortFlag(T.option_query_param_to_disable_short),
-    type=str,
-    metavar=T.metavar_param,
-    default=T.option_query_param_to_disable_default,
-    help=T.help_query_param_to_disable,
-)
-argparser.add_argument(
-    flag(T.option_transparent), shortFlag(T.option_transparent_short),
-    action="store_true",
-    help=T.help_transparent,
-)
-argparser.add_argument(
-    flag(T.option_userscripts_dir), shortFlag(T.option_userscripts_dir_short),
-    type=str,
-    metavar=T.metavar_dir,
-    default=T.option_userscripts_dir_default,
-    help=T.help_userscripts_dir,
-)
 
 
 def printWelcomeMessage():
@@ -114,7 +54,7 @@ def checkThatUserscriptsDirectoryExistsIfSpecified(directory: str):
 
 try:
     workingDirectory = os.getcwd()
-    args = argparser.parse_args()
+    args = getArgparser().parse_args()
     printWelcomeMessage()
     glob_ignore = args.ignore
     glob_intercept = args.intercept
