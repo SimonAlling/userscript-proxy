@@ -7,9 +7,9 @@ Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, inje
 Both HTTP and HTTPS are supported.
 
 
-## How to use it
+# How to use it
 
-### Security notice
+## Security notice
 
 Make sure you understand these security aspects before using Userscript Proxy:
 
@@ -17,7 +17,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
   * **You should not expose the proxy to the Internet** (i.e. outside your LAN), because then anyone can connect to it and use your Internet connection for whatever they want.
     In practice, this means that you should _not_ add a port-forward for Userscript Proxy in your router.
 
-### Getting started
+## Getting started
 
 1.  Make sure you have [Docker](https://www.docker.com) installed.
     This should work:
@@ -67,7 +67,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
         1.  Visit [`http://example.com`](http://example.com).
             You should see a green page and a message saying that Userscript Proxy is working.
 
-### On a mobile device
+## On a mobile device
 
 1.  You need to know the local IP address of the machine running Userscript Proxy (i.e. where you ran `docker run` above).
     This is usually something like `192.168.1.67`.
@@ -88,7 +88,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
 1.  Visit [`http://example.com`](http://example.com) on your mobile device.
     You should see the same green page as above.
 
-### HTTPS
+## HTTPS
 
 When you've set up Userscript Proxy on your mobile device as described above, you'll notice that you can't visit sites via HTTPS anymore.
 This is because your device thinks you're being [MITM'd](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (which, technically, you are – but that's exactly what we want).
@@ -121,12 +121,12 @@ Otherwise, read on.
 
 1.  Install the certificate.
 
-    #### Android
+    ### Android
 
     Follow the on-screen instructions.
     If you're asked to choose between **VPN and apps** and **Wi-Fi**, choose **VPN and apps**.
 
-    #### iOS
+    ### iOS
 
     1.  Tap **Allow** when asked if you want to download a configuration profile.
 
@@ -142,7 +142,7 @@ Otherwise, read on.
 
 1.  You should now be able to browse via HTTPS as usual.
 
-### Deploying userscripts
+## Deploying userscripts
 
 Userscript Proxy comes with one single userscript, useful only for testing that the proxy is up and running.
 To use userscripts you've downloaded or written yourself, you need to tell Userscript Proxy where they are.
@@ -157,7 +157,7 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
     ```
 
 
-## Apps with certificate pinning
+# Apps with certificate pinning
 
 Apps like App Store and Facebook Messenger refuse to connect through a MITM proxy, so their traffic must be ignored by mitmproxy.
 There are two approaches:
@@ -185,7 +185,7 @@ Examples:
 
 Rules can be specified in two ways:
 
-### Basic pattern
+## Basic pattern
 
 Based on the syntax used by userscript `@include` directives.
 Asterisk (`*`) means any string (including the empty string).
@@ -194,7 +194,7 @@ Asterisk (`*`) means any string (including the empty string).
 
 To match a domain without matching all of its subdomains, use a regex rule instead (see below).
 
-#### Examples
+### Examples
 
 | Rule           | Matches                                                         |
 |----------------|-----------------------------------------------------------------|
@@ -203,7 +203,7 @@ To match a domain without matching all of its subdomains, use a regex rule inste
 | `*cdn.net`     | `cdn.net`, `fbcdn.net` and `x.fbcdn.net`, but not `cdn.net.com` |
 | `site.com:80`  | `site.com:80` and `x.site.com:80`, but not `site.com:443`       |
 
-### Regular expression
+## Regular expression
 
 If a rule starts and ends with a slash (`/`), it is treated as a Python regex.
 
@@ -215,7 +215,7 @@ Also, be careful with `$`: A regex like `/site.com$/` will never match, because 
 Anything from a `#` until the end of the line is treated as a comment.
 Leading and trailing whitespace have no effect.
 
-#### Examples
+### Examples
 
 | Rule            | Matches                                                           |
 |-----------------|-------------------------------------------------------------------|
@@ -223,7 +223,7 @@ Leading and trailing whitespace have no effect.
 | `/^site\.com:/` | `site.com`, but not `x.site.com`, `mysite.com` or `site.com.net`  |
 
 
-## Data usage
+# Data usage
 
 Userscript Proxy has no data usage impact when no userscript is injected, i.e. for URLs without any matching userscript.
 When a script _is_ injected, **exactly one** of the following things happens:
@@ -238,7 +238,7 @@ Userscripts are injected into _every_ response from a matching URL, and the size
 If the `@downloadURL` approach is not possible, for one reason or the other, it is a good idea to be aware of this issue, and to take appropriate action such as [minifying][minification] userscripts and adding suitable ignore rules.
 
 
-## Userscript compatibility
+# Userscript compatibility
 
 Userscript Proxy supports (a subset of) the [Greasemonkey metadata syntax][metadata].
 No adaptation of plain JavaScript userscripts should be required.
@@ -256,7 +256,7 @@ These directives are supported:
 The [`GM` API][gm-api] and similar runtime facilities are not supported, because userscripts can only be injected as regular scripts.
 
 
-## Options
+# Options
 
 Options are specified by simply appending them to the `docker run` command, for example:
 
@@ -266,24 +266,24 @@ docker run --rm --name userscript-proxy -p 8080:8080 userscript-proxy --transpar
 #          flags to `docker run`                                      flags to Userscript Proxy
 ```
 
-### `--inline`, `-i`
+## `--inline`, `-i`
 
 Always inject scripts inline (`<script>...</script>`), never linked (`<script src="..."></script>`).
 Useful to test new userscript features without having to re-upload the userscript and clear browser cache.
 
-### `--list-injected`, `-l`
+## `--list-injected`, `-l`
 
 Insert an HTML comment in each page specifying which userscripts (if any) were injected.
 
-### `--no-default-rules`
+## `--no-default-rules`
 
 Skip built-in default rules, which are otherwise automatically applied so that common apps like App Store and Facebook Messenger work out of the box.
 
-### `--no-default-userscripts`
+## `--no-default-userscripts`
 
 Skip loading built-in default userscripts intended for sanity checks and similar purposes, e.g. Example Userscript.
 
-### `--port PORT`, `-p PORT`
+## `--port PORT`, `-p PORT`
 
 Make mitmproxy listen to TCP port `PORT`.
 Defaults to `8080`.
@@ -306,19 +306,19 @@ Or you can let the Docker container be a part of the host's network:
 docker run --rm --network host --name userscript-proxy userscript-proxy -p 5555
 ```
 
-### `--query-param-to-disable PARAM`, `-q PARAM`
+## `--query-param-to-disable PARAM`, `-q PARAM`
 
 Disable userscripts when the request URL contains `PARAM` as a query parameter.
 For example, use `-q foo` to disable userscripts for `http://example.com?foo`.
 Defaults to `nouserscripts`.
 
-### `--rules FILE`
+## `--rules FILE`
 
 Take ignore or intercept rules from `FILE`, which can be a glob pattern matching multiple files.
 By default, matching traffic is ignored; use `--intercept` to invert this behavior.
 See examples above.
 
-### `--transparent`, `-t`
+## `--transparent`, `-t`
 
 Run mitmproxy in [transparent mode][transparent-mode].
 Useful if you cannot set a proxy in the client, e.g. when using OpenVPN Connect on Android to connect to a VPN server on the network where your proxy is running.
@@ -326,12 +326,12 @@ In such cases, you have to route traffic from the client to the proxy at the net
 
 **NOTE:** In transparent mode, ignore/intercept rules based on hostname (rather than IP address) may not work, because mitmproxy may not be able to see the hostname of responses without intercepting them.
 
-### `--userscripts-dir DIR`, `-u DIR`
+## `--userscripts-dir DIR`, `-u DIR`
 
 Load userscripts from directory `DIR`.
 
 
-## Contribute
+# Contribute
 
 How to build and run from source:
 
