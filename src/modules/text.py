@@ -51,3 +51,11 @@ def stringifyVersion(version: str) -> str:
     return VERSION_PREFIX + version
 
 INFO_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
+
+WELCOME_MESSAGE: str = "\n".join([
+    "",
+    "╔═" + "═" * len(INFO_MESSAGE) + "═╗",
+    "║ " +           INFO_MESSAGE  + " ║",
+    "╚═" + "═" * len(INFO_MESSAGE) + "═╝",
+    "",
+])

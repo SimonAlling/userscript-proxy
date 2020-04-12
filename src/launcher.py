@@ -17,14 +17,6 @@ FILENAME_INJECTOR: str = "injector.py"
 MATCH_NO_HOSTS = r"^$"
 
 
-def printWelcomeMessage():
-    print("")
-    print("╔═" + "═" * len(T.INFO_MESSAGE) + "═╗")
-    print("║ " +           T.INFO_MESSAGE  + " ║")
-    print("╚═" + "═" * len(T.INFO_MESSAGE) + "═╝")
-    print("")
-
-
 def printInfo(
     useFiltering: bool,
     useIntercept: bool,
@@ -55,7 +47,7 @@ def checkThatUserscriptsDirectoryExistsIfSpecified(directory: str):
 try:
     workingDirectory = os.getcwd()
     args = getArgparser().parse_args()
-    printWelcomeMessage()
+    print(T.WELCOME_MESSAGE)
     glob_ignore = args.ignore
     glob_intercept = args.intercept
     globPattern = (
