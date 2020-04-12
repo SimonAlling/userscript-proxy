@@ -2,6 +2,13 @@ TOC_FILE = gh-md-toc
 TOC_HASH = 042fc595336c3a39f82b1edbafdf2afd2503d9930d192fcfda757aa65522c14c
 TOC_URL = https://raw.githubusercontent.com/ekalinin/github-markdown-toc/56f7c5939e2119bed86291ddba9fb6c2ee61fb09/gh-md-toc
 
+TAG ?= latest
+
+FILE_WITH_VERSION = src/modules/constants.py
+DOCKER_USER = alling
+DOCKER_REPO = userscript-proxy
+DOCKER_FULL = $(DOCKER_USER)/$(DOCKER_REPO):$(TAG)
+
 docs:
 	wget -O $(TOC_FILE) $(TOC_URL)
 	# Check that the file hasn't been tampered with:
@@ -14,4 +21,14 @@ docs:
 	rm README.md.toc.*
 
 image:
-	docker build -t userscript-proxy .
+	docker build -t $(DOCKER_FULL) .
+
+release: image
+ifneq "$(shell git status --porcelain)" ""
+	$(error Working directory not clean)
+endif
+	# Update in-app version:
+	sed -i 's/^VERSION: str = "[^"]*"/VERSION: str = "$(TAG)"/' $(FILE_WITH_VERSION)
+	git add $(FILE_WITH_VERSION)
+	git commit -m "v$(TAG)"
+	git tag "v$(TAG)"
