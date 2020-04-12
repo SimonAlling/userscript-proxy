@@ -1,21 +1,23 @@
-from typing import Optional, Iterable, List, Callable, Pattern, Match, Tuple
-import glob, os
+import functools
+import glob
+import os
+import shlex
+from typing import Callable, Iterable, List, Optional, Tuple
+
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
-from functools import partial
-import shlex
-import warnings
+
 import modules.arguments as A
-from modules.metadata import MetadataError, PREFIX_TAG
-import modules.userscript as userscript
+import modules.constants as C
+import modules.inject as inject
 import modules.inline as inline
-import modules.text as T
-from modules.userscript import Userscript, UserscriptError, document_end, document_start, document_idle
-from modules.utilities import first, second, itemList, fromOptional, flag, idem
-from modules.constants import VERSION, VERSION_PREFIX, DEFAULT_USERSCRIPTS_DIR
-from modules.inject import Options, inject
+import modules.metadata as metadata
 from modules.misc import sanitize
-from modules.requests import CONTENT_TYPE, inferEncoding, requestContainsQueryParam
+from modules.requests import CONTENT_TYPE, containsQueryParam, inferEncoding
+import modules.text as T
+import modules.userscript as userscript
+from modules.userscript import Userscript, UserscriptError
+from modules.utilities import first, flag, fromOptional, itemList, second
 
 PATTERN_USERSCRIPT: str = "*.user.js"
 RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
@@ -56,7 +58,7 @@ def indexOfDTD(soup: BeautifulSoup) -> Optional[int]:
         index += 1
     return None
 
-bulletList: Callable[[Iterable[str]], str] = partial(itemList, LIST_ITEM_PREFIX)
+bulletList: Callable[[Iterable[str]], str] = functools.partial(itemList, LIST_ITEM_PREFIX)
 
 def unsafeSequencesMessage(script: Userscript) -> str:
     sequences = script.unsafeSequences
@@ -71,7 +73,7 @@ def unsafeSequencesMessage(script: Userscript) -> str:
 Possible solutions:
 """ + bulletList([
     f"Make sure the userscript does not contain any of the sequences listed above.",
-    f"Make the userscript available online and give it a {PREFIX_TAG}{userscript.directive_downloadURL}",
+    f"Make the userscript available online and give it a {metadata.PREFIX_TAG}{userscript.directive_downloadURL}",
     f"Remove the {flag(A.inline)} flag.",
 ])
 
@@ -106,7 +108,7 @@ def loadUserscripts(directory: str) -> List[Userscript]:
             loadedUserscripts.append((script, filename))
             if script.downloadURL is None and len(script.unsafeSequences) > 0:
                 logError(unsafeSequencesMessage(script))
-        except MetadataError as err:
+        except metadata.MetadataError as err:
             logError("Metadata error:")
             logError(str(err))
             continue
@@ -148,7 +150,7 @@ class UserscriptInjector:
         if sanitize(A.query_param_to_disable) in updates:
             logInfo(f"""Userscripts will not be injected when the request URL contains a `{option(A.query_param_to_disable)}` query parameter.""")
         if sanitize(A.userscripts_dir) in updates:
-            userscripts = loadUserscripts(DEFAULT_USERSCRIPTS_DIR) if useDefaultUserscripts else []
+            userscripts = loadUserscripts(C.DEFAULT_USERSCRIPTS_DIR) if useDefaultUserscripts else []
             userscriptsDirectory = option(A.userscripts_dir)
             if userscriptsDirectory is None:
                 logWarning(f"No custom userscripts will be loaded, because {flag(A.userscripts_dir)} was not provided.")
@@ -169,7 +171,7 @@ class UserscriptInjector:
                     from_encoding=inferEncoding(response)
                 )
                 requestURL = flow.request.pretty_url # should work in transparent mode too, unless the Host header is spoofed
-                if requestContainsQueryParam(option(A.query_param_to_disable), flow.request):
+                if containsQueryParam(option(A.query_param_to_disable), flow.request):
                     logInfo(f"""Not injecting any userscripts into {requestURL} because it contains a `{option(A.query_param_to_disable)}` query parameter.""")
                     return
                 isApplicable: Callable[[Userscript], bool] = userscript.applicableChecker(requestURL)
@@ -179,8 +181,8 @@ class UserscriptInjector:
                         if useInline and len(script.unsafeSequences) > 0:
                             logError(unsafeSequencesMessage(script))
                             continue
-                        logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
-                        result = inject(script, soup, Options(
+                        logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + C.VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
+                        result = inject.inject(script, soup, inject.Options(
                             inline = option(A.inline),
                         ))
                         if type(result) is BeautifulSoup:

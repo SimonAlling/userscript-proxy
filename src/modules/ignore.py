@@ -1,5 +1,6 @@
-from typing import List, Pattern
 import re
+from typing import List, Pattern
+
 from modules.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
 COMMENT_PREFIX: str = "#"

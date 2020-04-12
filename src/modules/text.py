@@ -1,12 +1,11 @@
-from modules.constants import APP_NAME, VERSION, VERSION_PREFIX
-from modules.utilities import flag
+import modules.constants as C
 
 description = "Inject userscripts using mitmproxy."
 
 def stringifyVersion(version: str) -> str:
-    return VERSION_PREFIX + version
+    return C.VERSION_PREFIX + version
 
-INFO_MESSAGE: str = APP_NAME + " " + stringifyVersion(VERSION)
+INFO_MESSAGE: str = C.APP_NAME + " " + stringifyVersion(C.VERSION)
 
 WELCOME_MESSAGE: str = "\n".join([
     "",

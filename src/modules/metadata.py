@@ -1,9 +1,9 @@
-from typing import TypeVar, Tuple, List, Iterator, Iterable, Pattern, Match, Optional, Union, Callable, NamedTuple
+import functools
 import re
 from string import Template
-from functools import reduce
-import itertools
-from modules.utilities import first, second, isSomething
+from typing import Callable, Iterable, Iterator, List, Match, NamedTuple, Optional, Pattern, Tuple, TypeVar, Union
+
+from modules.utilities import first, isSomething, second
 
 class MetadataError(Exception):
     def __init__(self,*args,**kwargs):
@@ -165,7 +165,7 @@ def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises Metadata
 
     def withoutDuplicates(metadata: Metadata) -> Metadata:
         empty: Iterable[Tuple[str, Union[str, bool]]] = [] # to satisfy mypy
-        return list(reduce(handleDuplicate, metadata, empty))
+        return list(functools.reduce(handleDuplicate, metadata, empty))
 
     # Awkwardly written to satisfy mypy:
     def withDefaults(metadata: Metadata) -> Metadata:

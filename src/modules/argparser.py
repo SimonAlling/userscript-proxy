@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+
 import modules.arguments as A
 import modules.text as T
 from modules.utilities import flag, shortFlag

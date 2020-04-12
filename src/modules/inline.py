@@ -1,5 +1,5 @@
-from typing import List, Pattern
 import re
+from typing import List, Pattern
 
 # https://www.w3.org/TR/html/semantics-scripting.html#script-content-restrictions
 

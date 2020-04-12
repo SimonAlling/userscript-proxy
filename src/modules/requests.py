@@ -2,8 +2,10 @@
 # "in" mitm[dump|proxy], e.g. not in the launcher script.
 
 import re
-from typing import Callable, Optional, Pattern
+from typing import Optional, Pattern
+
 from mitmproxy import http
+
 from modules.utilities import equals
 
 CONTENT_TYPE: str = "Content-Type"
@@ -14,5 +16,5 @@ def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     match = REGEX_CHARSET.search(httpHeaderValue)
     return match.group(1) if match else None
 
-def requestContainsQueryParam(param: str, request: http.HTTPRequest) -> bool:
+def containsQueryParam(param: str, request: http.HTTPRequest) -> bool:
     return any(map(equals(param), request.query))

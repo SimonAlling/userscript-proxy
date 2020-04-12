@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, List, Callable, Any, TypeVar, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Tuple, TypeVar
 
 A = TypeVar('A')
 B = TypeVar('B')

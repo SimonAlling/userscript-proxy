@@ -1,9 +1,11 @@
-from typing import Union, NamedTuple
-import modules.userscript as userscript
+from typing import NamedTuple, Union
+
 from bs4 import BeautifulSoup, Tag
-from modules.userscript import Userscript, document_end, document_start, document_idle
-from modules.constants import VERSION, ATTRIBUTE_UP_VERSION
-from modules.utilities import idem, fromOptional, stripIndentation
+
+import modules.constants as C
+import modules.userscript as userscript
+from modules.userscript import Userscript, document_end, document_idle
+from modules.utilities import fromOptional, idem, stripIndentation
 
 class Options(NamedTuple):
     inline: bool
@@ -12,7 +14,7 @@ class Options(NamedTuple):
 def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[BeautifulSoup, Exception]:
     useInline = options.inline or script.downloadURL is None
     tag = soup.new_tag("script")
-    tag[ATTRIBUTE_UP_VERSION] = VERSION
+    tag[C.ATTRIBUTE_UP_VERSION] = C.VERSION
     withLoadListenerIfRunAtIdle = userscript.withEventListener("load") if script.runAt == document_idle else idem
     withNoframesIfNoframes = userscript.withNoframes if script.noframes else idem
     try:
@@ -28,7 +30,7 @@ def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[B
             JS_insertScriptTag = f"""document.head.appendChild({s});"""
             JS_insertionCode = (stripIndentation(f"""
                 const {s} = document.createElement("script");
-                {s}.setAttribute("{ATTRIBUTE_UP_VERSION}", "{VERSION}");
+                {s}.setAttribute("{C.ATTRIBUTE_UP_VERSION}", "{C.VERSION}");
                 {s}.src = "{src}";
                 {withLoadListenerIfRunAtIdle(JS_insertScriptTag)}
             """))

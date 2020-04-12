@@ -1,13 +1,15 @@
-from typing import Optional, Tuple, List, NamedTuple, Callable, Pattern
 import re
-import warnings
 from string import Template
+from typing import Callable, List, NamedTuple, Optional, Pattern
+import warnings
+
 from urlmatch import urlmatch
-import modules.metadata as metadata
+
 import modules.inline as inline
-from modules.utilities import first, second, isSomething, strs, compose2, stripIndentation
-from modules.metadata import Metadata, PREFIX_TAG, Tag, Tag_string, Tag_boolean
-from modules.patterns import isMatchPattern, isIncludePattern, regexFromIncludePattern
+import modules.metadata as metadata
+from modules.metadata import PREFIX_TAG, Metadata, Tag, Tag_boolean, Tag_string
+from modules.patterns import isIncludePattern, isMatchPattern, regexFromIncludePattern
+from modules.utilities import compose2, isSomething, stripIndentation, strs
 
 class UserscriptError(Exception):
     def __init__(self,*args,**kwargs):

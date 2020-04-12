@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-from typing import List
-import os
 import glob
-import subprocess
-import modules.arguments as A
-from modules.argparser import getArgparser
-from modules.constants import DEFAULT_IGNORE_RULES, DEFAULT_INTERCEPT_RULES
-from modules.utilities import itemList, flag, shortFlag, idem, isSomething
-from modules.misc import sanitize
-import modules.ignore as ignore
-import modules.text as T
+import os
 import shlex
-from functools import reduce
+import subprocess
+from typing import List
+
+from modules.argparser import getArgparser
+import modules.arguments as A
+import modules.constants as C
+import modules.ignore as ignore
+from modules.misc import sanitize
+import modules.text as T
+from modules.utilities import flag, idem, isSomething, itemList
 
 FILENAME_INJECTOR: str = "injector.py"
 MATCH_NO_HOSTS = r"^$"
@@ -66,7 +66,7 @@ try:
     def ruleFilesContent_default():
         if useDefaultRules:
             print(f"Reading default {'intercept' if useIntercept else 'ignore'} rules ...")
-            globPatternForDefaultRules = DEFAULT_INTERCEPT_RULES if useIntercept else DEFAULT_IGNORE_RULES
+            globPatternForDefaultRules = C.DEFAULT_INTERCEPT_RULES if useIntercept else C.DEFAULT_IGNORE_RULES
             filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPatternForDefaultRules) ]
             acc = ""
             for filename in filenames:
