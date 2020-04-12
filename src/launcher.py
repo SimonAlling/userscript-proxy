@@ -4,7 +4,7 @@ from typing import List
 import os
 import glob
 import subprocess
-from modules.constants import DEFAULT_IGNORE_RULES
+from modules.constants import DEFAULT_IGNORE_RULES, DEFAULT_INTERCEPT_RULES
 from modules.utilities import itemList, flag, shortFlag, idem, isSomething
 from modules.misc import sanitize
 import modules.ignore as ignore
