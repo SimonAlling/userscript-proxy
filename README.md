@@ -305,6 +305,12 @@ If you really want Userscript Proxy to use a certain port _inside_ the Docker co
 docker run --rm --name userscript-proxy -p 1337:5555 userscript-proxy -p 5555
 ```
 
+Or you can let the Docker container be a part of the host's network:
+
+```bash
+docker run --rm --network host --name userscript-proxy userscript-proxy -p 5555
+```
+
 ### `--query-param-to-disable PARAM`, `-q PARAM`
 
 Disable userscripts when the request URL contains `PARAM` as a query parameter.
