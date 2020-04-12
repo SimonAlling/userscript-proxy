@@ -8,6 +8,10 @@ FILE_WITH_VERSION = src/modules/constants.py
 DOCKER_USER = alling
 DOCKER_REPO = userscript-proxy
 DOCKER_FULL = $(DOCKER_USER)/$(DOCKER_REPO):$(TAG)
+# Can be anything:
+CA_VOLUME = mitmproxy-ca
+# Needs to match where mitmproxy stores its CA:
+CA_DIR = /root/.mitmproxy
 
 docs:
 	wget -O $(TOC_FILE) $(TOC_URL)
@@ -32,3 +36,6 @@ endif
 	git add $(FILE_WITH_VERSION)
 	git commit -m "v$(TAG)"
 	git tag "v$(TAG)"
+
+start: image
+	docker run --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_FULL)
