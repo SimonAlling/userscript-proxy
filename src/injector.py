@@ -155,7 +155,7 @@ class UserscriptInjector:
             if userscriptsDirectory is None:
                 logWarning(f"No custom userscripts will be loaded, because {flag(A.userscripts_dir)} was not provided.")
             else:
-                userscripts.append(loadUserscripts(userscriptsDirectory))
+                userscripts.extend(loadUserscripts(userscriptsDirectory))
             self.userscripts = userscripts
 
 
