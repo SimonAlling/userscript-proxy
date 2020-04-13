@@ -2,7 +2,8 @@ TOC_FILE = gh-md-toc
 TOC_HASH = 042fc595336c3a39f82b1edbafdf2afd2503d9930d192fcfda757aa65522c14c
 TOC_URL = https://raw.githubusercontent.com/ekalinin/github-markdown-toc/56f7c5939e2119bed86291ddba9fb6c2ee61fb09/gh-md-toc
 
-TAG ?= latest
+DEFAULT_TAG = latest
+TAG ?= $(DEFAULT_TAG)
 
 FILE_WITH_VERSION = src/modules/constants.py
 DOCKER_USER = alling
@@ -32,6 +33,9 @@ image:
 release: image
 ifneq "$(shell git status --porcelain)" ""
 	$(error Working directory not clean)
+endif
+ifeq "$(TAG)" "$(DEFAULT_TAG)"
+	$(error Please specify a version (e.g. TAG="1.2.3"))
 endif
 	# Update in-app version:
 	sed -i 's/^VERSION: str = "[^"]*"/VERSION: str = "$(TAG)"/' $(FILE_WITH_VERSION)
