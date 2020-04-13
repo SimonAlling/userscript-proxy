@@ -105,6 +105,8 @@ def loadUserscripts(directory: str) -> List[Userscript]:
             continue
         try:
             script = userscript.create(content)
+            if script.downloadURL is None:
+                logWarning(f"""{script.name} will be injected inline because it does not have a {metadata.PREFIX_TAG}{userscript.directive_downloadURL}.""")
             loadedUserscripts.append((script, filename))
             if script.downloadURL is None and len(script.unsafeSequences) > 0:
                 logError(unsafeSequencesMessage(script))
