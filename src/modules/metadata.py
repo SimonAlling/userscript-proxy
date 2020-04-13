@@ -39,6 +39,9 @@ PREFIX_TAG: str = "@"
 BLOCK_START: str = "==UserScript=="
 BLOCK_END: str = "==/UserScript=="
 
+def tag(name: str) -> str:
+    return PREFIX_TAG + name
+
 REGEXGROUP_CONTENT: str = "content"
 REGEX_METADATA_BLOCK: Pattern = re.compile(
     PREFIX_COMMENT + r"\s*" + BLOCK_START + r"\n"
@@ -58,19 +61,19 @@ REGEX_METADATA_LINE: Pattern = re.compile(
 STRING_ERROR_MISSING_BLOCK: str = f"""No metadata block found. The metadata block must follow this format:
 
     {PREFIX_COMMENT} {BLOCK_START}
-    {PREFIX_COMMENT} {PREFIX_TAG}key1    value1
-    {PREFIX_COMMENT} {PREFIX_TAG}key2    value2
+    {PREFIX_COMMENT} {tag("key1")}    value1
+    {PREFIX_COMMENT} {tag("key2")}    value2
     {PREFIX_COMMENT} ...
-    {PREFIX_COMMENT} {PREFIX_TAG}keyN    valueN
+    {PREFIX_COMMENT} {tag("keyN")}    valueN
     {PREFIX_COMMENT} {BLOCK_END}
 
-It must start with `{PREFIX_COMMENT} {BLOCK_START}` and end with `{PREFIX_COMMENT} {BLOCK_END}`, and every line must be a line comment starting with an {PREFIX_TAG}-prefixed tag name, then whitespace, then a tag value (with the exception of boolean directives such as {PREFIX_TAG}noframes, which are automatically true if present).
+It must start with `{PREFIX_COMMENT} {BLOCK_START}` and end with `{PREFIX_COMMENT} {BLOCK_END}`, and every line must be a line comment starting with an {PREFIX_TAG}-prefixed tag name, then whitespace, then a tag value (with the exception of boolean directives such as {tag("noframes")}, which are automatically true if present).
 
 """
 
 STRING_ERROR_INVALID_BLOCK: Template = Template(f"""Invalid metadata block. Only comments are allowed, and each line should follow this format:
 
-    {PREFIX_COMMENT} {PREFIX_TAG}key    value
+    {PREFIX_COMMENT} {tag("key")}    value
 
 This line does not:
 
@@ -78,15 +81,15 @@ This line does not:
 
 """)
 
-STRING_ERROR_MISSING_TAG: Template = Template(f"""The {PREFIX_TAG}$tagName metadata directive is required, but was not found.""")
+STRING_ERROR_MISSING_TAG: Template = Template(f"""The {tag("$tagName")} metadata directive is required, but was not found.""")
 
-STRING_ERROR_MISSING_VALUE: Template = Template(f"""The {PREFIX_TAG}$tagName metadata directive requires a value, like so:
+STRING_ERROR_MISSING_VALUE: Template = Template(f"""The {tag("$tagName")} metadata directive requires a value, like so:
 
-    {PREFIX_COMMENT} {PREFIX_TAG}$tagName    something
+    {PREFIX_COMMENT} {tag("$tagName")}    something
 
 """)
 
-STRING_ERROR_PREDICATE_FAILED: Template = Template(f"""Detected a {PREFIX_TAG}$tagName metadata directive with an invalid value, namely:
+STRING_ERROR_PREDICATE_FAILED: Template = Template(f"""Detected a {tag("$tagName")} metadata directive with an invalid value, namely:
 
     $tagValue
 

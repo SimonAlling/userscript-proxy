@@ -73,7 +73,7 @@ def unsafeSequencesMessage(script: Userscript) -> str:
 Possible solutions:
 """ + bulletList([
     f"Make sure the userscript does not contain any of the sequences listed above.",
-    f"Make the userscript available online and give it a {metadata.PREFIX_TAG}{userscript.directive_downloadURL}",
+    f"Make the userscript available online and give it a {metadata.tag(userscript.directive_downloadURL)}",
     f"Remove the {flag(A.inline)} flag.",
 ])
 
@@ -106,7 +106,7 @@ def loadUserscripts(directory: str) -> List[Userscript]:
         try:
             script = userscript.create(content)
             if script.downloadURL is None:
-                logWarning(f"""{script.name} will be injected inline because it does not have a {metadata.PREFIX_TAG}{userscript.directive_downloadURL}.""")
+                logWarning(f"""{script.name} will be injected inline because it does not have a {metadata.tag(userscript.directive_downloadURL)}.""")
             loadedUserscripts.append((script, filename))
             if script.downloadURL is None and len(script.unsafeSequences) > 0:
                 logError(unsafeSequencesMessage(script))

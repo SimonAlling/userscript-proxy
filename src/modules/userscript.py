@@ -7,7 +7,7 @@ from urlmatch import urlmatch
 
 import modules.inline as inline
 import modules.metadata as metadata
-from modules.metadata import PREFIX_TAG, Metadata, Tag, Tag_boolean, Tag_string
+from modules.metadata import Metadata, Tag, Tag_boolean, Tag_string
 from modules.patterns import isIncludePattern, isMatchPattern, regexFromIncludePattern
 from modules.utilities import compose2, isSomething, stripIndentation, strs
 
@@ -101,7 +101,7 @@ METADATA_TAGS: List[Tag] = [
 validateMetadata: Callable[[Metadata], Metadata] = metadata.validator(METADATA_TAGS)
 
 
-STRING_WARNING_INVALID_REGEX: Template = Template(f"""{PREFIX_TAG}{directive_include}/{PREFIX_TAG}{directive_exclude} patterns starting and ending with `/` are interpreted as regular expressions, and this pattern is not a valid regex:
+STRING_WARNING_INVALID_REGEX: Template = Template(f"""{metadata.tag(directive_include)}/{metadata.tag(directive_exclude)} patterns starting and ending with `/` are interpreted as regular expressions, and this pattern is not a valid regex:
 
     $pattern
 
@@ -181,7 +181,7 @@ def withEventListener(event: str) -> Callable[[str], str]:
 
 def withNoframes(scriptContent: str) -> str:
     return stripIndentation(f"""
-        if (window.top === window) {{ // {PREFIX_TAG + directive_noframes}
+        if (window.top === window) {{ // {metadata.tag(directive_noframes)}
         {scriptContent}
         }}
     """)
