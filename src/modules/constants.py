@@ -1,6 +1,6 @@
 VERSION_PREFIX: str = "v"
 APP_NAME: str = "Userscript Proxy"
-VERSION: str = "0.11.0"
+VERSION: str = "1.0.0"
 ATTRIBUTE_UP_VERSION: str = "data-userscript-proxy-version"
 
 DEFAULT_RULES_DIR: str = "default-rules/"
