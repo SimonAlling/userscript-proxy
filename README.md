@@ -59,25 +59,10 @@ Make sure you understand these security aspects before using Userscript Proxy:
     docker --version
     ```
 
-1.  If you have [Git](https://git-scm.com) installed, clone the repo:
-
-    ```
-    git clone https://github.com/SimonAlling/userscript-proxy
-    cd userscript-proxy
-    ```
-
-    Otherwise, you can [download the code as a ZIP file](https://github.com/SimonAlling/userscript-proxy/archive/master.zip), extract it and `cd` into the extracted `userscript-proxy` directory.
-
-1.  Build:
-
-    ```
-    docker build -t userscript-proxy .
-    ```
-
 1.  Start Userscript Proxy:
 
     ```
-    docker run -t --rm --name userscript-proxy -p 8080:8080 userscript-proxy
+    docker run -t --rm --name userscript-proxy -p 8080:8080 alling/userscript-proxy
     ```
 
     When you see _Proxy server listening at http://*:8080_, the proxy is up and running.
@@ -136,7 +121,7 @@ Otherwise, read on.
     Then start it again, this time with the `-v` flag as shown below:
 
     ```
-    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "mitmproxy-ca:/root/.mitmproxy" userscript-proxy
+    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "mitmproxy-ca:/root/.mitmproxy" alling/userscript-proxy
     ```
 
     This creates a new Docker volume and mounts it at `/root/.mitmproxy`, where mitmproxy stores its certificate authority files.
@@ -186,7 +171,7 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
 1.  Run Userscript Proxy with your userscripts directory mounted at some location (e.g. `/userscripts`) inside the Docker container, and tell Userscript Proxy to read userscripts from that directory:
 
     ```
-    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/userscripts" userscript-proxy --userscripts-dir "/userscripts"
+    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/userscripts" alling/userscript-proxy --userscripts-dir "/userscripts"
     ```
 
 
@@ -209,11 +194,11 @@ Examples:
 
   * Take ignore rules from `/home/alling/rules/ignore.txt`:
     ```bash
-    docker run -t --rm -v "/home/alling/rules:/rules" userscript-proxy --rules "/rules/ignore.txt"
+    docker run -t --rm -v "/home/alling/rules:/rules" alling/userscript-proxy --rules "/rules/ignore.txt"
     ```
   * Take intercept rules from all `.txt` files in the `/home/alling/rules` directory whose names start with `foo`:
     ```bash
-    docker run -t --rm -v "/home/alling/rules:/rules" userscript-proxy --rules "/rules/foo*.txt" --intercept
+    docker run -t --rm -v "/home/alling/rules:/rules" alling/userscript-proxy --rules "/rules/foo*.txt" --intercept
     ```
 
 Rules can be specified in two ways:
@@ -294,9 +279,9 @@ The [`GM` API][gm-api] and similar runtime facilities are not supported, because
 Options are specified by simply appending them to the `docker run` command, for example:
 
 ```bash
-docker run -t --rm --name userscript-proxy -p 8080:8080 userscript-proxy --transparent
-#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                  ^^^^^^^^^^^^^
-#          flags to `docker run`                                         flags to Userscript Proxy
+docker run -t --rm --name userscript-proxy -p 8080:8080 alling/userscript-proxy --transparent
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                         ^^^^^^^^^^^^^
+#          flags to `docker run`                                                flags to Userscript Proxy
 ```
 
 ## `--inline`, `-i`
@@ -324,19 +309,19 @@ Defaults to `8080`.
 **Note:** Be careful when running Userscript Proxy in Docker! If you want to use e.g. port 1337 on the host machine, do this instead:
 
 ```bash
-docker run -t --rm --name userscript-proxy -p 1337:8080 userscript-proxy
+docker run -t --rm --name userscript-proxy -p 1337:8080 alling/userscript-proxy
 ```
 
 If you really want Userscript Proxy to use a certain port _inside_ the Docker container, e.g. 5555, don't forget to publish that port:
 
 ```bash
-docker run -t --rm --name userscript-proxy -p 1337:5555 userscript-proxy -p 5555
+docker run -t --rm --name userscript-proxy -p 1337:5555 alling/userscript-proxy -p 5555
 ```
 
 Or you can let the Docker container be a part of the host's network:
 
 ```bash
-docker run -t --rm --network host --name userscript-proxy userscript-proxy -p 5555
+docker run -t --rm --network host --name userscript-proxy alling/userscript-proxy -p 5555
 ```
 
 ## `--query-param-to-disable PARAM`, `-q PARAM`
