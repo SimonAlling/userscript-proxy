@@ -31,6 +31,9 @@ docs:
 image:
 	docker build -t $(DOCKER_FULL) .
 
+install: image
+	docker image inspect $(DOCKER_FULL) > /dev/null
+
 release: image
 ifneq "$(shell git status --porcelain)" ""
 	$(error Working directory not clean)
