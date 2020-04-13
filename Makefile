@@ -19,12 +19,12 @@ all: image
 
 docs:
 	wget -O $(TOC_FILE) $(TOC_URL)
-	# Check that the file hasn't been tampered with:
+# Check that the file hasn't been tampered with:
 	echo "$(TOC_HASH) $(TOC_FILE)" | sha256sum -c
 	chmod +x $(TOC_FILE)
-	# Generate and insert TOC:
+# Generate and insert TOC:
 	./$(TOC_FILE) --insert README.md
-	# Remove files created by gh-md-toc:
+# Remove files created by gh-md-toc:
 	rm README.md.orig.*
 	rm README.md.toc.*
 
@@ -41,12 +41,12 @@ endif
 ifeq "$(TAG)" "$(DEFAULT_TAG)"
 	$(error Please specify a version (e.g. TAG="1.2.3"))
 endif
-	# Update in-app version:
+# Update in-app version:
 	sed -i 's/^VERSION: str = "[^"]*"/VERSION: str = "$(TAG)"/' $(FILE_WITH_VERSION)
 	git add $(FILE_WITH_VERSION)
 	git commit -m "v$(TAG)"
 	git tag "v$(TAG)"
 
 start: image
+# The -t flag enables colored output:
 	docker run -t --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_FULL)
-# The -t flag enables colored output.
