@@ -34,7 +34,7 @@ image:
 install: image
 	docker image inspect $(DOCKER_FULL) > /dev/null
 
-release: image
+release:
 ifneq "$(shell git status --porcelain)" ""
 	$(error Working directory not clean)
 endif
@@ -43,6 +43,7 @@ ifeq "$(TAG)" "$(DEFAULT_TAG)"
 endif
 # Update in-app version:
 	sed -i 's/^VERSION: str = "[^"]*"/VERSION: str = "$(TAG)"/' $(FILE_WITH_VERSION)
+	docker build -t $(DOCKER_FULL) .
 	git add $(FILE_WITH_VERSION)
 	git commit -m "v$(TAG)"
 	git tag "v$(TAG)"
