@@ -44,4 +44,5 @@ endif
 	git tag "v$(TAG)"
 
 start: image
-	docker run --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_FULL)
+	docker run -t --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_FULL)
+# The -t flag enables colored output.
