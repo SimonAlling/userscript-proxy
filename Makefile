@@ -8,7 +8,6 @@ TAG ?= $(DEFAULT_TAG)
 FILE_WITH_VERSION = src/modules/constants.py
 DOCKER_USER = alling
 DOCKER_REPO = userscript-proxy
-DOCKER_FULL = $(DOCKER_USER)/$(DOCKER_REPO):$(TAG)
 # Can be anything:
 CA_VOLUME = mitmproxy-ca
 # Needs to match where mitmproxy stores its CA:
@@ -29,10 +28,10 @@ docs:
 	rm README.md.toc.*
 
 image:
-	docker build -t $(DOCKER_FULL) .
+	docker build -t $(DOCKER_USER)/$(DOCKER_REPO):$(TAG) .
 
 install: image
-	docker image inspect $(DOCKER_FULL) > /dev/null
+	docker image inspect $(DOCKER_USER)/$(DOCKER_REPO):$(TAG) > /dev/null
 
 release:
 ifneq "$(shell git status --porcelain)" ""
@@ -43,11 +42,12 @@ ifeq "$(TAG)" "$(DEFAULT_TAG)"
 endif
 # Update in-app version:
 	sed -i 's/^VERSION: str = "[^"]*"/VERSION: str = "$(TAG)"/' $(FILE_WITH_VERSION)
-	docker build -t $(DOCKER_FULL) .
+	docker build -t $(DOCKER_USER)/$(DOCKER_REPO):$(TAG) .
+	docker tag $(DOCKER_USER)/$(DOCKER_REPO):$(TAG) $(DOCKER_USER)/$(DOCKER_REPO):$(DEFAULT_TAG)
 	git add $(FILE_WITH_VERSION)
 	git commit -m "v$(TAG)"
 	git tag "v$(TAG)"
 
 start: image
 # The -t flag enables colored output:
-	docker run -t --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_FULL)
+	docker run -t --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_USER)/$(DOCKER_REPO):$(TAG)
