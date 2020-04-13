@@ -119,6 +119,7 @@ def loadUserscripts(directory: str) -> List[Userscript]:
     os.chdir(workingDirectory) # so mitmproxy does not unload the script
     logInfo("")
     logInfo(str(len(loadedUserscripts)) + " userscript(s) loaded:")
+    logInfo("")
     logInfo(bulletList(map(
         lambda s: f"{first(s).name} ({second(s)})",
         loadedUserscripts
