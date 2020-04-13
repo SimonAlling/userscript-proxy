@@ -11,7 +11,8 @@ FROM base
 
 WORKDIR /app
 
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /root/.local/lib /root/.local/lib
+COPY --from=builder /root/.local/bin/mitmdump /root/.local/bin/mitmdump
 ENV PATH=/root/.local/bin:$PATH
 COPY src src
 COPY default-rules default-rules
