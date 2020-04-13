@@ -13,6 +13,8 @@ CA_VOLUME = mitmproxy-ca
 # Needs to match where mitmproxy stores its CA:
 CA_DIR = /root/.mitmproxy
 
+.DEFAULT_GOAL := image
+
 docs:
 	wget -O $(TOC_FILE) $(TOC_URL)
 	# Check that the file hasn't been tampered with:
