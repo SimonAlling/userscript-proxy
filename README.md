@@ -135,7 +135,7 @@ Otherwise, read on.
 1.  On your mobile device, go to [http://mitm.it](http://mitm.it).
     You should see icons for Apple, Windows, Android, etc.
 
-1.  Click the icon matching your device, i.e. **Apple** for Apple devices, **Android** for Android devices etc.
+1.  Click the icon matching your device.
 
 1.  Install the certificate.
 
