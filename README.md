@@ -3,7 +3,7 @@
 Browser extensions on iOS, Android and pretty much any other web browsing device.
 No jailbreak/root required.
 
-Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, injecting matching userscripts into web pages as they flow through it.
+Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, injecting userscripts into web pages as they flow through it.
 Both HTTP and HTTPS are supported.
 
 <!--ts-->
