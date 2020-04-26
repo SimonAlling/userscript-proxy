@@ -47,8 +47,9 @@ Both HTTP and HTTPS are supported.
 Make sure you understand these security aspects before using Userscript Proxy:
 
   * **You should run the proxy on your own server**, because it can read and modify all traffic sent through it.
-  * **You should not expose the proxy to the Internet** (i.e. outside your LAN), because then anyone can connect to it and use your Internet connection for whatever they want.
+  * **You should not expose the proxy to incoming connections from the Internet**, because then anyone can connect to it and use your Internet connection for whatever they want.
     In practice, this means that you should _not_ add a port-forward for Userscript Proxy in your router.
+    (Browsing the web via the proxy uses only outgoing connections, which is fine.)
 
 ## Starting the proxy
 
