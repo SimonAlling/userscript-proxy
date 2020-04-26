@@ -168,11 +168,14 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
 1.  You need the **absolute path** to a directory containing your userscripts.
     This could be something like `/home/alling/userscripts`.
 
-1.  Run Userscript Proxy with your userscripts directory mounted at some location (e.g. `/userscripts`) inside the Docker container, and tell Userscript Proxy to read userscripts from that directory:
+1.  Run Userscript Proxy like this:
 
     ```
     docker run -t --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/userscripts" alling/userscript-proxy --userscripts-dir "/userscripts"
     ```
+
+    *   `-v "/home/alling/userscripts:/userscripts"` mounts your userscripts directory at `/userscripts` inside the Docker container.
+    *   `--userscripts-dir "/userscripts"` tells Userscript Proxy to read userscripts from `/userscripts`.
 
 
 # Apps with certificate pinning
