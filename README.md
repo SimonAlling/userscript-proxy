@@ -90,7 +90,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
 
 1.  You need to know the local IP address of the machine running Userscript Proxy (i.e. where you ran `docker run` above).
     This is usually something like `192.168.1.67`.
-    There are [plenty of guides online](https://google.com/search?q=find+local+IP+address) if you're unsure.
+    You can typically [find it](https://google.com/search?q=find+local+IP+address) by running `ip a`, `ifconfig` or `ipconfig` depending on your operating system.
 
     If your local IP address is `192.168.1.67`, and the proxy is running (see above), this should work:
 
