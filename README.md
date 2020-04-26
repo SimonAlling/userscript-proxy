@@ -109,7 +109,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
 ## HTTPS
 
 When you've set up Userscript Proxy on your mobile device as described above, you'll notice that you can't visit sites via HTTPS anymore.
-This is because your device thinks you're being [MITM'd](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (which, technically, you are – but that's exactly what we want).
+This is because your device thinks you're being [MITM'd](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (which, technically, you are – by yourself).
 
 To make HTTPS connections work, you need to tell your device that it should trust your proxy.
 This is accomplished by installing a certificate.
