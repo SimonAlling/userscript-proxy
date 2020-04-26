@@ -98,8 +98,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
     curl --proxy 192.168.1.67:8080 http://example.com
     ```
 
-1.  Your mobile device needs to be on the same LAN as your proxy.
-    This usually means they should be connected to the same router, so make sure your mobile device is connected to your Wi-Fi.
+1.  Your mobile device needs to be on the same LAN as your proxy, so make sure it's connected to your Wi-Fi.
 
 1.  On your mobile device, go to the settings for the currently active Wi-Fi connection.
     Find the proxy settings, select **Manual proxy** or similar, and set `192.168.1.67` with port `8080`.
