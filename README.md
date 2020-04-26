@@ -77,7 +77,7 @@ Make sure you understand these security aspects before using Userscript Proxy:
         curl --proxy localhost:8080 http://example.com
         ```
 
-    The output should contain a `<script>` element whose first line is `// ==UserScript==`.
+        The output should contain a `<script>` element whose first line is `// ==UserScript==`.
 
     *   In a web browser:
 
