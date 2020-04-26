@@ -171,7 +171,7 @@ To use userscripts you've downloaded or written yourself, you need to tell Users
 1.  Run Userscript Proxy like this:
 
     ```
-    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "/home/alling/userscripts:/userscripts" alling/userscript-proxy --userscripts-dir "/userscripts"
+    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "mitmproxy-ca:/root/.mitmproxy" -v "/home/alling/userscripts:/userscripts" alling/userscript-proxy --userscripts-dir "/userscripts"
     ```
 
     *   `-v "/home/alling/userscripts:/userscripts"` mounts your userscripts directory at `/userscripts` inside the Docker container.
