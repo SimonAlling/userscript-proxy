@@ -55,6 +55,7 @@ try:
     useTransparent = args.transparent
     useFiltering = useCustomFiltering or useDefaultRules
     useIntercept = args.intercept is True
+    bypassCsp = args.bypass_csp
     userscriptsDirectory = args.userscripts_dir
     checkThatUserscriptsDirectoryExistsIfSpecified(userscriptsDirectory)
     def ruleFilesContent_default():
@@ -101,6 +102,7 @@ try:
         "--set", f"""{sanitize(A.inline)}={str(args.inline).lower()}""",
         "--set", f"""{sanitize(A.list_injected)}={str(args.list_injected).lower()}""",
         "--set", f"""{sanitize(A.no_default_userscripts)}={str(args.no_default_userscripts).lower()}""",
+        "--set", "" if bypassCsp is None else f"""{sanitize(A.bypass_csp)}={bypassCsp}""",
         "--set", "" if userscriptsDirectory is None else f"""{sanitize(A.userscripts_dir)}={userscriptsDirectory}""",
         "--set", f"""{sanitize(A.query_param_to_disable)}={args.query_param_to_disable}""",
         # Empty string breaks the argument chain:

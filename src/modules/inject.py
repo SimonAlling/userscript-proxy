@@ -9,11 +9,13 @@ from modules.utilities import fromOptional, idem, stripIndentation
 
 class Options(NamedTuple):
     inline: bool
+    nonce: str
 
 
 def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[BeautifulSoup, Exception]:
     useInline = options.inline or script.downloadURL is None
     tag = soup.new_tag("script")
+    tag["nonce"] = options.nonce # Used to bypass CSP for inline-injected userscripts.
     tag[C.ATTRIBUTE_UP_VERSION] = C.VERSION
     withLoadListenerIfRunAtIdle = userscript.withEventListener("load") if script.runAt == document_idle else idem
     withNoframesIfNoframes = userscript.withNoframes if script.noframes else idem

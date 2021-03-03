@@ -9,6 +9,7 @@ from mitmproxy import ctx, http
 
 import modules.arguments as A
 import modules.constants as C
+import modules.csp as csp
 import modules.inject as inject
 import modules.inline as inline
 import modules.metadata as metadata
@@ -139,6 +140,7 @@ class UserscriptInjector:
         loader.add_option(sanitize(A.inline), bool, False, A.inline_help)
         loader.add_option(sanitize(A.no_default_userscripts), bool, False, A.no_default_userscripts_help)
         loader.add_option(sanitize(A.list_injected), bool, False, A.list_injected_help)
+        loader.add_option(sanitize(A.bypass_csp), Optional[str], None, A.bypass_csp_help)
         loader.add_option(sanitize(A.userscripts_dir), Optional[str], A.userscripts_dir_default, A.userscripts_dir_help)
         loader.add_option(sanitize(A.query_param_to_disable), str, A.query_param_to_disable_default, A.query_param_to_disable_help)
 
@@ -167,7 +169,7 @@ class UserscriptInjector:
         if CONTENT_TYPE in response.headers:
             if any(map(lambda t: t in response.headers[CONTENT_TYPE], RELEVANT_CONTENT_TYPES)):
                 # Response is a web page; proceed.
-                insertedScripts: List[str] = []
+                injections: List[csp.Injection] = []
                 soup = BeautifulSoup(
                     response.content,
                     HTML_PARSER,
@@ -185,23 +187,31 @@ class UserscriptInjector:
                             logError(unsafeSequencesMessage(script))
                             continue
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + C.VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
+                        nonce = csp.generateNonce()
                         result = inject.inject(script, soup, inject.Options(
                             inline = option(A.inline),
+                            nonce = nonce
                         ))
                         if type(result) is BeautifulSoup:
                             soup = result
-                            insertedScripts.append(script.name + ("" if script.version is None else " " + T.stringifyVersion(script.version)))
+                            injections.append(csp.Injection(
+                                userscript = script,
+                                useInline = useInline,
+                                nonce = nonce,
+                            ))
                         else:
                             logError("Injection failed due to the following error:")
                             logError(str(result))
 
+                handleContentSecurityPolicy(response, injections)
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 # Insert information comment:
                 if option(A.list_injected):
+                    namesOfInjectedScripts = [ i.userscript.name + ("" if i.userscript.version is None else " " + T.stringifyVersion(i.userscript.version)) for i in injections ]
                     soup.insert(0 if index_DTD is None else 1+index_DTD, Comment(
                         HTML_INFO_COMMENT_PREFIX + (
-                            "No matching userscripts for this URL." if insertedScripts == []
-                            else "These scripts were inserted:\n" + bulletList(insertedScripts)
+                            "No matching userscripts for this URL." if namesOfInjectedScripts == []
+                            else "These scripts were inserted:\n" + bulletList(namesOfInjectedScripts)
                         ) + "\n"
                     ))
                 # Serialize and encode:
@@ -209,6 +219,21 @@ class UserscriptInjector:
                     fromOptional(soup.original_encoding, CHARSET_DEFAULT),
                     "replace"
                 )
+
+
+def handleContentSecurityPolicy(response: http.HTTPFlow.response, injections: List[csp.Injection]):
+    # If there is a CSP header, we may need to modify it for the userscript(s) to work.
+    ContentSecurityPolicy = "Content-Security-Policy"
+    if ContentSecurityPolicy in response.headers:
+        bypassCspValue = option(A.bypass_csp)
+        if bypassCspValue == A.bypass_csp_script:
+            logInfo(f"Bypassing host site's Content Security Policy for userscripts only (not any resources injected _by_ userscripts, such as stylesheets and images). Try `{flag(A.bypass_csp)} {A.bypass_csp_everything}` if something does not work properly.")
+            response.headers[ContentSecurityPolicy] = csp.headerWithScriptsAllowed(response.headers[ContentSecurityPolicy], injections)
+        elif bypassCspValue == A.bypass_csp_everything:
+            logInfo(f"Bypassing host site's Content Security Policy altogether due to `{flag(A.bypass_csp)} {A.bypass_csp_everything}`.")
+            del response.headers[ContentSecurityPolicy]
+        else:
+            logWarning(f"Host site has a Content Security Policy. Try the {flag(A.bypass_csp)} flag if userscripts don't work properly.")
 
 
 addons = [ UserscriptInjector() ]

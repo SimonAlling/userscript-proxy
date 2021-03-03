@@ -4,8 +4,17 @@ from modules.utilities import flag
 metavar_file = "FILE"
 metavar_dir = "DIR"
 metavar_param = "PARAM"
+metavar_allow = "ALLOW"
 
 RULES = "rules"
+
+bypass_csp = "bypass-csp"
+bypass_csp_never = "never"
+bypass_csp_script = "script"
+bypass_csp_everything = "everything"
+bypass_csp_default = bypass_csp_never
+bypass_csp_values = { bypass_csp_never, bypass_csp_script, bypass_csp_everything }
+bypass_csp_help = f"Bypass host site's Content Security Policy to allow userscripts to run properly. If {metavar_allow} is '{bypass_csp_script}', the CSP is bypassed only for the userscript itself. Use '{bypass_csp_everything}' to allow everything, which may be necessary if the userscript injects CSS, images etc. Note that the latter completely disables any CSP from every host site into which a userscript is injected. Default: '{bypass_csp_default}'."
 
 inline = "inline"
 inline_short = "i"
