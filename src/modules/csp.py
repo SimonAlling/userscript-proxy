@@ -1,15 +1,15 @@
 import secrets
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Optional
 
 from modules.userscript import Userscript
+from modules.utilities import isSomething
 
 # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 
 
 class Injection(NamedTuple):
     userscript: Userscript
-    useInline: bool
-    nonce: str
+    nonce: Optional[str]
 
 
 def headerWithScriptsAllowed(cspHeaderValue: str, injections: List[Injection]) -> str:
@@ -29,7 +29,7 @@ def headerWithScriptsAllowed(cspHeaderValue: str, injections: List[Injection]) -
 
 
 def source(injection: Injection) -> str:
-    if injection.useInline:
+    if isSomething(injection.nonce):
         return f"'nonce-{injection.nonce}'"
     else:
         # MDN about host (i.e. download URL) sources: "Unlike other values below, single quotes shouldn't be used."

@@ -187,7 +187,8 @@ class UserscriptInjector:
                             logError(unsafeSequencesMessage(script))
                             continue
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + C.VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
-                        nonce = csp.generateNonce()
+                        shouldUseNonce = useInline and option(A.bypass_csp) == A.bypass_csp_script # If not inline, then URL is used for bypassing; if bypass for nothing or everything, then the nonce would have no effect anyway.
+                        nonce = csp.generateNonce() if shouldUseNonce else None
                         result = inject.inject(script, soup, inject.Options(
                             inline = option(A.inline),
                             nonce = nonce
@@ -196,7 +197,6 @@ class UserscriptInjector:
                             soup = result
                             injections.append(csp.Injection(
                                 userscript = script,
-                                useInline = useInline,
                                 nonce = nonce,
                             ))
                         else:
