@@ -140,7 +140,7 @@ class UserscriptInjector:
         loader.add_option(sanitize(A.inline), bool, False, A.inline_help)
         loader.add_option(sanitize(A.no_default_userscripts), bool, False, A.no_default_userscripts_help)
         loader.add_option(sanitize(A.list_injected), bool, False, A.list_injected_help)
-        loader.add_option(sanitize(A.bypass_csp), Optional[str], None, A.bypass_csp_help)
+        loader.add_option(sanitize(A.bypass_csp), Optional[str], A.bypass_csp_default, A.bypass_csp_help)
         loader.add_option(sanitize(A.userscripts_dir), Optional[str], A.userscripts_dir_default, A.userscripts_dir_help)
         loader.add_option(sanitize(A.query_param_to_disable), str, A.query_param_to_disable_default, A.query_param_to_disable_help)
 
