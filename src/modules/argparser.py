@@ -7,6 +7,14 @@ from modules.utilities import flag, shortFlag
 def getArgparser():
     argparser = ArgumentParser(description=T.description)
     argparser.add_argument(
+        flag(A.bypass_csp),
+        type=str,
+        metavar=A.metavar_allow,
+        choices=A.bypass_csp_values,
+        default=A.bypass_csp_default,
+        help=A.bypass_csp_help,
+    )
+    argparser.add_argument(
         flag(A.intercept),
         action="store_true",
         help=A.intercept_help,

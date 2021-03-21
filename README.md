@@ -24,6 +24,7 @@ Both HTTP and HTTPS are supported.
    * [Data usage](#data-usage)
    * [Userscript compatibility](#userscript-compatibility)
    * [Options](#options)
+      * [--bypass-csp ALLOW](#--bypass-csp-allow)
       * [--inline, -i](#--inline--i)
       * [--list-injected, -l](#--list-injected--l)
       * [--no-default-rules](#--no-default-rules)
@@ -35,7 +36,7 @@ Both HTTP and HTTPS are supported.
       * [--userscripts-dir DIR, -u DIR](#--userscripts-dir-dir--u-dir)
    * [Contribute](#contribute)
 
-<!-- Added by: alling, at: sön 12 apr 2020 19:56:29 CEST -->
+<!-- Added by: alling, at: sön 21 mar 2021 20:35:05 CET -->
 
 <!--te-->
 
@@ -286,6 +287,15 @@ docker run -t --rm --name userscript-proxy -p 8080:8080 alling/userscript-proxy 
 #          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                         ^^^^^^^^^^^^^
 #          flags to `docker run`                                                flags to Userscript Proxy
 ```
+
+## `--bypass-csp ALLOW`
+
+Bypass host site's Content Security Policy (if any) to allow userscripts to run properly.
+If `ALLOW` is `script`, the CSP is bypassed only for the userscript itself.
+Use `nothing` to never bypass any CSP (meaning userscripts won't work at all on some sites).
+Use `everything` to allow everything, which may be necessary if the userscript injects CSS, images etc.
+Note that the latter completely disables any CSP from every host site into which a userscript is injected.
+Defaults to `script`.
 
 ## `--inline`, `-i`
 
