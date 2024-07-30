@@ -3,7 +3,7 @@ from typing import List, Pattern
 
 # https://www.w3.org/TR/html/semantics-scripting.html#script-content-restrictions
 
-DANGEROUS_SEQUENCES: List[str] = [
+(DANGEROUS_SEQUENCES: List[str] = [
     r"<!--",
     r"<script",
     r"</script",
