@@ -20,3 +20,6 @@ COPY default-userscripts default-userscripts
 
 EXPOSE 8080
 ENTRYPOINT [ "python", "-u", "src/launcher.py" ]
+
+# Persist mitmproxy CA between container runs:
+VOLUME /root/.mitmproxy

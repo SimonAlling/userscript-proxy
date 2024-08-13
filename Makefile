@@ -8,10 +8,6 @@ TAG ?= $(DEFAULT_TAG)
 FILE_WITH_VERSION = src/modules/constants.py
 DOCKER_USER = alling
 DOCKER_REPO = userscript-proxy
-# Can be anything:
-CA_VOLUME = mitmproxy-ca
-# Needs to match where mitmproxy stores its CA:
-CA_DIR = /root/.mitmproxy
 
 .PHONY : all
 all: image
@@ -50,4 +46,4 @@ endif
 
 start: image
 # The -t flag enables colored output:
-	docker run -t --rm -p 8080:8080 --name $(DOCKER_REPO) -v "$(CA_VOLUME):$(CA_DIR)" $(DOCKER_USER)/$(DOCKER_REPO):$(TAG)
+	docker run -t --rm -p 8080:8080 --name $(DOCKER_REPO) $(DOCKER_USER)/$(DOCKER_REPO):$(TAG)
