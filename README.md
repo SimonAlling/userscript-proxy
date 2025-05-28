@@ -21,11 +21,6 @@ Make sure you understand these security aspects before using Userscript Proxy:
 ## Starting the proxy
 
 1.  Make sure you have [Docker](https://www.docker.com) installed.
-    This should work:
-
-    ```
-    docker --version
-    ```
 
 1.  Start Userscript Proxy:
 
@@ -59,13 +54,11 @@ Make sure you understand these security aspects before using Userscript Proxy:
     This is usually something like `192.168.1.67`.
     You can typically [find it](https://google.com/search?q=find+local+IP+address) by running `ip a`, `ifconfig` or `ipconfig` depending on your operating system.
 
-    If your local IP address is `192.168.1.67`, and the proxy is running (see above), this should work:
+    This should work on any computer within the LAN:
 
     ```
     curl --proxy 192.168.1.67:8080 http://example.com
     ```
-
-1.  Your mobile device needs to be on the same LAN as your proxy, so make sure it's connected to your Wi-Fi.
 
 1.  On your mobile device, go to the settings for the currently active Wi-Fi connection.
     Find the proxy settings, select **Manual proxy** or similar, and set `192.168.1.67` with port `8080`.
@@ -130,7 +123,7 @@ Otherwise, read on.
 ## Deploying userscripts
 
 Userscript Proxy comes with one single userscript, useful only for testing that the proxy is up and running.
-To use userscripts you've downloaded or written yourself, you need to tell Userscript Proxy where they are.
+To use userscripts you've downloaded or written yourself:
 
 1.  You need the **absolute path** to a directory containing your userscripts.
     This could be something like `/home/alling/userscripts`.
@@ -223,7 +216,7 @@ A userscript is injected by reference if and only if it has a specified `@downlo
 (This can be overridden using the `--inline` flag, in which case all userscripts are injected inline.)
 
 Userscripts are injected into _every_ response from a matching URL, and the size of a userscript can be anything from a few hundred bytes for the most basic ones to hundreds of kilobytes in extreme cases, so there are _massive_ data usage reductions to be gained from making the userscript accessible by URL and including a `@downloadURL`.
-If the `@downloadURL` approach is not possible, for one reason or the other, it is a good idea to be aware of this issue, and to take appropriate action such as [minifying][minification] userscripts and adding suitable ignore rules.
+If the `@downloadURL` approach is not possible, for one reason or the other, it is a good idea to be aware of this issue, and to take appropriate action such as [minifying] userscripts and adding suitable ignore rules.
 
 
 # Userscript compatibility
@@ -340,7 +333,7 @@ make start
 
 
 [mitmproxy]: https://mitmproxy.org
-[minification]: https://en.wikipedia.org/wiki/Minification_(programming)
+[minifying]: https://en.wikipedia.org/wiki/Minification_(programming)
 [metadata]: https://wiki.greasespot.net/Metadata_Block
 [transparent-mode]: https://docs.mitmproxy.org/stable/concepts-modes/#transparent-proxy
 [gm-api]: https://wiki.greasespot.net/GM.getValue
