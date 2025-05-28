@@ -32,7 +32,7 @@ ruamel.yaml.clib==0.2.2
 six==1.15.0
 sortedcontainers==2.2.2
 soupsieve==2.2.1
-tornado==6.1
+tornado==6.5.1
 urlmatch==1.0.1
 urwid==2.1.2
 Werkzeug==1.0.1
