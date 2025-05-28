@@ -131,11 +131,8 @@ To use userscripts you've downloaded or written yourself:
 1.  Run Userscript Proxy like this:
 
     ```
-    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "mitmproxy-ca:/root/.mitmproxy" -v "/home/alling/userscripts:/userscripts" alling/userscript-proxy --userscripts-dir "/userscripts"
+    docker run -t --rm --name userscript-proxy -p 8080:8080 -v "mitmproxy-ca:/root/.mitmproxy" -v "/home/alling/userscripts:/my-userscripts" alling/userscript-proxy --userscripts-dir "/my-userscripts"
     ```
-
-    *   `-v "/home/alling/userscripts:/userscripts"` mounts your userscripts directory at `/userscripts` inside the Docker container.
-    *   `--userscripts-dir "/userscripts"` tells Userscript Proxy to read userscripts from `/userscripts`.
 
 
 # Apps with certificate pinning
@@ -157,11 +154,11 @@ Examples:
 
   * Take ignore rules from `/home/alling/rules/ignore.txt`:
     ```bash
-    docker run -t --rm -v "/home/alling/rules:/rules" alling/userscript-proxy --rules "/rules/ignore.txt"
+    docker run -t --rm -v "/home/alling/rules:/my-rules" alling/userscript-proxy --rules "/my-rules/ignore.txt"
     ```
   * Take intercept rules from all `.txt` files in the `/home/alling/rules` directory whose names start with `foo`:
     ```bash
-    docker run -t --rm -v "/home/alling/rules:/rules" alling/userscript-proxy --rules "/rules/foo*.txt" --intercept
+    docker run -t --rm -v "/home/alling/rules:/my-rules" alling/userscript-proxy --rules "/my-rules/foo*.txt" --intercept
     ```
 
 Rules can be specified in two ways:
