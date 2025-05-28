@@ -1,6 +1,3 @@
-# Project-specific stuff:
-gh-md-toc
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -6,40 +6,6 @@ No jailbreak/root required.
 Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, injecting userscripts into web pages as they flow through it.
 Both HTTP and HTTPS are supported.
 
-<!--ts-->
-   * [Userscript Proxy](#userscript-proxy)
-   * [Getting started](#getting-started)
-      * [Security notice](#security-notice)
-      * [Starting the proxy](#starting-the-proxy)
-      * [On a mobile device](#on-a-mobile-device)
-      * [HTTPS](#https)
-         * [Android](#android)
-         * [iOS](#ios)
-      * [Deploying userscripts](#deploying-userscripts)
-   * [Apps with certificate pinning](#apps-with-certificate-pinning)
-      * [Basic pattern](#basic-pattern)
-         * [Examples](#examples)
-      * [Regular expression](#regular-expression)
-         * [Examples](#examples-1)
-   * [Data usage](#data-usage)
-   * [Userscript compatibility](#userscript-compatibility)
-   * [Options](#options)
-      * [--bypass-csp ALLOW](#--bypass-csp-allow)
-      * [--inline, -i](#--inline--i)
-      * [--list-injected, -l](#--list-injected--l)
-      * [--no-default-rules](#--no-default-rules)
-      * [--no-default-userscripts](#--no-default-userscripts)
-      * [--port PORT, -p PORT](#--port-port--p-port)
-      * [--query-param-to-disable PARAM, -q PARAM](#--query-param-to-disable-param--q-param)
-      * [--rules FILE](#--rules-file)
-      * [--transparent, -t](#--transparent--t)
-      * [--userscripts-dir DIR, -u DIR](#--userscripts-dir-dir--u-dir)
-   * [Contribute](#contribute)
-
-<!-- Added by: alling, at: sön 21 mar 2021 20:35:05 CET -->
-
-<!--te-->
-
 
 # Getting started
 
