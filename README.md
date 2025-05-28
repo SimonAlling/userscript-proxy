@@ -9,6 +9,32 @@ Both HTTP and HTTPS are supported.
 
 # Getting started
 
+If you're familiar with Userscript Proxy, you might want to use Docker Compose:
+
+```yaml
+services:
+  userscript-proxy:
+    image: alling/userscript-proxy:v1.1.0
+    container_name: userscript-proxy
+    command:
+      - --userscripts-dir
+      - /my-userscripts
+      - --rules
+      - /my-rules/ignore.txt
+    ports:
+      - "8080:8080"
+    volumes:
+      - mitmproxy-ca:/root/.mitmproxy
+      - /absolute/path/to/my/userscripts/:/my-userscripts # Modify the part before the ':'!
+      - /absolute/path/to/my/rules/:/my-rules # Modify the part before the ':'!
+    restart: always
+
+volumes:
+  mitmproxy-ca:
+```
+
+Otherwise, keep reading.
+
 ## Security notice
 
 Make sure you understand these security aspects before using Userscript Proxy:
