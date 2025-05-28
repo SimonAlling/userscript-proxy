@@ -52,16 +52,10 @@ Make sure you understand these security aspects before using Userscript Proxy:
 
 1.  You need to know the local IP address of the machine running Userscript Proxy (i.e. where you ran `docker run` above).
     This is usually something like `192.168.1.67`.
-    You can typically [find it](https://google.com/search?q=find+local+IP+address) by running `ip a`, `ifconfig` or `ipconfig` depending on your operating system.
-
-    This should work on any computer within the LAN:
-
-    ```
-    curl --proxy 192.168.1.67:8080 http://example.com
-    ```
+    You can typically [find it](https://google.com/search?q=find+local+IP+address) by running `ip a`, `ifconfig` or `ipconfig`.
 
 1.  On your mobile device, go to the settings for the currently active Wi-Fi connection.
-    Find the proxy settings, select **Manual proxy** or similar, and set `192.168.1.67` with port `8080`.
+    Find the proxy settings, select **Manual proxy** or similar, and set e.g. `192.168.1.67` with port `8080`.
 
 1.  Visit [`http://example.com`](http://example.com) on your mobile device.
     You should see the same green page as above.
