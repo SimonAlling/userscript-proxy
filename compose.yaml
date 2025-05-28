@@ -1,0 +1,14 @@
+services:
+  userscript-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: userscript-proxy
+    ports:
+      - "8080:8080"
+    volumes:
+      - mitmproxy-ca:/root/.mitmproxy
+    restart: always
+
+volumes:
+  mitmproxy-ca:
