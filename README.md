@@ -14,7 +14,7 @@ If you're familiar with Userscript Proxy, you might want to use Docker Compose:
 ```yaml
 services:
   userscript-proxy:
-    image: alling/userscript-proxy:v1.1.0
+    image: alling/userscript-proxy:1.1.0
     container_name: userscript-proxy
     command:
       - --userscripts-dir
