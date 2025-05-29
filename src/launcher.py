@@ -12,7 +12,7 @@ import modules.constants as C
 import modules.ignore as ignore
 from modules.misc import sanitize
 import modules.text as T
-from modules.utilities import flag, idem, isSomething, itemList
+from modules.utilities import flag, idem, itemList
 
 FILENAME_INJECTOR: str = "injector.py"
 MATCH_NO_HOSTS = r"^$"
