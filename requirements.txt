@@ -36,6 +36,6 @@ soupsieve==2.2.1
 tornado==6.1
 urlmatch==1.0.1
 urwid==2.1.2
-Werkzeug==1.0.1
+Werkzeug==3.0.6
 wsproto==0.15.0
 zstandard==0.14.1
