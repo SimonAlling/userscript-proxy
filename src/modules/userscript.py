@@ -9,7 +9,7 @@ import modules.inline as inline
 import modules.metadata as metadata
 from modules.metadata import Metadata, Tag, Tag_boolean, Tag_string
 from modules.patterns import isIncludePattern, isMatchPattern, regexFromIncludePattern
-from modules.utilities import compose2, isSomething, stripIndentation, strs
+from modules.utilities import compose2, stripIndentation, strs
 
 class UserscriptError(Exception):
     def __init__(self,*args,**kwargs):
@@ -84,7 +84,7 @@ tag_downloadURL: Tag_string = Tag_string(
     unique = True,
     default = None,
     required = False,
-    predicate = lambda val: isSomething(REGEX_URL.match(val)),
+    predicate = lambda val: REGEX_URL.match(val) is not None,
 )
 
 METADATA_TAGS: List[Tag] = [
@@ -133,14 +133,14 @@ def create(content: str) -> Userscript:
     valueOf = metadata.valueGetter_one(validMetadata)
     allValuesOf = metadata.valueGetter_all(validMetadata)
     includePatternRegexes: List[Pattern] = list(filter(
-        isSomething,
+        lambda x: x is not None,
         map(
             compose2(regexFromIncludePattern_safe, str),
             allValuesOf(tag_include)
         )
     ))
     excludePatternRegexes: List[Pattern] = list(filter(
-        isSomething,
+        lambda x: x is not None,
         map(
             compose2(regexFromIncludePattern_safe, str),
             allValuesOf(tag_exclude)
@@ -163,10 +163,10 @@ def create(content: str) -> Userscript:
 def applicableChecker(url: str) -> Callable[[Userscript], bool]:
     def isApplicable(userscript: Userscript) -> bool:
         for regex in userscript.excludePatternRegexes:
-            if isSomething(regex.search(url)):
+            if regex.search(url) is not None:
                 return False
         for regex in userscript.includePatternRegexes:
-            if isSomething(regex.search(url)):
+            if regex.search(url) is not None:
                 return True
         for pattern in userscript.matchPatterns:
             if urlmatch(pattern, url):

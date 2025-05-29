@@ -3,7 +3,7 @@ import re
 from string import Template
 from typing import Callable, Iterable, Iterator, List, Match, NamedTuple, Optional, Pattern, Tuple, TypeVar, Union
 
-from modules.utilities import first, isSomething, second
+from modules.utilities import first, second
 
 class MetadataError(Exception):
     def __init__(self,*args,**kwargs):
@@ -97,10 +97,10 @@ STRING_ERROR_PREDICATE_FAILED: Template = Template(f"""Detected a {tag("$tagName
 
 
 def isWhitespaceLine(s: str) -> bool:
-    return isSomething(re.compile(r"^\s*$").match(s))
+    return re.compile(r"^\s*$").match(s) is not None
 
 def isCommentLine(s: str) -> bool:
-    return isSomething(re.compile(r"^\s*" + PREFIX_COMMENT + r".*$").match(s))
+    return re.compile(r"^\s*" + PREFIX_COMMENT + r".*$").match(s) is not None
 
 def extract(userscriptContent: str) -> str: # raises MetadataError
     match_metadataBlock: Optional[Match] = REGEX_METADATA_BLOCK.search(userscriptContent)

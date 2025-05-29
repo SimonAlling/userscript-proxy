@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup, Tag
 import modules.constants as C
 import modules.userscript as userscript
 from modules.userscript import Userscript, document_end, document_idle
-from modules.utilities import fromOptional, idem, isSomething, stripIndentation
+from modules.utilities import fromOptional, idem, stripIndentation
 
 class Options(NamedTuple):
     inline: bool
@@ -15,7 +15,7 @@ class Options(NamedTuple):
 def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[BeautifulSoup, Exception]:
     useInline = options.inline or script.downloadURL is None
     tag = soup.new_tag("script")
-    if isSomething(options.nonce):
+    if options.nonce is not None:
         tag["nonce"] = options.nonce # Used to bypass CSP for inline-injected userscripts.
     tag[C.ATTRIBUTE_UP_VERSION] = C.VERSION
     withLoadListenerIfRunAtIdle = userscript.withEventListener("load") if script.runAt == document_idle else idem

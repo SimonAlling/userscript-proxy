@@ -23,10 +23,6 @@ def second(tuple: Tuple[A, B]) -> B:
     return b
 
 
-def isSomething(x: Optional[A]) -> bool:
-    return x is not None
-
-
 def strs(xs: Any) -> List[str]:
     return list(map(str, xs))
 

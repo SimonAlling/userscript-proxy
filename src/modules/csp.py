@@ -2,7 +2,6 @@ import secrets
 from typing import List, NamedTuple, Optional
 
 from modules.userscript import Userscript
-from modules.utilities import isSomething
 
 # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 
@@ -29,7 +28,7 @@ def headerWithScriptsAllowed(cspHeaderValue: str, injections: List[Injection]) -
 
 
 def source(injection: Injection) -> str:
-    if isSomething(injection.nonce):
+    if injection.nonce is not None:
         return f"'nonce-{injection.nonce}'"
     else:
         # MDN about host (i.e. download URL) sources: "Unlike other values below, single quotes shouldn't be used."

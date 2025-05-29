@@ -1,7 +1,7 @@
 import re
 from typing import Match, Optional, Pattern
 
-from modules.utilities import first, isSomething
+from modules.utilities import first
 
 REGEX_MATCH_ALL = r"<all_urls>"
 REGEX_MATCH_SCHEME = r"\*|https?"
@@ -34,15 +34,15 @@ def normalizeMatchPattern(pattern: str) -> str:
 
 
 def isMatchPattern(pattern: str) -> bool:
-    return isSomething(REGEX_MATCH_PATTERN.match(pattern))
+    return REGEX_MATCH_PATTERN.match(pattern) is not None
 
 
 def isIncludePattern(pattern: str) -> bool:
-    return isSomething(REGEX_INCLUDE_PATTERN.match(pattern))
+    return REGEX_INCLUDE_PATTERN.match(pattern) is not None
 
 
 def isIncludePattern_regex(pattern: str) -> bool:
-    return isSomething(re.compile(REGEX_INCLUDE_REGEX).match(pattern))
+    return re.compile(REGEX_INCLUDE_REGEX).match(pattern) is not None
 
 
 def withoutSurroundingSlashes(s: str) -> str:
