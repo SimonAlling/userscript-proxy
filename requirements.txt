@@ -21,7 +21,7 @@ mitmproxy==5.3.0
 msgpack==1.0.2
 mypy==1.4.1
 passlib==1.7.4
-protobuf==3.13.0
+protobuf==4.25.8
 publicsuffix2==2.20191221
 pyasn1==0.4.8
 pycparser==2.20
