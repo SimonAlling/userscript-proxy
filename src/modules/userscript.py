@@ -11,10 +11,6 @@ from modules.metadata import Metadata, Tag, Tag_boolean, Tag_string
 from modules.patterns import isIncludePattern, isMatchPattern, regexFromIncludePattern
 from modules.utilities import compose2, stripIndentation, strs
 
-class UserscriptError(Exception):
-    def __init__(self,*args,**kwargs):
-        Exception.__init__(self,*args,**kwargs)
-
 REGEX_URL: Pattern = re.compile(r"^https?://")
 
 directive_name     : str = "name"

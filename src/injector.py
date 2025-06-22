@@ -17,7 +17,7 @@ from modules.misc import sanitize
 from modules.requests import CONTENT_TYPE, containsQueryParam, inferEncoding
 import modules.text as T
 import modules.userscript as userscript
-from modules.userscript import Userscript, UserscriptError
+from modules.userscript import Userscript
 from modules.utilities import first, flag, fromOptional, itemList, second
 
 PATTERN_USERSCRIPT: str = "*.user.js"
@@ -113,10 +113,6 @@ def loadUserscripts(directory: str) -> List[Userscript]:
                 logError(unsafeSequencesMessage(script))
         except metadata.MetadataError as err:
             logError("Metadata error:")
-            logError(str(err))
-            continue
-        except UserscriptError as err:
-            logError("Userscript error:")
             logError(str(err))
             continue
     os.chdir(workingDirectory) # so mitmproxy does not unload the script
