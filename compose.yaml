@@ -8,6 +8,8 @@ services:
       - "8080:8080"
     volumes:
       - mitmproxy-ca:/root/.mitmproxy
+      - ./default-userscripts/:/my-userscripts
+      - ./default-rules/:/my-rules
     restart: always
 
 volumes:
