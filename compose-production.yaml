@@ -1,0 +1,19 @@
+services:
+  userscript-proxy:
+    image: alling/userscript-proxy:1.1.0
+    container_name: userscript-proxy
+    command:
+      - --userscripts-dir
+      - /my-userscripts
+      - --rules
+      - /my-rules/ignore.txt
+    ports:
+      - "8080:8080"
+    volumes:
+      - mitmproxy-ca:/root/.mitmproxy
+      - /absolute/path/to/my/userscripts/:/my-userscripts # Modify the part before the ':'!
+      - /absolute/path/to/my/rules/:/my-rules # Modify the part before the ':'!
+    restart: always
+
+volumes:
+  mitmproxy-ca:
