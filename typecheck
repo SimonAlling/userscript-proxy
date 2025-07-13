@@ -2,6 +2,5 @@
 
 export MYPYPATH=/usr/local/lib/python3.6/dist-packages/
 
-cd src
-mypy *.py --ignore-missing-imports --follow-imports skip
-mypy modules/*.py --ignore-missing-imports --follow-imports skip
+mypy src/*.py --ignore-missing-imports --follow-imports skip
+mypy src/modules/*.py --ignore-missing-imports --follow-imports skip
