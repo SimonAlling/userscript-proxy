@@ -1,5 +1,5 @@
 import re
-from typing import List, Pattern
+from typing import Pattern
 
 from modules.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
@@ -8,7 +8,7 @@ PORT_PREFIX: str = ":"
 PIPE: str = "|"
 REGEX_COMMENT: Pattern = re.compile(r"\#.*$")
 
-def rulesIn(text: str) -> List[str]:
+def rulesIn(text: str) -> list[str]:
     return list(filter(
         lambda s: s != "",
         map(withoutCommentAndTrimmed, text.splitlines())

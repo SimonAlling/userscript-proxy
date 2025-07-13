@@ -2,7 +2,7 @@ import functools
 import glob
 import os
 import shlex
-from typing import Callable, Iterable, List, Optional, Tuple
+from typing import Callable, Iterable, Optional, Tuple
 
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
@@ -21,7 +21,7 @@ from modules.userscript import Userscript
 from modules.utilities import first, flag, fromOptional, itemList, second
 
 PATTERN_USERSCRIPT: str = "*.user.js"
-RELEVANT_CONTENT_TYPES: List[str] = ["text/html", "application/xhtml+xml"]
+RELEVANT_CONTENT_TYPES: list[str] = ["text/html", "application/xhtml+xml"]
 CHARSET_DEFAULT: str = "utf-8"
 TAB: str = "    "
 LIST_ITEM_PREFIX: str = TAB + "• "
@@ -85,8 +85,8 @@ def option(key: str):
     return ctx.options.__getattr__(sanitize(key))
 
 
-def loadUserscripts(directory: str) -> List[Userscript]:
-    loadedUserscripts: List[Tuple[Userscript, str]] = []
+def loadUserscripts(directory: str) -> list[Userscript]:
+    loadedUserscripts: list[Tuple[Userscript, str]] = []
     workingDirectory = os.getcwd()
     logInfo(f"""Looking recursively for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
     os.chdir(directory)
@@ -129,7 +129,7 @@ def loadUserscripts(directory: str) -> List[Userscript]:
 
 class UserscriptInjector:
     def __init__(self):
-        self.userscripts: List[Userscript] = []
+        self.userscripts: list[Userscript] = []
 
 
     def load(self, loader):
@@ -165,7 +165,7 @@ class UserscriptInjector:
         if CONTENT_TYPE in response.headers:
             if any(map(lambda t: t in response.headers[CONTENT_TYPE], RELEVANT_CONTENT_TYPES)):
                 # Response is a web page; proceed.
-                injections: List[csp.Injection] = []
+                injections: list[csp.Injection] = []
                 soup = BeautifulSoup(
                     response.content,
                     HTML_PARSER,
@@ -217,7 +217,7 @@ class UserscriptInjector:
                 )
 
 
-def handleContentSecurityPolicy(response: http.HTTPFlow.response, injections: List[csp.Injection]):
+def handleContentSecurityPolicy(response: http.HTTPFlow.response, injections: list[csp.Injection]):
     # If there is a CSP header, we may need to modify it for the userscript(s) to work.
     ContentSecurityPolicy = "Content-Security-Policy"
     if ContentSecurityPolicy in response.headers:

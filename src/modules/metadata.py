@@ -1,7 +1,7 @@
 import functools
 import re
 from string import Template
-from typing import Callable, Iterable, Iterator, List, Match, NamedTuple, Optional, Pattern, Tuple, TypeVar, Union
+from typing import Callable, Iterable, Iterator, Match, NamedTuple, Optional, Pattern, Tuple, TypeVar, Union
 
 from modules.utilities import first, second
 
@@ -15,7 +15,7 @@ T = TypeVar("T")
 Predicate = Callable[[T], bool]
 TagValue = Union[str, bool]
 MetadataItem = Tuple[str, TagValue]
-Metadata = List[MetadataItem]
+Metadata = list[MetadataItem]
 
 class Tag_string(NamedTuple):
     name: str
@@ -135,11 +135,11 @@ def parse(metadataContent: str) -> Metadata:
     return parsedItems
 
 
-def tagByName(tags: List[Tag], tagName: str) -> Optional[Tag]:
+def tagByName(tags: list[Tag], tagName: str) -> Optional[Tag]:
     return next((x for x in tags if x.name == tagName), None)
 
 
-def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
+def validatePair(tags: list[Tag], pair: MetadataItem) -> MetadataItem:
     (tagName, tagValue) = pair
     tag: Optional[Tag] = tagByName(tags, tagName)
     if tag is None:
@@ -158,7 +158,7 @@ def validatePair(tags: List[Tag], pair: MetadataItem) -> MetadataItem:
         return (tagName, tagValue)
 
 
-def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises MetadataError
+def validate(tags: list[Tag], metadata: Metadata) -> Metadata: # raises MetadataError
     def handleDuplicate(acc: Iterable[MetadataItem], pair: MetadataItem) -> Iterable[MetadataItem]:
         name: str = first(pair)
         tag: Optional[Tag] = tagByName(tags, name)
@@ -172,7 +172,7 @@ def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises Metadata
 
     # Awkwardly written to satisfy mypy:
     def withDefaults(metadata: Metadata) -> Metadata:
-        tagNamesThatWeHave: List[str] = list(map(first, metadata))
+        tagNamesThatWeHave: list[str] = list(map(first, metadata))
         unseenItems = map(
             lambda tag: (tag.name, tag.default),
             filter(
@@ -202,11 +202,11 @@ def validate(tags: List[Tag], metadata: Metadata) -> Metadata: # raises Metadata
     ))
 
 
-def validator(tags: List[Tag]) -> Callable[[Metadata], Metadata]:
+def validator(tags: list[Tag]) -> Callable[[Metadata], Metadata]:
     return lambda metadata: validate(tags, metadata)
 
 
-def valueGetter_all(metadata: Metadata) -> Callable[[Tag], List[TagValue]]:
+def valueGetter_all(metadata: Metadata) -> Callable[[Tag], list[TagValue]]:
     return lambda tag: [second(pair) for pair in metadata if first(pair) == tag.name]
 
 

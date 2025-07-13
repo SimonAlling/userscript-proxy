@@ -1,5 +1,5 @@
 import secrets
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from modules.userscript import Userscript
 
@@ -11,7 +11,7 @@ class Injection(NamedTuple):
     nonce: Optional[str]
 
 
-def headerWithScriptsAllowed(cspHeaderValue: str, injections: List[Injection]) -> str:
+def headerWithScriptsAllowed(cspHeaderValue: str, injections: list[Injection]) -> str:
     # Example CSP header:
     #
     #     Content-Security-Policy: default-src 'self'; frame-src 'self'; img-src https:; connect-src 'self'

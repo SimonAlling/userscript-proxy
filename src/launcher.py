@@ -4,7 +4,6 @@ import glob
 import os
 import shlex
 import subprocess
-from typing import List
 
 from modules.argparser import getArgparser
 import modules.arguments as A
@@ -22,7 +21,7 @@ def printInfo(
     useFiltering: bool,
     useIntercept: bool,
     useTransparent: bool,
-    filterRules: List[str],
+    filterRules: list[str],
 ):
     print()
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
@@ -62,7 +61,7 @@ try:
         if useDefaultRules:
             print(f"Reading default {'intercept' if useIntercept else 'ignore'} rules ...")
             globPatternForDefaultRules = C.DEFAULT_INTERCEPT_RULES if useIntercept else C.DEFAULT_IGNORE_RULES
-            filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPatternForDefaultRules) ]
+            filenames: list[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPatternForDefaultRules) ]
             acc = ""
             for filename in filenames:
                 print("Reading " + filename + " ...")
@@ -73,7 +72,7 @@ try:
     def ruleFilesContent_custom():
         if useCustomFiltering:
             print(f"Reading custom {'intercept' if useIntercept else 'ignore'} rules ({globPattern}) ...")
-            filenames: List[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
+            filenames: list[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]
             acc = ""
             for filename in filenames:
                 print("Reading " + filename + " ...")

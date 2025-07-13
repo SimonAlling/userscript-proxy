@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, List, Optional, Tuple, TypeVar
+from typing import Any, Callable, Iterable, Optional, Tuple, TypeVar
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -23,7 +23,7 @@ def second(tuple: Tuple[A, B]) -> B:
     return b
 
 
-def strs(xs: Any) -> List[str]:
+def strs(xs: Any) -> list[str]:
     return list(map(str, xs))
 
 

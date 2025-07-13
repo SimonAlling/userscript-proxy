@@ -1,6 +1,6 @@
 import re
 from string import Template
-from typing import Callable, List, NamedTuple, Optional, Pattern
+from typing import Callable, NamedTuple, Optional, Pattern
 import warnings
 
 from urlmatch import urlmatch
@@ -83,7 +83,7 @@ tag_downloadURL: Tag_string = Tag_string(
     predicate = lambda val: REGEX_URL.match(val) is not None,
 )
 
-METADATA_TAGS: List[Tag] = [
+METADATA_TAGS: list[Tag] = [
     tag_name,
     tag_run_at,
     tag_match,
@@ -114,11 +114,11 @@ class Userscript(NamedTuple):
     content: str
     runAt: str
     noframes: bool
-    matchPatterns: List[str]
-    includePatternRegexes: List[Pattern]
-    excludePatternRegexes: List[Pattern]
+    matchPatterns: list[str]
+    includePatternRegexes: list[Pattern]
+    excludePatternRegexes: list[Pattern]
     downloadURL: Optional[str]
-    unsafeSequences: List[str] # in <script> tag
+    unsafeSequences: list[str] # in <script> tag
 
     def __str__(self) -> str:
         return self.name
@@ -128,14 +128,14 @@ def create(content: str) -> Userscript:
     validMetadata: Metadata = validateMetadata(metadata.parse(metadata.extract(content)))
     valueOf = metadata.valueGetter_one(validMetadata)
     allValuesOf = metadata.valueGetter_all(validMetadata)
-    includePatternRegexes: List[Pattern] = list(filter(
+    includePatternRegexes: list[Pattern] = list(filter(
         lambda x: x is not None,
         map(
             compose2(regexFromIncludePattern_safe, str),
             allValuesOf(tag_include)
         )
     ))
-    excludePatternRegexes: List[Pattern] = list(filter(
+    excludePatternRegexes: list[Pattern] = list(filter(
         lambda x: x is not None,
         map(
             compose2(regexFromIncludePattern_safe, str),
