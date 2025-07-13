@@ -46,7 +46,7 @@ def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[B
                 insertLateIn(soup, tag)
             else:
                 insertEarlyIn(soup, tag)
-        return soup
+        return 5
     except Exception as e:
         return e
 
