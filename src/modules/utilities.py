@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, Optional, Tuple, TypeVar
+from typing import Any, Callable, Iterable, Optional, TypeVar
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -13,12 +13,12 @@ def equals(x: A) -> Callable[[A], bool]:
     return lambda y: x == y
 
 
-def first(tuple: Tuple[A, B]) -> A:
+def first(tuple: tuple[A, B]) -> A:
     (a, b) = tuple
     return a
 
 
-def second(tuple: Tuple[A, B]) -> B:
+def second(tuple: tuple[A, B]) -> B:
     (a, b) = tuple
     return b
 

@@ -2,7 +2,7 @@ import functools
 import glob
 import os
 import shlex
-from typing import Callable, Iterable, Optional, Tuple
+from typing import Callable, Iterable, Optional
 
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
@@ -86,7 +86,7 @@ def option(key: str):
 
 
 def loadUserscripts(directory: str) -> list[Userscript]:
-    loadedUserscripts: list[Tuple[Userscript, str]] = []
+    loadedUserscripts: list[tuple[Userscript, str]] = []
     workingDirectory = os.getcwd()
     logInfo(f"""Looking recursively for userscripts ({PATTERN_USERSCRIPT}) in directory `{directory}` ...""")
     os.chdir(directory)

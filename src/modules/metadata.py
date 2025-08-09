@@ -1,7 +1,7 @@
 import functools
 import re
 from string import Template
-from typing import Callable, Iterable, Iterator, Match, NamedTuple, Optional, Pattern, Tuple, TypeVar, Union
+from typing import Callable, Iterable, Iterator, Match, NamedTuple, Optional, Pattern, TypeVar, Union
 
 from modules.utilities import first, second
 
@@ -14,7 +14,7 @@ class MetadataError(Exception):
 T = TypeVar("T")
 Predicate = Callable[[T], bool]
 TagValue = Union[str, bool]
-MetadataItem = Tuple[str, TagValue]
+MetadataItem = tuple[str, TagValue]
 Metadata = list[MetadataItem]
 
 class Tag_string(NamedTuple):
@@ -167,7 +167,7 @@ def validate(tags: list[Tag], metadata: Metadata) -> Metadata: # raises Metadata
         return acc if tag is not None and tag.unique and name in seenTagNames else list(acc) + [pair]
 
     def withoutDuplicates(metadata: Metadata) -> Metadata:
-        empty: Iterable[Tuple[str, Union[str, bool]]] = [] # to satisfy mypy
+        empty: Iterable[tuple[str, Union[str, bool]]] = [] # to satisfy mypy
         return list(functools.reduce(handleDuplicate, metadata, empty))
 
     # Awkwardly written to satisfy mypy:
