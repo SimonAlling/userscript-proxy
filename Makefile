@@ -34,6 +34,7 @@ endif
 	git add $(FILE_WITH_VERSION) README.md
 	git commit -m "v$(TAG)"
 	git tag "v$(TAG)"
+	echo "Run these commands to push to Docker Hub:\n\n    docker push alling/userscript-proxy:$(TAG)\n    docker push alling/userscript-proxy:$(DEFAULT_TAG)\n"
 
 start: image
 # The -t flag enables colored output:
