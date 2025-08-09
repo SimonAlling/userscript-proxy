@@ -1,5 +1,5 @@
 import re
-from typing import Match, Optional, Pattern
+from typing import Match, Optional
 
 from modules.utilities import first
 
@@ -49,7 +49,7 @@ def withoutSurroundingSlashes(s: str) -> str:
     return first(re.subn(re.compile(r"^\/|\/$"), "", s))
 
 
-def regexFromIncludePattern(pattern: str) -> Pattern: # raises re.error
+def regexFromIncludePattern(pattern: str) -> re.Pattern: # raises re.error
     return (
         re.compile(withoutSurroundingSlashes(pattern), re.IGNORECASE)
         if isIncludePattern_regex(pattern)

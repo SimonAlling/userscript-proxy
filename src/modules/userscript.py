@@ -1,6 +1,6 @@
 import re
 from string import Template
-from typing import Callable, NamedTuple, Optional, Pattern
+from typing import Callable, NamedTuple, Optional
 import warnings
 
 from urlmatch import urlmatch
@@ -11,7 +11,7 @@ from modules.metadata import Metadata, Tag, Tag_boolean, Tag_string
 from modules.patterns import isIncludePattern, isMatchPattern, regexFromIncludePattern
 from modules.utilities import compose2, stripIndentation, strs
 
-REGEX_URL: Pattern = re.compile(r"^https?://")
+REGEX_URL: re.Pattern = re.compile(r"^https?://")
 
 directive_name     : str = "name"
 directive_version  : str = "version"
@@ -115,8 +115,8 @@ class Userscript(NamedTuple):
     runAt: str
     noframes: bool
     matchPatterns: list[str]
-    includePatternRegexes: list[Pattern]
-    excludePatternRegexes: list[Pattern]
+    includePatternRegexes: list[re.Pattern]
+    excludePatternRegexes: list[re.Pattern]
     downloadURL: Optional[str]
     unsafeSequences: list[str] # in <script> tag
 
@@ -128,14 +128,14 @@ def create(content: str) -> Userscript:
     validMetadata: Metadata = validateMetadata(metadata.parse(metadata.extract(content)))
     valueOf = metadata.valueGetter_one(validMetadata)
     allValuesOf = metadata.valueGetter_all(validMetadata)
-    includePatternRegexes: list[Pattern] = list(filter(
+    includePatternRegexes: list[re.Pattern] = list(filter(
         lambda x: x is not None,
         map(
             compose2(regexFromIncludePattern_safe, str),
             allValuesOf(tag_include)
         )
     ))
-    excludePatternRegexes: list[Pattern] = list(filter(
+    excludePatternRegexes: list[re.Pattern] = list(filter(
         lambda x: x is not None,
         map(
             compose2(regexFromIncludePattern_safe, str),
@@ -187,7 +187,7 @@ def withVersionSuffix(url: str, version: Optional[str]) -> str:
     return url + ("" if version is None else "?v=" + version)
 
 
-def regexFromIncludePattern_safe(pattern: str) -> Optional[Pattern]:
+def regexFromIncludePattern_safe(pattern: str) -> Optional[re.Pattern]:
     try:
         return regexFromIncludePattern(pattern)
     except re.error as error:

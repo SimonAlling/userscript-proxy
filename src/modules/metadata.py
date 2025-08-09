@@ -1,7 +1,7 @@
 import functools
 import re
 from string import Template
-from typing import Callable, Iterable, Iterator, Match, NamedTuple, Optional, Pattern, TypeVar, Union
+from typing import Callable, Iterable, Iterator, Match, NamedTuple, Optional, TypeVar, Union
 
 from modules.utilities import first, second
 
@@ -43,7 +43,7 @@ def tag(name: str) -> str:
     return PREFIX_TAG + name
 
 REGEXGROUP_CONTENT: str = "content"
-REGEX_METADATA_BLOCK: Pattern = re.compile(
+REGEX_METADATA_BLOCK: re.Pattern = re.compile(
     PREFIX_COMMENT + r"\s*" + BLOCK_START + r"\n"
     + r"(?P<" + REGEXGROUP_CONTENT + r">.*)"
     + PREFIX_COMMENT + r"\s*" + BLOCK_END,
@@ -51,7 +51,7 @@ REGEX_METADATA_BLOCK: Pattern = re.compile(
 )
 REGEXGROUP_TAGNAME: str = "tagname"
 REGEXGROUP_TAGVALUE: str = "tagvalue"
-REGEX_METADATA_LINE: Pattern = re.compile(
+REGEX_METADATA_LINE: re.Pattern = re.compile(
     r"^\s*" + PREFIX_COMMENT
     + r"\s*" + PREFIX_TAG
     + r"(?P<" + REGEXGROUP_TAGNAME + r">[^\s]+)"

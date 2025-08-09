@@ -1,12 +1,11 @@
 import re
-from typing import Pattern
 
 from modules.patterns import isIncludePattern_regex, regexify, withoutSurroundingSlashes
 
 COMMENT_PREFIX: str = "#"
 PORT_PREFIX: str = ":"
 PIPE: str = "|"
-REGEX_COMMENT: Pattern = re.compile(r"\#.*$")
+REGEX_COMMENT: re.Pattern = re.compile(r"\#.*$")
 
 def rulesIn(text: str) -> list[str]:
     return list(filter(

@@ -2,14 +2,14 @@
 # "in" mitm[dump|proxy], e.g. not in the launcher script.
 
 import re
-from typing import Optional, Pattern
+from typing import Optional
 
 from mitmproxy import http
 
 from modules.utilities import equals
 
 CONTENT_TYPE: str = "Content-Type"
-REGEX_CHARSET: Pattern = re.compile(r"charset=([^;\s]+)")
+REGEX_CHARSET: re.Pattern = re.compile(r"charset=([^;\s]+)")
 
 def inferEncoding(response: http.HTTPResponse) -> Optional[str]:
     httpHeaderValue = response.headers.get(CONTENT_TYPE, "").lower()
