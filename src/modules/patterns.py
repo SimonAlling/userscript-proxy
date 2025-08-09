@@ -1,5 +1,5 @@
 import re
-from typing import Match, Optional
+from typing import Optional
 
 from modules.utilities import first
 
@@ -64,7 +64,7 @@ def regexify(segment: str) -> str:
 # Returns None if the pattern is invalid:
 def extractGroup(group: str, matchPattern: str) -> Optional[str]:
     try:
-        match: Optional[Match] = REGEX_MATCH_PATTERN.search(normalizeMatchPattern(matchPattern))
+        match: Optional[re.Match] = REGEX_MATCH_PATTERN.search(normalizeMatchPattern(matchPattern))
         return None if match is None else match.group(group)
     except:
         return None

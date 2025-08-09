@@ -1,7 +1,7 @@
 import functools
 import re
 from string import Template
-from typing import Callable, Iterable, Iterator, Match, NamedTuple, Optional, TypeVar, Union
+from typing import Callable, Iterable, Iterator, NamedTuple, Optional, TypeVar, Union
 
 from modules.utilities import first, second
 
@@ -103,7 +103,7 @@ def isCommentLine(s: str) -> bool:
     return re.compile(r"^\s*" + PREFIX_COMMENT + r".*$").match(s) is not None
 
 def extract(userscriptContent: str) -> str: # raises MetadataError
-    match_metadataBlock: Optional[Match] = REGEX_METADATA_BLOCK.search(userscriptContent)
+    match_metadataBlock: Optional[re.Match] = REGEX_METADATA_BLOCK.search(userscriptContent)
     if (match_metadataBlock is None):
         raise MetadataError(STRING_ERROR_MISSING_BLOCK)
     block: str = match_metadataBlock.group(REGEXGROUP_CONTENT)
@@ -115,7 +115,7 @@ def extract(userscriptContent: str) -> str: # raises MetadataError
 
 def parse(metadataContent: str) -> Metadata:
     def parseLine(line: str) -> Optional[MetadataItem]:
-        match: Optional[Match] = REGEX_METADATA_LINE.search(line)
+        match: Optional[re.Match] = REGEX_METADATA_LINE.search(line)
         if match is None:
             return None
         else:
