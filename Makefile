@@ -27,9 +27,11 @@ ifeq "$(TAG)" "$(DEFAULT_TAG)"
 endif
 # Update in-app version:
 	sed -i 's/^VERSION: str = "[^"]*"/VERSION: str = "$(TAG)"/' $(FILE_WITH_VERSION)
+# Update readme version:
+	sed -i 's#image: alling/userscript-proxy:.*#image: alling/userscript-proxy:$(TAG)#' README.md
 	docker build -t $(DOCKER_USER)/$(DOCKER_REPO):$(TAG) .
 	docker tag $(DOCKER_USER)/$(DOCKER_REPO):$(TAG) $(DOCKER_USER)/$(DOCKER_REPO):$(DEFAULT_TAG)
-	git add $(FILE_WITH_VERSION)
+	git add $(FILE_WITH_VERSION) README.md
 	git commit -m "v$(TAG)"
 	git tag "v$(TAG)"
 
