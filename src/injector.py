@@ -2,7 +2,7 @@ import functools
 import glob
 import os
 import shlex
-from typing import Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from bs4 import BeautifulSoup, Comment, Doctype
 from mitmproxy import ctx, http
@@ -81,7 +81,7 @@ Possible solutions:
 
 # Because ctx.options is not subscriptable and we want to be able to use
 # expressions as keys:
-def option(key: str):
+def option(key: str) -> Any:
     return ctx.options.__getattr__(sanitize(key))
 
 
@@ -128,11 +128,11 @@ def loadUserscripts(directory: str) -> list[Userscript]:
 
 
 class UserscriptInjector:
-    def __init__(self):
+    def __init__(self) -> None:
         self.userscripts: list[Userscript] = []
 
 
-    def load(self, loader):
+    def load(self, loader: Any) -> None:
         loader.add_option(sanitize(A.inline), bool, False, A.inline_help)
         loader.add_option(sanitize(A.no_default_userscripts), bool, False, A.no_default_userscripts_help)
         loader.add_option(sanitize(A.list_injected), bool, False, A.list_injected_help)
@@ -141,7 +141,7 @@ class UserscriptInjector:
         loader.add_option(sanitize(A.query_param_to_disable), str, A.query_param_to_disable_default, A.query_param_to_disable_help)
 
 
-    def configure(self, updates):
+    def configure(self, updates: Any) -> None:
         useDefaultUserscripts = True
         if sanitize(A.no_default_userscripts) in updates and option(A.no_default_userscripts):
             logInfo(f"""Built-in default userscripts will be skipped due to {flag(A.no_default_userscripts)} flag.""")
@@ -160,7 +160,7 @@ class UserscriptInjector:
             self.userscripts = userscripts
 
 
-    def response(self, flow: http.HTTPFlow):
+    def response(self, flow: http.HTTPFlow) -> None:
         response = flow.response
         if CONTENT_TYPE in response.headers:
             if any(map(lambda t: t in response.headers[CONTENT_TYPE], RELEVANT_CONTENT_TYPES)):
@@ -217,7 +217,7 @@ class UserscriptInjector:
                 )
 
 
-def handleContentSecurityPolicy(response: http.HTTPFlow.response, injections: list[csp.Injection]):
+def handleContentSecurityPolicy(response: http.HTTPFlow.response, injections: list[csp.Injection]) -> None:
     # If there is a CSP header, we may need to modify it for the userscript(s) to work.
     ContentSecurityPolicy = "Content-Security-Policy"
     if ContentSecurityPolicy in response.headers:

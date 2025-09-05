@@ -22,7 +22,7 @@ def printInfo(
     useIntercept: bool,
     useTransparent: bool,
     filterRules: list[str],
-):
+) -> None:
     print()
     print("mitmproxy will be run in " + ("TRANSPARENT" if useTransparent else "REGULAR") + " mode.")
     print()
@@ -38,7 +38,7 @@ def printInfo(
     print()
 
 
-def checkThatUserscriptsDirectoryExistsIfSpecified(directory: str):
+def checkThatUserscriptsDirectoryExistsIfSpecified(directory: str) -> None:
     if directory is not None and not os.path.isdir(directory):
         print(f"Directory `{directory}` does not exist. If you're using Docker, you need to use -v to mount a directory from the host inside the container. Exiting.")
         exit(1)
@@ -57,7 +57,7 @@ try:
     bypassCsp = args.bypass_csp
     userscriptsDirectory = args.userscripts_dir
     checkThatUserscriptsDirectoryExistsIfSpecified(userscriptsDirectory)
-    def ruleFilesContent_default():
+    def ruleFilesContent_default() -> str:
         if useDefaultRules:
             print(f"Reading default {'intercept' if useIntercept else 'ignore'} rules ...")
             globPatternForDefaultRules = C.DEFAULT_INTERCEPT_RULES if useIntercept else C.DEFAULT_IGNORE_RULES
@@ -69,7 +69,7 @@ try:
             return acc
         else:
             return ""
-    def ruleFilesContent_custom():
+    def ruleFilesContent_custom() -> str:
         if useCustomFiltering:
             print(f"Reading custom {'intercept' if useIntercept else 'ignore'} rules ({globPattern}) ...")
             filenames: list[str] = [ shlex.quote(unsafeFilename) for unsafeFilename in glob.glob(globPattern) ]

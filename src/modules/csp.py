@@ -35,5 +35,5 @@ def source(injection: Injection) -> str:
         return injection.userscript.downloadURL
 
 
-def generateNonce():
+def generateNonce() -> str:
     return secrets.token_hex() # If no argument is passed, "a reasonable default is used" for the number of bytes.

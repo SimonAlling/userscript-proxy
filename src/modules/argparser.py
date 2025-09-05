@@ -4,7 +4,7 @@ import modules.arguments as A
 import modules.text as T
 from modules.utilities import flag, shortFlag
 
-def getArgparser():
+def getArgparser() -> ArgumentParser:
     argparser = ArgumentParser(description=T.description)
     argparser.add_argument(
         flag(A.bypass_csp),

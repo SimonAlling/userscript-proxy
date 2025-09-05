@@ -1,12 +1,12 @@
 import functools
 import re
 from string import Template
-from typing import Callable, Iterable, Iterator, NamedTuple, Optional, TypeVar, Union
+from typing import Any, Callable, Iterable, Iterator, NamedTuple, Optional, TypeVar, Union
 
 from modules.utilities import first, second
 
 class MetadataError(Exception):
-    def __init__(self,*args,**kwargs):
+    def __init__(self,*args: Any,**kwargs: Any) -> None:
         Exception.__init__(self,*args,**kwargs)
 
 

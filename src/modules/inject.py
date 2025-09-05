@@ -52,7 +52,7 @@ def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[B
 
 
 
-def insertEarlyIn(soup: BeautifulSoup, tag: Tag):
+def insertEarlyIn(soup: BeautifulSoup, tag: Tag) -> None:
     if soup.body is not None and soup.body.find() is not None:
         soup.body.find().insert_before(tag)
     elif soup.title is not None:
@@ -63,5 +63,5 @@ def insertEarlyIn(soup: BeautifulSoup, tag: Tag):
         soup.append(tag)
 
 
-def insertLateIn(soup: BeautifulSoup, tag: Tag):
+def insertLateIn(soup: BeautifulSoup, tag: Tag) -> None:
     fromOptional(soup.body, soup).append(tag)
