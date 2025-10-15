@@ -4,5 +4,4 @@ set -e
 
 export MYPYPATH=/usr/local/lib/python3.6/dist-packages/
 
-mypy src/*.py --ignore-missing-imports --disallow-untyped-defs --follow-imports skip
-mypy src/modules/*.py --ignore-missing-imports --disallow-untyped-defs --follow-imports skip
+mypy src/ --config-file mypy.ini --ignore-missing-imports --disallow-untyped-defs

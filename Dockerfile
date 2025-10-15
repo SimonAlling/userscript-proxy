@@ -14,6 +14,7 @@ COPY --from=builder /root/.local/lib /root/.local/lib
 COPY --from=builder /root/.local/bin/mitmdump /root/.local/bin/mitmdump
 COPY --from=builder /root/.local/bin/mypy /root/.local/bin/mypy
 ENV PATH=/root/.local/bin:$PATH
+COPY mypy.ini .
 COPY typecheck .
 COPY src src
 COPY default-rules default-rules
