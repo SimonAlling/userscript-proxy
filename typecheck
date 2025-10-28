@@ -2,7 +2,7 @@
 
 set -e
 
-export MYPYPATH=/usr/local/lib/python3.6/dist-packages/
+export MYPYPATH=/usr/local/lib/python3.9/dist-packages/
 
 mypy src/*.py --ignore-missing-imports --disallow-untyped-defs --follow-imports skip
 mypy src/modules/*.py --ignore-missing-imports --disallow-untyped-defs --follow-imports skip
