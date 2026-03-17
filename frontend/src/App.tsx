@@ -10,7 +10,7 @@ type Script = {
   source: string;
 };
 
-const initialScripts: Script[] = [
+const initialScripts: ReadonlyArray<Script> = [
   {
     id: "1",
     name: "Dark mode helper",
@@ -42,7 +42,7 @@ console.log("hello");
 ];
 
 function App() {
-  const [scripts, setScripts] = useState<Script[]>(initialScripts);
+  const [scripts, setScripts] = useState<ReadonlyArray<Script>>(initialScripts);
   const [selectedId, setSelectedId] = useState<string>(initialScripts[0].id);
 
   const selectedScript = scripts.find((script) => script.id === selectedId);
