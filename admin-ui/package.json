@@ -3,6 +3,7 @@
   "type": "module",
   "workspaces": [
     "core",
+    "backend",
     "frontend"
   ],
   "scripts": {

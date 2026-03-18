@@ -19,6 +19,7 @@ export default defineConfig([
       parserOptions: {
         project: [
           "./core/tsconfig.json",
+          "./backend/tsconfig.json",
           "./frontend/tsconfig.node.json",
           "./frontend/tsconfig.app.json",
         ],

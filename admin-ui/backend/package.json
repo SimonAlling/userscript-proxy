@@ -1,0 +1,11 @@
+{
+  "name": "@userscript-proxy/backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@userscript-proxy/core": "*"
+  }
+}
