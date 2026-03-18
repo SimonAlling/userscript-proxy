@@ -14,7 +14,7 @@ type UiState =
   | {
       tag: "EditScript";
       scripts: ReadonlyArray<Script>;
-      scriptId: string;
+      script: Script;
       draftSource: string;
       metadataError: string | null;
       isDirty: boolean;
@@ -71,7 +71,7 @@ function App() {
             setUiState({
               tag: "EditScript",
               scripts: uiState.scripts,
-              scriptId: script.id,
+              script: script,
               draftSource: script.source,
               metadataError:
                 parseResult.tag === "Err" ? parseResult.error : null,
@@ -82,19 +82,9 @@ function App() {
       );
 
     case "EditScript": {
-      const script = uiState.scripts.find((s) => s.id === uiState.scriptId);
-
-      if (script === undefined) {
-        return (
-          <div className="app">
-            <p>Script not found.</p>
-          </div>
-        );
-      }
-
       return (
         <EditScriptView
-          script={script}
+          script={uiState.script}
           draftSource={uiState.draftSource}
           metadataError={uiState.metadataError}
           isDirty={uiState.isDirty}
@@ -106,7 +96,7 @@ function App() {
                 ...uiState,
                 draftSource,
                 metadataError: result.error,
-                isDirty: draftSource !== script.source,
+                isDirty: draftSource !== uiState.script.source,
               });
               return;
             }
@@ -115,7 +105,7 @@ function App() {
               ...uiState,
               draftSource,
               metadataError: null,
-              isDirty: draftSource !== script.source,
+              isDirty: draftSource !== uiState.script.source,
             });
           }}
           onSave={() => {
@@ -130,7 +120,7 @@ function App() {
             }
 
             const updatedScripts = uiState.scripts.map((currentScript) =>
-              currentScript.id === uiState.scriptId
+              currentScript.id === uiState.script.id
                 ? {
                     ...currentScript,
                     source: uiState.draftSource,
@@ -143,7 +133,7 @@ function App() {
             setUiState({
               tag: "EditScript",
               scripts: updatedScripts,
-              scriptId: uiState.scriptId,
+              script: uiState.script,
               draftSource: uiState.draftSource,
               metadataError: null,
               isDirty: false,
@@ -161,7 +151,7 @@ function App() {
             }
 
             const updatedScripts = uiState.scripts.map((currentScript) =>
-              currentScript.id === uiState.scriptId
+              currentScript.id === uiState.script.id
                 ? {
                     ...currentScript,
                     source: uiState.draftSource,
