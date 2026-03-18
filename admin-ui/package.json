@@ -6,6 +6,6 @@
     "frontend"
   ],
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint . --config eslint.config.js"
   }
 }
