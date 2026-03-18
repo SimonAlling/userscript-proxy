@@ -27,11 +27,11 @@ export default defineConfig([
       },
     },
     rules: {
-      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/array-type": [
         "error",
         { default: "generic", readonly: "generic" },
       ],
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
     },
   },
 ]);
