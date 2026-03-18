@@ -11,166 +11,353 @@ type Script = {
   source: string;
 };
 
+type UiState =
+  | {
+      tag: "ListScripts";
+      scripts: ReadonlyArray<Script>;
+    }
+  | {
+      tag: "EditScript";
+      scripts: ReadonlyArray<Script>;
+      scriptId: string;
+      draftSource: string;
+      metadataError: string | null;
+      isDirty: boolean;
+    };
+
 const initialScripts: ReadonlyArray<Script> = [
   makeNewScript(crypto.randomUUID()),
 ];
 
 function App() {
-  const [scripts, setScripts] = useState<ReadonlyArray<Script>>(initialScripts);
-  const [selectedId, setSelectedId] = useState<string>(initialScripts[0].id);
+  const [uiState, setUiState] = useState<UiState>({
+    tag: "ListScripts",
+    scripts: initialScripts,
+  });
 
-  const [metadataError, setMetadataError] = useState<string | null>(null);
+  switch (uiState.tag) {
+    case "ListScripts":
+      return (
+        <ListScriptsView
+          scripts={uiState.scripts}
+          onAddScript={() => {
+            const newScript = makeNewScript(crypto.randomUUID());
 
-  const selectedScript = scripts.find((script) => script.id === selectedId);
+            setUiState({
+              tag: "ListScripts",
+              scripts: [newScript, ...uiState.scripts],
+            });
+          }}
+          onDeleteScript={(scriptId) => {
+            setUiState({
+              tag: "ListScripts",
+              scripts: uiState.scripts.filter(
+                (script) => script.id !== scriptId,
+              ),
+            });
+          }}
+          onToggleEnabled={(scriptId, enabled) => {
+            setUiState({
+              tag: "ListScripts",
+              scripts: uiState.scripts.map((script) =>
+                script.id === scriptId ? { ...script, enabled } : script,
+              ),
+            });
+          }}
+          onEditScript={(scriptId) => {
+            const script = uiState.scripts.find((s) => s.id === scriptId);
 
-  function updateSelectedScript(update: ScriptUpdate) {
-    switch (update.tag) {
-      case "EnabledChanged": {
-        setMetadataError(null);
+            if (script === undefined) {
+              return;
+            }
 
-        setScripts((currentScripts) =>
-          currentScripts.map((script) =>
-            script.id === selectedId
-              ? { ...script, enabled: update.enabled }
-              : script,
-          ),
+            const parseResult = extractMetadata(script.source);
+
+            setUiState({
+              tag: "EditScript",
+              scripts: uiState.scripts,
+              scriptId: script.id,
+              draftSource: script.source,
+              metadataError:
+                parseResult.tag === "Err" ? parseResult.error : null,
+              isDirty: false,
+            });
+          }}
+        />
+      );
+
+    case "EditScript": {
+      const script = uiState.scripts.find((s) => s.id === uiState.scriptId);
+
+      if (script === undefined) {
+        return (
+          <div className="app">
+            <p>Script not found.</p>
+          </div>
         );
-
-        break;
       }
 
-      case "SourceChanged": {
-        const result = extractMetadata(update.source);
+      return (
+        <EditScriptView
+          script={script}
+          draftSource={uiState.draftSource}
+          metadataError={uiState.metadataError}
+          isDirty={uiState.isDirty}
+          onDraftSourceChange={(draftSource) => {
+            const result = extractMetadata(draftSource);
 
-        if (result.tag === "Err") {
-          setMetadataError(result.error);
-          return;
-        }
+            if (result.tag === "Err") {
+              setUiState({
+                ...uiState,
+                draftSource,
+                metadataError: result.error,
+                isDirty: draftSource !== script.source,
+              });
+              return;
+            }
 
-        setMetadataError(null);
+            setUiState({
+              ...uiState,
+              draftSource,
+              metadataError: null,
+              isDirty: draftSource !== script.source,
+            });
+          }}
+          onSave={() => {
+            const result = extractMetadata(uiState.draftSource);
 
-        setScripts((currentScripts) =>
-          currentScripts.map((script) =>
-            script.id === selectedId
-              ? {
-                  ...script,
-                  source: update.source,
-                  name: result.value.name,
-                  version: result.value.version,
-                }
-              : script,
-          ),
-        );
-        break;
-      }
+            if (result.tag === "Err") {
+              setUiState({
+                ...uiState,
+                metadataError: result.error,
+              });
+              return;
+            }
 
-      default:
-        assertExhausted(update, "script update action");
+            const updatedScripts = uiState.scripts.map((currentScript) =>
+              currentScript.id === uiState.scriptId
+                ? {
+                    ...currentScript,
+                    source: uiState.draftSource,
+                    name: result.value.name,
+                    version: result.value.version,
+                  }
+                : currentScript,
+            );
+
+            setUiState({
+              tag: "EditScript",
+              scripts: updatedScripts,
+              scriptId: uiState.scriptId,
+              draftSource: uiState.draftSource,
+              metadataError: null,
+              isDirty: false,
+            });
+          }}
+          onSaveAndClose={() => {
+            const result = extractMetadata(uiState.draftSource);
+
+            if (result.tag === "Err") {
+              setUiState({
+                ...uiState,
+                metadataError: result.error,
+              });
+              return;
+            }
+
+            const updatedScripts = uiState.scripts.map((currentScript) =>
+              currentScript.id === uiState.scriptId
+                ? {
+                    ...currentScript,
+                    source: uiState.draftSource,
+                    name: result.value.name,
+                    version: result.value.version,
+                  }
+                : currentScript,
+            );
+
+            setUiState({
+              tag: "ListScripts",
+              scripts: updatedScripts,
+            });
+          }}
+          onClose={() => {
+            if (uiState.isDirty) {
+              const shouldDiscard = window.confirm("Discard unsaved changes?");
+
+              if (!shouldDiscard) {
+                return;
+              }
+            }
+
+            setUiState({
+              tag: "ListScripts",
+              scripts: uiState.scripts,
+            });
+          }}
+        />
+      );
     }
+
+    default:
+      assertExhausted(uiState, "ui state");
   }
+}
 
-  function addScript() {
-    const newScript = makeNewScript(crypto.randomUUID());
+type ListScriptsViewProps = {
+  scripts: ReadonlyArray<Script>;
+  onAddScript: () => void;
+  onDeleteScript: (scriptId: string) => void;
+  onToggleEnabled: (scriptId: string, enabled: boolean) => void;
+  onEditScript: (scriptId: string) => void;
+};
 
-    setScripts((currentScripts) => [newScript, ...currentScripts]);
-    setSelectedId(newScript.id);
-  }
-
-  function deleteSelectedScript() {
-    const remainingScripts = scripts.filter(
-      (script) => script.id !== selectedId,
-    );
-    setScripts(remainingScripts);
-
-    if (remainingScripts.length > 0) {
-      setSelectedId(remainingScripts[0].id);
-    }
-  }
-
-  if (selectedScript === undefined) {
-    return <div className="app">No script selected.</div>;
-  }
+function ListScriptsView(props: ListScriptsViewProps) {
+  const {
+    scripts,
+    onAddScript,
+    onDeleteScript,
+    onToggleEnabled,
+    onEditScript,
+  } = props;
 
   return (
     <div className="app">
       <header className="topbar">
         <div>
           <h1>Userscript Proxy</h1>
-          <p>Simple React prototype for managing userscripts</p>
+          <p>Manage your installed userscripts</p>
         </div>
-        <button onClick={addScript}>Add script</button>
+        <button onClick={onAddScript}>Add script</button>
       </header>
 
-      <main className="layout">
-        <aside className="sidebar">
-          <h2>Scripts</h2>
-          <ul className="scriptList">
+      <main className="listMode">
+        {scripts.length === 0 ? (
+          <div className="emptyState">No scripts installed.</div>
+        ) : (
+          <ul className="scriptCards">
             {scripts.map((script) => (
-              <li key={script.id}>
-                <button
-                  className={
-                    script.id === selectedId
-                      ? "scriptListItem selected"
-                      : "scriptListItem"
-                  }
-                  onClick={() => {
-                    setSelectedId(script.id);
-                  }}
-                >
-                  <div className="scriptListTitle">{script.name}</div>
-                  <div className="scriptListMeta">
-                    {script.version === null
-                      ? ""
-                      : "v" + script.version + " · "}
-                    {script.enabled ? "Enabled" : "Disabled"}
+              <li key={script.id} className="scriptCard">
+                <div className="scriptCardHeader">
+                  <div>
+                    <div className="scriptCardTitle">{script.name}</div>
+                    <div className="scriptCardMeta">
+                      {script.version === null
+                        ? "No version"
+                        : `v${script.version}`}{" "}
+                      · {script.enabled ? "Enabled" : "Disabled"}
+                    </div>
                   </div>
-                </button>
+
+                  <label className="inlineCheckbox">
+                    <input
+                      type="checkbox"
+                      checked={script.enabled}
+                      onChange={(e) => {
+                        onToggleEnabled(script.id, e.target.checked);
+                      }}
+                    />
+                    Enabled
+                  </label>
+                </div>
+
+                <div className="scriptCardActions">
+                  <button
+                    onClick={() => {
+                      onEditScript(script.id);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="dangerButton"
+                    onClick={() => {
+                      onDeleteScript(script.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
-        </aside>
+        )}
+      </main>
+    </div>
+  );
+}
 
-        <section className="editor">
-          <div className="formRow checkboxRow">
-            <label htmlFor="enabled">Enabled</label>
-            <input
-              id="enabled"
-              type="checkbox"
-              checked={selectedScript.enabled}
-              onChange={(e) => {
-                updateSelectedScript({
-                  tag: "EnabledChanged",
-                  enabled: e.target.checked,
-                });
-              }}
-            />
-          </div>
+type EditScriptViewProps = {
+  script: Script;
+  draftSource: string;
+  metadataError: string | null;
+  isDirty: boolean;
+  onDraftSourceChange: (draftSource: string) => void;
+  onSave: () => void;
+  onSaveAndClose: () => void;
+  onClose: () => void;
+};
 
+function EditScriptView(props: EditScriptViewProps) {
+  const {
+    script,
+    draftSource,
+    metadataError,
+    isDirty,
+    onDraftSourceChange,
+    onSave,
+    onSaveAndClose,
+    onClose,
+  } = props;
+
+  return (
+    <div className="app editModeApp">
+      <header className="topbar">
+        <div>
+          <h1>Edit script</h1>
+          <p>
+            {script.name}
+            {isDirty ? " · Unsaved changes" : ""}
+          </p>
+        </div>
+
+        <div className="buttonGroup">
+          <button onClick={onSave} disabled={metadataError !== null}>
+            Save
+          </button>
+          <button onClick={onSaveAndClose} disabled={metadataError !== null}>
+            Save &amp; Close
+          </button>
+          <button onClick={onClose}>Close</button>
+        </div>
+      </header>
+
+      <main className="editMode">
+        <section className="editorPanel">
           <div className="formRow">
             <label htmlFor="source">Source</label>
             <textarea
               id="source"
-              rows={16}
-              value={selectedScript.source}
+              rows={24}
+              value={draftSource}
               onChange={(e) => {
-                updateSelectedScript({
-                  tag: "SourceChanged",
-                  source: e.target.value,
-                });
+                onDraftSourceChange(e.target.value);
               }}
             />
-
-            {metadataError !== null && (
-              <div className="errorBox">{metadataError}</div>
-            )}
-          </div>
-
-          <div className="buttonRow">
-            <button className="dangerButton" onClick={deleteSelectedScript}>
-              Delete script
-            </button>
           </div>
         </section>
+
+        <aside className="diagnosticsPanel">
+          <h2>Diagnostics</h2>
+
+          {metadataError !== null && (
+            <div className="errorBox">{metadataError}</div>
+          )}
+
+          {metadataError === null && (
+            <div className="okBox">No problems found.</div>
+          )}
+        </aside>
       </main>
     </div>
   );
@@ -180,7 +367,7 @@ export default App;
 
 function makeNewScript(id: string): Script {
   return {
-    id: id,
+    id,
     name: "New script",
     version: "0.1.0",
     enabled: true,
@@ -192,7 +379,3 @@ function makeNewScript(id: string): Script {
 `,
   };
 }
-
-type ScriptUpdate =
-  | { tag: "EnabledChanged"; enabled: boolean }
-  | { tag: "SourceChanged"; source: string };

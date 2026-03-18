@@ -15,6 +15,10 @@ textarea {
     font: inherit;
 }
 
+button {
+    cursor: pointer;
+}
+
 .app {
     min-height: 100vh;
     padding: 24px;
@@ -37,79 +41,93 @@ textarea {
     color: #666;
 }
 
-.layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 24px;
+.buttonGroup {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.sidebar,
-.editor {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
+.listMode {
+    display: block;
 }
 
-.sidebar h2 {
-    margin-top: 0;
-}
-
-.scriptList {
+.scriptCards {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: grid;
+    gap: 16px;
 }
 
-.scriptList li + li {
-    margin-top: 8px;
-}
-
-.scriptListItem {
-    width: 100%;
-    text-align: left;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+.scriptCard {
     background: white;
-    cursor: pointer;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #ddd;
 }
 
-.scriptListItem.selected {
-    border-color: #646cff;
-    background: #f0f2ff;
+.scriptCardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
 }
 
-.scriptListTitle {
+.scriptCardTitle {
+    font-size: 18px;
     font-weight: bold;
     margin-bottom: 4px;
 }
 
-.scriptListMeta {
-    font-size: 14px;
+.scriptCardMeta {
     color: #666;
+    font-size: 14px;
+}
+
+.scriptCardActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.inlineCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.editMode {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+}
+
+.editorPanel,
+.diagnosticsPanel,
+.emptyState {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
 }
 
 .formRow {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 16px;
 }
 
-.formRow input[type="text"],
 .formRow textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 8px;
-}
-
-.formRow textarea {
     font-family: monospace;
+    resize: vertical;
 }
 
 .errorBox {
-    margin-top: 8px;
     padding: 10px;
     border: 1px solid #d92d20;
     border-radius: 8px;
@@ -117,15 +135,40 @@ textarea {
     color: #b42318;
 }
 
-.checkboxRow {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+.warningBox {
+    padding: 10px;
+    border: 1px solid #f79009;
+    border-radius: 8px;
+    background: #fffaeb;
+    color: #b54708;
 }
 
-.buttonRow {
+.warningTitle {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.warningBox ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.okBox {
+    padding: 10px;
+    border: 1px solid #12b76a;
+    border-radius: 8px;
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.diagnosticsPanel {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.diagnosticsPanel h2 {
+    margin: 0;
 }
 
 .dangerButton {
@@ -134,5 +177,15 @@ textarea {
     border: none;
     padding: 10px 14px;
     border-radius: 8px;
-    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .editMode {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
