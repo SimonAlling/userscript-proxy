@@ -1,10 +1,10 @@
+import { assertExhausted } from "@userscript-proxy/core/assertions";
 import { useState } from "react";
 import "./App.css";
 import { EditScriptView } from "./EditScriptView";
 import { ListScriptsView } from "./ListScriptsView";
 import { extractMetadata } from "./metadata";
 import { makeNewScript, type Script } from "./userscript";
-import { assertExhausted } from "./util/assertions";
 
 type UiState =
   | {
