@@ -3,7 +3,7 @@ import "./App.css";
 import { EditScriptView } from "./EditScriptView";
 import { ListScriptsView } from "./ListScriptsView";
 import { extractMetadata } from "./metadata";
-import type { Script } from "./userscript";
+import { makeNewScript, type Script } from "./userscript";
 import { assertExhausted } from "./util/assertions";
 
 type UiState =
@@ -200,18 +200,3 @@ function App() {
 }
 
 export default App;
-
-function makeNewScript(id: string): Script {
-  return {
-    id,
-    name: "New script",
-    version: "0.1.0",
-    enabled: true,
-    source: `// ==UserScript==
-// @name        New script
-// @version     0.1.0
-// @match       *://*/*
-// ==/UserScript==
-`,
-  };
-}
