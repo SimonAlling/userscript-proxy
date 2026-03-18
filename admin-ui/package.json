@@ -1,7 +1,11 @@
 {
   "private": true,
+  "type": "module",
   "workspaces": [
     "core",
     "frontend"
-  ]
+  ],
+  "scripts": {
+    "lint": "eslint ."
+  }
 }
