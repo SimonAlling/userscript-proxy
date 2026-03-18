@@ -6,7 +6,6 @@ type Script = {
   name: string;
   version: string;
   enabled: boolean;
-  matches: string[];
   source: string;
 };
 
@@ -16,7 +15,6 @@ const initialScripts: ReadonlyArray<Script> = [
     name: "Dark mode helper",
     version: "0.1.0",
     enabled: true,
-    matches: ["*://example.com/*"],
     source: `// ==UserScript==
 // @name        Dark mode helper
 // @version     0.1.0
@@ -31,7 +29,6 @@ console.log("hello");
     name: "YouTube cleanup",
     version: "1.0.0",
     enabled: false,
-    matches: ["*://www.youtube.com/*"],
     source: `// ==UserScript==
 // @name        YouTube cleanup
 // @version     1.0.0
@@ -152,23 +149,6 @@ function App() {
           </div>
 
           <div className="formRow">
-            <label htmlFor="matches">Match patterns</label>
-            <textarea
-              id="matches"
-              rows={4}
-              value={selectedScript.matches.join("\n")}
-              onChange={(e) => {
-                updateSelectedScript({
-                  matches: e.target.value
-                    .split("\n")
-                    .map((line) => line.trim())
-                    .filter(Boolean),
-                });
-              }}
-            />
-          </div>
-
-          <div className="formRow">
             <label htmlFor="source">Source</label>
             <textarea
               id="source"
@@ -199,7 +179,6 @@ function makeNewScript(id: string): Script {
     name: "New script",
     version: "0.1.0",
     enabled: true,
-    matches: ["*://*/*"],
     source: `// ==UserScript==
 // @name        New script
 // @version     0.1.0
