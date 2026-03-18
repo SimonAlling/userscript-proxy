@@ -12,32 +12,7 @@ type Script = {
 };
 
 const initialScripts: ReadonlyArray<Script> = [
-  {
-    id: "1",
-    name: "Dark mode helper",
-    version: "0.1.0",
-    enabled: true,
-    source: `// ==UserScript==
-// @name        Dark mode helper
-// @version     0.1.0
-// @match       *://example.com/*
-// ==/UserScript==
-
-console.log("hello");
-`,
-  },
-  {
-    id: "2",
-    name: "YouTube cleanup",
-    version: "1.0.0",
-    enabled: false,
-    source: `// ==UserScript==
-// @name        YouTube cleanup
-// @version     1.0.0
-// @match       *://www.youtube.com/*
-// ==/UserScript==
-`,
-  },
+  makeNewScript(crypto.randomUUID()),
 ];
 
 function App() {
