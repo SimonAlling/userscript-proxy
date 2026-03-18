@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsc --build tsconfig.json"
   },
   "dependencies": {
     "@userscript-proxy/core": "*"
