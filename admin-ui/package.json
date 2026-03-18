@@ -7,6 +7,7 @@
     "frontend"
   ],
   "scripts": {
+    "build": "npm run build --workspace backend && npm run build --workspace frontend",
     "lint": "eslint . --config eslint.config.js"
   },
   "devDependencies": {
