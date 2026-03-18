@@ -44,6 +44,12 @@ function App() {
             });
           }}
           onDeleteScript={(scriptId) => {
+            const shouldDelete = window.confirm("Are you sure?");
+
+            if (!shouldDelete) {
+              return;
+            }
+
             setUiState({
               tag: "ListScripts",
               scripts: uiState.scripts.filter(
