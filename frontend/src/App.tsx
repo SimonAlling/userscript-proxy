@@ -124,18 +124,6 @@ function App() {
             />
           </div>
 
-          <div className="formRow">
-            <label htmlFor="version">Version</label>
-            <input
-              id="version"
-              type="text"
-              value={selectedScript.version}
-              onChange={(e) => {
-                updateSelectedScript({ version: e.target.value });
-              }}
-            />
-          </div>
-
           <div className="formRow checkboxRow">
             <label htmlFor="enabled">Enabled</label>
             <input
