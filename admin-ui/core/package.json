@@ -1,0 +1,11 @@
+{
+  "name": "@userscript-proxy/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "tiny-decoders": "^24.0.0"
+  }
+}

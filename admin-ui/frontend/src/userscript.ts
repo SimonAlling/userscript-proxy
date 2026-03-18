@@ -1,3 +1,7 @@
+import { fooish } from "@userscript-proxy/core";
+
+console.warn(fooish.decoder(5));
+
 export type Script = {
   id: string;
   name: string;

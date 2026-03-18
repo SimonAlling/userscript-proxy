@@ -1,5 +1,5 @@
 {
-  "name": "userscript-proxy-frontend",
+  "name": "@userscript-proxy/frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@userscript-proxy/core": "*",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
