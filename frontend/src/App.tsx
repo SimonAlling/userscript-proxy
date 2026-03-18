@@ -1,10 +1,12 @@
 import { useState } from "react";
 import "./App.css";
+import { extractMetadata } from "./metadata";
+import { assertExhausted } from "./util/assertions";
 
 type Script = {
   id: string;
   name: string;
-  version: string;
+  version: string | null;
   enabled: boolean;
   source: string;
 };
@@ -42,14 +44,54 @@ function App() {
   const [scripts, setScripts] = useState<ReadonlyArray<Script>>(initialScripts);
   const [selectedId, setSelectedId] = useState<string>(initialScripts[0].id);
 
+  const [metadataError, setMetadataError] = useState<string | null>(null);
+
   const selectedScript = scripts.find((script) => script.id === selectedId);
 
-  function updateSelectedScript(changes: Partial<Script>) {
-    setScripts((currentScripts) =>
-      currentScripts.map((script) =>
-        script.id === selectedId ? { ...script, ...changes } : script,
-      ),
-    );
+  function updateSelectedScript(update: ScriptUpdate) {
+    switch (update.tag) {
+      case "EnabledChanged": {
+        setMetadataError(null);
+
+        setScripts((currentScripts) =>
+          currentScripts.map((script) =>
+            script.id === selectedId
+              ? { ...script, enabled: update.enabled }
+              : script,
+          ),
+        );
+
+        break;
+      }
+
+      case "SourceChanged": {
+        const result = extractMetadata(update.source);
+
+        if (result.tag === "Err") {
+          setMetadataError(result.error);
+          return;
+        }
+
+        setMetadataError(null);
+
+        setScripts((currentScripts) =>
+          currentScripts.map((script) =>
+            script.id === selectedId
+              ? {
+                  ...script,
+                  source: update.source,
+                  name: result.value.name,
+                  version: result.value.version,
+                }
+              : script,
+          ),
+        );
+        break;
+      }
+
+      default:
+        assertExhausted(update, "script update action");
+    }
   }
 
   function addScript() {
@@ -102,7 +144,9 @@ function App() {
                 >
                   <div className="scriptListTitle">{script.name}</div>
                   <div className="scriptListMeta">
-                    v{script.version} ·{" "}
+                    {script.version === null
+                      ? ""
+                      : "v" + script.version + " · "}
                     {script.enabled ? "Enabled" : "Disabled"}
                   </div>
                 </button>
@@ -119,7 +163,10 @@ function App() {
               type="checkbox"
               checked={selectedScript.enabled}
               onChange={(e) => {
-                updateSelectedScript({ enabled: e.target.checked });
+                updateSelectedScript({
+                  tag: "EnabledChanged",
+                  enabled: e.target.checked,
+                });
               }}
             />
           </div>
@@ -131,9 +178,16 @@ function App() {
               rows={16}
               value={selectedScript.source}
               onChange={(e) => {
-                updateSelectedScript({ source: e.target.value });
+                updateSelectedScript({
+                  tag: "SourceChanged",
+                  source: e.target.value,
+                });
               }}
             />
+
+            {metadataError !== null && (
+              <div className="errorBox">{metadataError}</div>
+            )}
           </div>
 
           <div className="buttonRow">
@@ -163,3 +217,7 @@ function makeNewScript(id: string): Script {
 `,
   };
 }
+
+type ScriptUpdate =
+  | { tag: "EnabledChanged"; enabled: boolean }
+  | { tag: "SourceChanged"; source: string };

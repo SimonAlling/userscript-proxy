@@ -108,6 +108,15 @@ textarea {
     font-family: monospace;
 }
 
+.errorBox {
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #d92d20;
+    border-radius: 8px;
+    background: #fef3f2;
+    color: #b42318;
+}
+
 .checkboxRow {
     flex-direction: row;
     align-items: center;

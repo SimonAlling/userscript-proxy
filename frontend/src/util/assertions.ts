@@ -1,3 +1,9 @@
+export function assertExhausted(x: never, description: string): never {
+  throw new TypeError(
+    `assertExhausted: ${description} was unexpectedly ${JSON.stringify(x)}`,
+  );
+}
+
 export function throwIfNullOrUndefined<T>(
   x: T,
   descriptionOfIt: DescriptionOrRedundanceHint<T>,
