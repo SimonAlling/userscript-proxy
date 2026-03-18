@@ -56,19 +56,7 @@ function App() {
   }
 
   function addScript() {
-    const newScript: Script = {
-      id: crypto.randomUUID(),
-      name: "New script",
-      version: "0.1.0",
-      enabled: true,
-      matches: ["*://*/*"],
-      source: `// ==UserScript==
-// @name        New script
-// @version     0.1.0
-// @match       *://*/*
-// ==/UserScript==
-`,
-    };
+    const newScript = makeNewScript(crypto.randomUUID());
 
     setScripts((currentScripts) => [newScript, ...currentScripts]);
     setSelectedId(newScript.id);
@@ -204,3 +192,19 @@ function App() {
 }
 
 export default App;
+
+function makeNewScript(id: string): Script {
+  return {
+    id: id,
+    name: "New script",
+    version: "0.1.0",
+    enabled: true,
+    matches: ["*://*/*"],
+    source: `// ==UserScript==
+// @name        New script
+// @version     0.1.0
+// @match       *://*/*
+// ==/UserScript==
+`,
+  };
+}
