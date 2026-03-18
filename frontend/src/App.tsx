@@ -85,7 +85,7 @@ function App() {
     }
   }
 
-  if (!selectedScript) {
+  if (selectedScript === undefined) {
     return <div className="app">No script selected.</div>;
   }
 
