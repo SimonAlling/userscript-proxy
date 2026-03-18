@@ -112,18 +112,6 @@ function App() {
         </aside>
 
         <section className="editor">
-          <div className="formRow">
-            <label htmlFor="name">Name</label>
-            <input
-              id="name"
-              type="text"
-              value={selectedScript.name}
-              onChange={(e) => {
-                updateSelectedScript({ name: e.target.value });
-              }}
-            />
-          </div>
-
           <div className="formRow checkboxRow">
             <label htmlFor="enabled">Enabled</label>
             <input
