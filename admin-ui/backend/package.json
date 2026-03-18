@@ -3,9 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc --build tsconfig.json"
+    "build": "tsc --build tsconfig.json",
+    "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
-    "@userscript-proxy/core": "*"
+    "@userscript-proxy/core": "*",
+    "fastify": "^5.8.2"
   }
 }
