@@ -1,0 +1,77 @@
+import type { Script } from "./userscript";
+
+type EditScriptViewProps = {
+  script: Script;
+  draftSource: string;
+  metadataError: string | null;
+  isDirty: boolean;
+  onDraftSourceChange: (draftSource: string) => void;
+  onSave: () => void;
+  onSaveAndClose: () => void;
+  onClose: () => void;
+};
+
+export function EditScriptView(props: EditScriptViewProps) {
+  const {
+    script,
+    draftSource,
+    metadataError,
+    isDirty,
+    onDraftSourceChange,
+    onSave,
+    onSaveAndClose,
+    onClose,
+  } = props;
+
+  return (
+    <div className="app editModeApp">
+      <header className="topbar">
+        <div>
+          <h1>Edit script</h1>
+          <p>
+            {script.name}
+            {isDirty ? " · Unsaved changes" : ""}
+          </p>
+        </div>
+
+        <div className="buttonGroup">
+          <button onClick={onSave} disabled={metadataError !== null}>
+            Save
+          </button>
+          <button onClick={onSaveAndClose} disabled={metadataError !== null}>
+            Save &amp; Close
+          </button>
+          <button onClick={onClose}>Close</button>
+        </div>
+      </header>
+
+      <main className="editMode">
+        <section className="editorPanel">
+          <div className="formRow">
+            <label htmlFor="source">Source</label>
+            <textarea
+              id="source"
+              rows={24}
+              value={draftSource}
+              onChange={(e) => {
+                onDraftSourceChange(e.target.value);
+              }}
+            />
+          </div>
+        </section>
+
+        <aside className="diagnosticsPanel">
+          <h2>Diagnostics</h2>
+
+          {metadataError !== null && (
+            <div className="errorBox">{metadataError}</div>
+          )}
+
+          {metadataError === null && (
+            <div className="okBox">No problems found.</div>
+          )}
+        </aside>
+      </main>
+    </div>
+  );
+}
