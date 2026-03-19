@@ -1,7 +1,7 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { registerScriptRoutes } from "./routes/scripts";
-import { InMemoryScriptStore } from "./services/script-store";
+import { FileSystemScriptStore } from "./services/script-store";
 
 export async function buildApp() {
   const app = Fastify({
@@ -17,7 +17,8 @@ export async function buildApp() {
     return { ok: true };
   });
 
-  const scriptStore = new InMemoryScriptStore();
+  const dataDir = process.env["DATA_DIR"] ?? "/tmp/userscript-proxy/data";
+  const scriptStore = new FileSystemScriptStore(dataDir);
 
   registerScriptRoutes(app, scriptStore);
 
