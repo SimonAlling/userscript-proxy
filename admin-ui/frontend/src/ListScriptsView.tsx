@@ -4,8 +4,8 @@ type ListScriptsViewProps = {
   scripts: ReadonlyArray<Script>;
   onAddScript: () => void;
   onDeleteScript: (scriptId: string) => void;
-  onToggleEnabled: (scriptId: string, enabled: boolean) => void;
-  onEditScript: (scriptId: string) => void;
+  onToggleEnabled: (scriptId: string, enabled: boolean) => Promise<void>;
+  onEditScript: (scriptId: string) => Promise<void>;
 };
 
 export function ListScriptsView(props: ListScriptsViewProps) {
@@ -50,7 +50,9 @@ export function ListScriptsView(props: ListScriptsViewProps) {
                       type="checkbox"
                       checked={script.enabled}
                       onChange={(e) => {
-                        onToggleEnabled(script.id, e.target.checked);
+                        onToggleEnabled(script.id, e.target.checked).catch(
+                          console.error,
+                        );
                       }}
                     />
                     Enabled
@@ -60,7 +62,7 @@ export function ListScriptsView(props: ListScriptsViewProps) {
                 <div className="scriptCardActions">
                   <button
                     onClick={() => {
-                      onEditScript(script.id);
+                      onEditScript(script.id).catch(console.error);
                     }}
                   >
                     Edit

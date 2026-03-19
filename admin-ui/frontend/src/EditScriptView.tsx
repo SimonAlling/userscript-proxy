@@ -6,9 +6,11 @@ type EditScriptViewProps = {
   metadataError: string | null;
   isDirty: boolean;
   onDraftSourceChange: (draftSource: string) => void;
-  onSave: () => void;
-  onSaveAndClose: () => void;
+  onSave: () => Promise<void>;
+  onSaveAndClose: () => Promise<void>;
   onClose: () => void;
+  saving: boolean;
+  saveError: string | null;
 };
 
 export function EditScriptView(props: EditScriptViewProps) {
@@ -21,6 +23,8 @@ export function EditScriptView(props: EditScriptViewProps) {
     onSave,
     onSaveAndClose,
     onClose,
+    saving,
+    saveError,
   } = props;
 
   return (
@@ -33,16 +37,25 @@ export function EditScriptView(props: EditScriptViewProps) {
             {isDirty ? " · Unsaved changes" : ""}
           </p>
         </div>
-
         <div className="buttonGroup">
-          <button onClick={onSave} disabled={metadataError !== null}>
-            Save
+          <button
+            onClick={() => void onSave().catch(console.error)}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save"}
           </button>
-          <button onClick={onSaveAndClose} disabled={metadataError !== null}>
-            Save &amp; Close
+          <button
+            onClick={() => void onSaveAndClose().catch(console.error)}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save & Close"}
           </button>
-          <button onClick={onClose}>Close</button>
+          <button onClick={onClose} disabled={saving}>
+            Close
+          </button>
         </div>
+
+        {saveError !== null && <div className="errorBox">{saveError}</div>}
       </header>
 
       <main className="editMode">

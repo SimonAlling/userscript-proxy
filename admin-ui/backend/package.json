@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.2.0",
     "@userscript-proxy/core": "*",
     "fastify": "^5.8.2"
   }

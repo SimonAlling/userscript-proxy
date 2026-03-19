@@ -1,15 +1,30 @@
+import { useEffect, useState } from "react";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 import { extractMetadata } from "@userscript-proxy/core/metadata";
-import { useState } from "react";
 import "./App.css";
 import { EditScriptView } from "./EditScriptView";
 import { ListScriptsView } from "./ListScriptsView";
+import {
+  getScript,
+  listScripts,
+  saveScriptSource,
+  setScriptEnabled,
+  type ScriptDetails,
+} from "./api";
 import { makeNewScript, type Script } from "./userscript";
 
 type UiState =
   | {
+      tag: "Loading";
+    }
+  | {
+      tag: "LoadFailed";
+      error: string;
+    }
+  | {
       tag: "ListScripts";
       scripts: ReadonlyArray<Script>;
+      saving: boolean;
     }
   | {
       tag: "EditScript";
@@ -18,19 +33,68 @@ type UiState =
       draftSource: string;
       metadataError: string | null;
       isDirty: boolean;
+      saving: boolean;
+      saveError: string | null;
     };
 
-const initialScripts: ReadonlyArray<Script> = [
-  makeNewScript(crypto.randomUUID()),
-];
-
 function App() {
-  const [uiState, setUiState] = useState<UiState>({
-    tag: "ListScripts",
-    scripts: initialScripts,
-  });
+  const [uiState, setUiState] = useState<UiState>({ tag: "Loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load(): Promise<void> {
+      try {
+        const summaries = await listScripts();
+
+        const scripts: ReadonlyArray<Script> = summaries.map((script) => ({
+          id: script.id,
+          name: script.name,
+          version: script.version,
+          enabled: script.enabled,
+          source: "",
+        }));
+
+        if (cancelled) {
+          return;
+        }
+
+        setUiState({
+          tag: "ListScripts",
+          scripts,
+          saving: false,
+        });
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setUiState({
+          tag: "LoadFailed",
+          error:
+            error instanceof Error ? error.message : "Failed to load scripts.",
+        });
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   switch (uiState.tag) {
+    case "Loading":
+      return <div className="app">Loading scripts...</div>;
+
+    case "LoadFailed":
+      return (
+        <div className="app">
+          <div className="errorBox">{uiState.error}</div>
+        </div>
+      );
+
     case "ListScripts":
       return (
         <ListScriptsView
@@ -41,6 +105,7 @@ function App() {
             setUiState({
               tag: "ListScripts",
               scripts: [newScript, ...uiState.scripts],
+              saving: true,
             });
           }}
           onDeleteScript={(scriptId) => {
@@ -55,34 +120,71 @@ function App() {
               scripts: uiState.scripts.filter(
                 (script) => script.id !== scriptId,
               ),
+              saving: true,
             });
           }}
-          onToggleEnabled={(scriptId, enabled) => {
+          onToggleEnabled={async (scriptId, enabled) => {
             setUiState({
-              tag: "ListScripts",
-              scripts: uiState.scripts.map((script) =>
-                script.id === scriptId ? { ...script, enabled } : script,
-              ),
+              ...uiState,
+              saving: true,
             });
-          }}
-          onEditScript={(scriptId) => {
-            const script = uiState.scripts.find((s) => s.id === scriptId);
 
-            if (script === undefined) {
-              return;
+            try {
+              await setScriptEnabled(scriptId, enabled);
+
+              setUiState({
+                tag: "ListScripts",
+                scripts: uiState.scripts.map((script) =>
+                  script.id === scriptId ? { ...script, enabled } : script,
+                ),
+                saving: false,
+              });
+            } catch (error) {
+              setUiState({
+                tag: "LoadFailed",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update enabled state.",
+              });
             }
-
-            const parseResult = extractMetadata(script.source);
-
+          }}
+          onEditScript={async (scriptId) => {
             setUiState({
-              tag: "EditScript",
-              scripts: uiState.scripts,
-              script: script,
-              draftSource: script.source,
-              metadataError:
-                parseResult.tag === "Err" ? parseResult.error : null,
-              isDirty: false,
+              ...uiState,
+              saving: true,
             });
+
+            try {
+              const script = await getScript(scriptId);
+
+              const parseResult = extractMetadata(script.source);
+
+              setUiState({
+                tag: "EditScript",
+                scripts: uiState.scripts.map((candidate) =>
+                  // TODO: WHY???
+                  candidate.id === script.id
+                    ? toFrontendScript(script)
+                    : candidate,
+                ),
+                script: script,
+                draftSource: script.source,
+                metadataError:
+                  parseResult.tag === "Err" ? parseResult.error : null,
+                isDirty: false,
+                saving: false,
+                saveError: null,
+              });
+            } catch (error) {
+              setUiState({
+                tag: "LoadFailed",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to load script details.",
+              });
+            }
           }}
         />
       );
@@ -114,63 +216,99 @@ function App() {
               isDirty: draftSource !== uiState.script.source,
             });
           }}
-          onSave={() => {
-            const result = extractMetadata(uiState.draftSource);
+          onSave={async () => {
+            const parseResult = extractMetadata(uiState.draftSource);
 
-            if (result.tag === "Err") {
+            if (parseResult.tag === "Err") {
               setUiState({
                 ...uiState,
-                metadataError: result.error,
+                metadataError: parseResult.error,
+                saveError: null,
               });
               return;
             }
 
-            const updatedScripts = uiState.scripts.map((currentScript) =>
-              currentScript.id === uiState.script.id
-                ? {
-                    ...currentScript,
-                    source: uiState.draftSource,
-                    name: result.value.name,
-                    version: result.value.version,
-                  }
-                : currentScript,
-            );
-
             setUiState({
-              tag: "EditScript",
-              scripts: updatedScripts,
-              script: uiState.script,
-              draftSource: uiState.draftSource,
-              metadataError: null,
-              isDirty: false,
+              ...uiState,
+              saving: true,
+              saveError: null,
             });
+
+            try {
+              const savedScript = await saveScriptSource(
+                uiState.script.id,
+                uiState.draftSource,
+              );
+
+              setUiState({
+                tag: "EditScript",
+                scripts: uiState.scripts.map((script) =>
+                  // TODO: WHY???
+                  script.id === savedScript.id
+                    ? toFrontendScript(savedScript)
+                    : script,
+                ),
+                script: savedScript,
+                draftSource: savedScript.source,
+                metadataError: null,
+                isDirty: false,
+                saving: false,
+                saveError: null,
+              });
+            } catch (error) {
+              setUiState({
+                ...uiState,
+                saving: false,
+                saveError:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to save script.",
+              });
+            }
           }}
-          onSaveAndClose={() => {
-            const result = extractMetadata(uiState.draftSource);
+          onSaveAndClose={async () => {
+            const parseResult = extractMetadata(uiState.draftSource);
 
-            if (result.tag === "Err") {
+            if (parseResult.tag === "Err") {
               setUiState({
                 ...uiState,
-                metadataError: result.error,
+                metadataError: parseResult.error,
+                saveError: null,
               });
               return;
             }
 
-            const updatedScripts = uiState.scripts.map((currentScript) =>
-              currentScript.id === uiState.script.id
-                ? {
-                    ...currentScript,
-                    source: uiState.draftSource,
-                    name: result.value.name,
-                    version: result.value.version,
-                  }
-                : currentScript,
-            );
-
             setUiState({
-              tag: "ListScripts",
-              scripts: updatedScripts,
+              ...uiState,
+              saving: true,
+              saveError: null,
             });
+
+            try {
+              const savedScript = await saveScriptSource(
+                uiState.script.id,
+                uiState.draftSource,
+              );
+
+              setUiState({
+                tag: "ListScripts",
+                scripts: uiState.scripts.map((script) =>
+                  script.id === savedScript.id
+                    ? toFrontendScript(savedScript)
+                    : script,
+                ),
+                saving: false,
+              });
+            } catch (error) {
+              setUiState({
+                ...uiState,
+                saving: false,
+                saveError:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to save script.",
+              });
+            }
           }}
           onClose={() => {
             if (uiState.isDirty) {
@@ -184,8 +322,11 @@ function App() {
             setUiState({
               tag: "ListScripts",
               scripts: uiState.scripts,
+              saving: false,
             });
           }}
+          saving={uiState.saving}
+          saveError={uiState.saveError}
         />
       );
     }
@@ -196,3 +337,13 @@ function App() {
 }
 
 export default App;
+
+function toFrontendScript(script: ScriptDetails): Script {
+  return {
+    id: script.id,
+    name: script.name,
+    version: script.version,
+    enabled: script.enabled,
+    source: script.source,
+  };
+}
