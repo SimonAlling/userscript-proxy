@@ -24,4 +24,4 @@ COPY default-rules default-rules
 COPY default-userscripts default-userscripts
 
 EXPOSE 8080
-ENTRYPOINT [ "python", "-u", "src/launcher.py" ]
+ENTRYPOINT [ "python", "-u", "src/restartable_launcher.py" ]
