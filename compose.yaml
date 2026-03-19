@@ -1,0 +1,66 @@
+services:
+  userscript-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    expose:
+      - "8765"
+    environment:
+      RESTART_CONTROL_HOST: "0.0.0.0"
+      RESTART_CONTROL_PORT: "8765"
+      RESTART_CONTROL_PATH: "/internal/restart"
+      RESTART_CONTROL_HEALTH_PATH: "/internal/health"
+    volumes:
+      - userscript_proxy_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/internal/health', timeout=2)",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  admin-backend:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+      target: the-backend
+    restart: unless-stopped
+    ports:
+      - "8081:3000"
+    environment:
+      PORT: "3000"
+      DATA_DIR: "/data"
+      PROXY_RESTART_URL: "http://userscript-proxy:8765/internal/restart"
+    volumes:
+      - userscript_proxy_data:/data
+    depends_on:
+      userscript-proxy:
+        condition: service_healthy
+
+  admin-frontend:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+      target: the-frontend
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    environment:
+      DATA_DIR: "/data"
+    volumes:
+      - userscript_proxy_data:/data
+    depends_on:
+      userscript-proxy:
+        condition: service_healthy
+
+volumes:
+  userscript_proxy_data:
