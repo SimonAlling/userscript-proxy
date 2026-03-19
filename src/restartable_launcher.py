@@ -8,11 +8,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Optional
 
 
-HOST = "0.0.0.0"
-PORT = 8765
-RESTART_PATH = "/internal/restart"
-HEALTH_PATH = "/internal/health"
-SHUTDOWN_TIMEOUT_SECONDS = 10
+HOST = os.environ.get("RESTART_CONTROL_HOST", "0.0.0.0")
+PORT = int(os.environ.get("RESTART_CONTROL_PORT", "8765"))
+RESTART_PATH = os.environ.get("RESTART_CONTROL_PATH", "/internal/restart")
+HEALTH_PATH = os.environ.get("RESTART_CONTROL_HEALTH_PATH", "/internal/health")
+SHUTDOWN_TIMEOUT_SECONDS = float(
+    os.environ.get("RESTART_CONTROL_SHUTDOWN_TIMEOUT_SECONDS", "10")
+)
 
 LAUNCHER_COMMAND = [sys.executable, "-u", "src/launcher.py"]
 
