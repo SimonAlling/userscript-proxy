@@ -142,7 +142,7 @@ class ControlHandler(BaseHTTPRequestHandler):
         threading.Thread(target=supervisor.restart_child, daemon=True).start()
         self._send_json(202, b'{"ok":true,"message":"Restart requested."}')
 
-    def log_message(self, format: str, *args) -> None:
+    def log_message(self, format: str, *args: object) -> None:
         print(f"[control] {format % args}", flush=True)
 
     def _send_not_found(self) -> None:
@@ -157,7 +157,7 @@ class ControlHandler(BaseHTTPRequestHandler):
 
 
 def install_signal_handlers(server: ThreadingHTTPServer) -> None:
-    def handle_shutdown(signum: int, _frame) -> None:
+    def handle_shutdown(signum: int, _frame: object) -> None:
         print(f"Received signal {signum}; shutting down.", flush=True)
 
         def shutdown() -> None:
