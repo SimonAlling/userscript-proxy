@@ -14,6 +14,7 @@ COPY backend/tsconfig.json ./backend/
 COPY frontend/tsconfig.json ./frontend/
 COPY frontend/tsconfig.app.json ./frontend/
 COPY frontend/tsconfig.node.json ./frontend/
+COPY eslint.config.js ./
 COPY frontend/vite.config.ts ./frontend/
 COPY frontend/index.html ./frontend/
 
@@ -21,6 +22,7 @@ COPY core/src/ ./core/src/
 COPY backend/src/ ./backend/src/
 COPY frontend/src/ ./frontend/src/
 RUN npm run build
+RUN npm run lint
 
 
 FROM node:24.14.0-bookworm-slim AS the-backend
