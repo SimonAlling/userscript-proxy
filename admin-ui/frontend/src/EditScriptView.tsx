@@ -1,7 +1,7 @@
 import type { Script } from "./userscript";
 
 type EditScriptViewProps = {
-  script: Script;
+  whatIsBeingEdited: WhatIsBeingEdited;
   draftSource: string;
   metadataError: string | null;
   isDirty: boolean;
@@ -13,9 +13,13 @@ type EditScriptViewProps = {
   saveError: string | null;
 };
 
+export type WhatIsBeingEdited =
+  | { tag: "NewScript" }
+  | { tag: "ExistingScript"; script: Script };
+
 export function EditScriptView(props: EditScriptViewProps) {
   const {
-    script,
+    whatIsBeingEdited,
     draftSource,
     metadataError,
     isDirty,
@@ -33,7 +37,7 @@ export function EditScriptView(props: EditScriptViewProps) {
         <div>
           <h1>Edit script</h1>
           <p>
-            {script.name}
+            {deriveDisplayName(whatIsBeingEdited)}
             {isDirty ? " · Unsaved changes" : ""}
           </p>
         </div>
@@ -87,4 +91,14 @@ export function EditScriptView(props: EditScriptViewProps) {
       </main>
     </div>
   );
+}
+
+function deriveDisplayName(whatIsBeingEdited: WhatIsBeingEdited): string {
+  switch (whatIsBeingEdited.tag) {
+    case "NewScript":
+      return "New script";
+
+    case "ExistingScript":
+      return whatIsBeingEdited.script.name;
+  }
 }

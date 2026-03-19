@@ -6,17 +6,11 @@ export type Script = {
   source: string;
 };
 
-export function makeNewScript(id: string): Script {
-  return {
-    id,
-    name: "New script",
-    version: "0.1.0",
-    enabled: true,
-    source: `// ==UserScript==
+export function makeNewScriptSource(): string {
+  return `// ==UserScript==
 // @name        New script
 // @version     0.1.0
 // @match       *://*/*
 // ==/UserScript==
-`,
-  };
+`;
 }

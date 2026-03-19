@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 import { extractMetadata } from "@userscript-proxy/core/metadata";
 import "./App.css";
-import { EditScriptView } from "./EditScriptView";
+import { EditScriptView, type WhatIsBeingEdited } from "./EditScriptView";
 import { ListScriptsView } from "./ListScriptsView";
 import {
   getScript,
@@ -11,7 +11,7 @@ import {
   setScriptEnabled,
   type ScriptDetails,
 } from "./api";
-import { makeNewScript, type Script } from "./userscript";
+import { makeNewScriptSource, type Script } from "./userscript";
 
 type UiState =
   | {
@@ -29,7 +29,7 @@ type UiState =
   | {
       tag: "EditScript";
       scripts: ReadonlyArray<Script>;
-      script: Script;
+      whatIsBeingEdited: WhatIsBeingEdited;
       draftSource: string;
       metadataError: string | null;
       isDirty: boolean;
@@ -100,12 +100,15 @@ function App() {
         <ListScriptsView
           scripts={uiState.scripts}
           onAddScript={() => {
-            const newScript = makeNewScript(crypto.randomUUID());
-
             setUiState({
-              tag: "ListScripts",
-              scripts: [newScript, ...uiState.scripts],
-              saving: true,
+              tag: "EditScript",
+              scripts: uiState.scripts,
+              whatIsBeingEdited: { tag: "NewScript" },
+              draftSource: makeNewScriptSource(),
+              metadataError: null,
+              isDirty: false,
+              saving: false,
+              saveError: null,
             });
           }}
           onDeleteScript={(scriptId) => {
@@ -168,7 +171,7 @@ function App() {
                     ? toFrontendScript(script)
                     : candidate,
                 ),
-                script: script,
+                whatIsBeingEdited: { tag: "ExistingScript", script: script },
                 draftSource: script.source,
                 metadataError:
                   parseResult.tag === "Err" ? parseResult.error : null,
@@ -192,7 +195,7 @@ function App() {
     case "EditScript": {
       return (
         <EditScriptView
-          script={uiState.script}
+          whatIsBeingEdited={uiState.whatIsBeingEdited}
           draftSource={uiState.draftSource}
           metadataError={uiState.metadataError}
           isDirty={uiState.isDirty}
@@ -204,7 +207,10 @@ function App() {
                 ...uiState,
                 draftSource,
                 metadataError: result.error,
-                isDirty: draftSource !== uiState.script.source,
+                isDirty: deriveDirtiness(
+                  draftSource,
+                  uiState.whatIsBeingEdited,
+                ),
               });
               return;
             }
@@ -213,7 +219,7 @@ function App() {
               ...uiState,
               draftSource,
               metadataError: null,
-              isDirty: draftSource !== uiState.script.source,
+              isDirty: deriveDirtiness(draftSource, uiState.whatIsBeingEdited),
             });
           }}
           onSave={async () => {
@@ -236,7 +242,7 @@ function App() {
 
             try {
               const savedScript = await saveScriptSource(
-                uiState.script.id,
+                deriveScriptId(uiState.whatIsBeingEdited),
                 uiState.draftSource,
               );
 
@@ -248,7 +254,10 @@ function App() {
                     ? toFrontendScript(savedScript)
                     : script,
                 ),
-                script: savedScript,
+                whatIsBeingEdited: {
+                  tag: "ExistingScript",
+                  script: savedScript,
+                },
                 draftSource: savedScript.source,
                 metadataError: null,
                 isDirty: false,
@@ -286,7 +295,7 @@ function App() {
 
             try {
               const savedScript = await saveScriptSource(
-                uiState.script.id,
+                deriveScriptId(uiState.whatIsBeingEdited),
                 uiState.draftSource,
               );
 
@@ -346,4 +355,27 @@ function toFrontendScript(script: ScriptDetails): Script {
     enabled: script.enabled,
     source: script.source,
   };
+}
+
+function deriveDirtiness(
+  draftSource: string,
+  whatIsBeingEdited: WhatIsBeingEdited,
+): boolean {
+  switch (whatIsBeingEdited.tag) {
+    case "NewScript":
+      return draftSource !== makeNewScriptSource();
+
+    case "ExistingScript":
+      return draftSource !== whatIsBeingEdited.script.source;
+  }
+}
+
+function deriveScriptId(whatIsBeingEdited: WhatIsBeingEdited): string {
+  switch (whatIsBeingEdited.tag) {
+    case "NewScript":
+      return crypto.randomUUID();
+
+    case "ExistingScript":
+      return whatIsBeingEdited.script.id;
+  }
 }
