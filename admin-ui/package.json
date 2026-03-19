@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "dev": "run-pty % npm run dev --workspace backend % npm run dev --workspace frontend",
     "lint": "eslint . --config eslint.config.js"
   },
   "devDependencies": {
@@ -16,6 +17,7 @@
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "run-pty": "6.0.2",
     "tsx": "4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.56.1"
