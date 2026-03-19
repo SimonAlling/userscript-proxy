@@ -111,7 +111,9 @@ class LauncherSupervisor:
                     self._process = None
             return
 
+        print("", flush=True)
         print("Stopping child process group.", flush=True)
+        print("", flush=True)
 
         try:
             os.killpg(process.pid, signal.SIGTERM)
