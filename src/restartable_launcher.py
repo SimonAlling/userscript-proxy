@@ -40,10 +40,14 @@ class LauncherSupervisor:
                 stdout=None,
                 stderr=None,
                 text=True,
+                start_new_session=True,
             )
 
     def restart_child(self) -> None:
         with self._lock:
+            if self._stopping:
+                return
+
             if self._restart_in_progress:
                 print("Restart already in progress; ignoring duplicate request.", flush=True)
                 return
@@ -57,9 +61,10 @@ class LauncherSupervisor:
             with self._lock:
                 self._restart_in_progress = False
 
-    def stop_all(self) -> None:
+    def begin_shutdown(self) -> None:
         with self._lock:
             self._stopping = True
+
         self._stop_child()
 
     def is_running(self) -> bool:
@@ -78,6 +83,7 @@ class LauncherSupervisor:
                 continue
 
             return_code = process.wait()
+
             with self._lock:
                 if self._stopping:
                     print(f"Child exited during shutdown with code {return_code}.", flush=True)
@@ -101,18 +107,26 @@ class LauncherSupervisor:
 
         if process.poll() is not None:
             with self._lock:
-                self._process = None
+                if self._process is process:
+                    self._process = None
             return
 
-        print("Stopping child process.", flush=True)
-        process.terminate()
+        print("Stopping child process group.", flush=True)
+
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
 
         try:
             process.wait(timeout=SHUTDOWN_TIMEOUT_SECONDS)
-            print("Child process stopped cleanly.", flush=True)
+            print("Child process group stopped cleanly.", flush=True)
         except subprocess.TimeoutExpired:
-            print("Child did not stop in time; killing it.", flush=True)
-            process.kill()
+            print("Child did not stop in time; killing process group.", flush=True)
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
             process.wait()
 
         with self._lock:
@@ -121,6 +135,8 @@ class LauncherSupervisor:
 
 
 supervisor = LauncherSupervisor()
+shutdown_started = False
+shutdown_lock = threading.Lock()
 
 
 class ControlHandler(BaseHTTPRequestHandler):
@@ -158,13 +174,24 @@ class ControlHandler(BaseHTTPRequestHandler):
 
 def install_signal_handlers(server: ThreadingHTTPServer) -> None:
     def handle_shutdown(signum: int, _frame: object) -> None:
+        global shutdown_started
+
+        with shutdown_lock:
+            if shutdown_started:
+                print("Second interrupt received; forcefully exiting.", flush=True)
+                os._exit(130)
+
+            shutdown_started = True
+
         print(f"Received signal {signum}; shutting down.", flush=True)
 
-        def shutdown() -> None:
-            server.shutdown()
+        def shutdown_worker() -> None:
+            try:
+                supervisor.begin_shutdown()
+            finally:
+                server.shutdown()
 
-        threading.Thread(target=shutdown, daemon=True).start()
-        supervisor.stop_all()
+        threading.Thread(target=shutdown_worker, daemon=True).start()
 
     signal.signal(signal.SIGTERM, handle_shutdown)
     signal.signal(signal.SIGINT, handle_shutdown)
@@ -180,16 +207,13 @@ def main() -> int:
     print(f"Restart endpoint: {RESTART_PATH}", flush=True)
     print(f"Health endpoint: {HEALTH_PATH}", flush=True)
 
-    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
-    server_thread.start()
-
     try:
-        supervisor.wait_forever()
-        return 0
+        server.serve_forever()
     finally:
         print("Stopping control server.", flush=True)
-        server.shutdown()
         server.server_close()
+
+    return 0
 
 
 if __name__ == "__main__":
