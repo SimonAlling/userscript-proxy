@@ -1,4 +1,4 @@
-import { Err, Ok, type Result } from "@userscript-proxy/core/results";
+import { Err, Ok, type Result } from "./results";
 
 const PREFIX_NAME = "// @name";
 const PREFIX_VERSION = "// @version";
