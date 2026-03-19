@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc --build tsconfig.json",
+    "build": "tsc --build tsconfig.json && esbuild --tsconfig=tsconfig.json --bundle src/index.ts --outdir=dist --platform=node --out-extension:.js=.cjs --minify",
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
