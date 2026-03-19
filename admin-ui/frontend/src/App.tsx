@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 import { extractMetadata } from "@userscript-proxy/core/metadata";
+import { quote } from "@userscript-proxy/core/strings";
 import "./App.css";
 import { EditScriptView, type WhatIsBeingEdited } from "./EditScriptView";
 import { ListScriptsView } from "./ListScriptsView";
@@ -11,7 +12,7 @@ import {
   setScriptEnabled,
   type ScriptDetails,
 } from "./api";
-import { makeNewScriptSource, type Script } from "./userscript";
+import { isSafeScriptId, makeNewScriptSource, type Script } from "./userscript";
 
 type UiState =
   | {
@@ -234,6 +235,20 @@ function App() {
               return;
             }
 
+            const scriptId = getScriptId(uiState.whatIsBeingEdited);
+            if (scriptId === null) {
+              return;
+            }
+
+            if (!isSafeScriptId(scriptId)) {
+              setUiState({
+                ...uiState,
+                saving: false,
+                saveError: `Invalid script ID: ${quote(scriptId)}`,
+              });
+              return;
+            }
+
             setUiState({
               ...uiState,
               saving: true,
@@ -242,7 +257,7 @@ function App() {
 
             try {
               const savedScript = await saveScriptSource(
-                deriveScriptId(uiState.whatIsBeingEdited),
+                scriptId,
                 uiState.draftSource,
               );
 
@@ -287,6 +302,20 @@ function App() {
               return;
             }
 
+            const scriptId = getScriptId(uiState.whatIsBeingEdited);
+            if (scriptId === null) {
+              return;
+            }
+
+            if (!isSafeScriptId(scriptId)) {
+              setUiState({
+                ...uiState,
+                saving: false,
+                saveError: `Invalid script ID: ${quote(scriptId)}`,
+              });
+              return;
+            }
+
             setUiState({
               ...uiState,
               saving: true,
@@ -295,7 +324,7 @@ function App() {
 
             try {
               const savedScript = await saveScriptSource(
-                deriveScriptId(uiState.whatIsBeingEdited),
+                scriptId,
                 uiState.draftSource,
               );
 
@@ -370,10 +399,13 @@ function deriveDirtiness(
   }
 }
 
-function deriveScriptId(whatIsBeingEdited: WhatIsBeingEdited): string {
+function getScriptId(whatIsBeingEdited: WhatIsBeingEdited): string | null {
   switch (whatIsBeingEdited.tag) {
     case "NewScript":
-      return crypto.randomUUID();
+      return window.prompt(
+        "Please enter a script ID (e.g. 'foo' to save as 'foo.user.js'):",
+        "something-like-this",
+      );
 
     case "ExistingScript":
       return whatIsBeingEdited.script.id;
