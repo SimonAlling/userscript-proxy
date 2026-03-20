@@ -24,9 +24,10 @@ export type ScriptDetails = {
 export type ScriptStore = {
   listScripts(): Promise<ReadonlyArray<ScriptSummary>>;
   getScript(id: string): Promise<ScriptDetails | null>;
+  createScript(id: string, source: string): Promise<ScriptDetails>;
   saveSource(id: string, source: string): Promise<ScriptDetails>;
   setEnabled(id: string, enabled: boolean): Promise<void>;
-}
+};
 
 export class InMemoryScriptStore implements ScriptStore {
   private scripts: Array<ScriptRecord>;
@@ -62,6 +63,25 @@ console.log("hello");
     }
 
     return this.toDetails(script);
+  }
+
+  public async createScript(id: string, source: string): Promise<ScriptDetails> {
+    await Promise.resolve();
+    const parseResult = extractMetadata(source);
+
+    if (parseResult.tag === "Err") {
+      throw new InvalidScriptSourceError(parseResult.error);
+    }
+
+    const exists = this.scripts.some((candidate) => candidate.id === id);
+
+    if (exists) {
+      throw new ScriptAlreadyExistsError(id);
+    }
+
+    const record: ScriptRecord = { id, enabled: true, source };
+    this.scripts.push(record);
+    return this.toDetails(record);
   }
 
   public async saveSource(id: string, source: string): Promise<ScriptDetails> {
@@ -157,6 +177,13 @@ export class ScriptNotFoundError extends Error {
   public constructor(id: string) {
     super(`Script not found: ${id}`);
     this.name = "ScriptNotFoundError";
+  }
+}
+
+export class ScriptAlreadyExistsError extends Error {
+  public constructor(id: string) {
+    super(`Script already exists: ${id}`);
+    this.name = "ScriptAlreadyExistsError";
   }
 }
 

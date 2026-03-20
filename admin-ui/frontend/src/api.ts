@@ -97,6 +97,24 @@ export async function getScript(id: string): Promise<ScriptDetails> {
   return body.script;
 }
 
+export async function createScript(
+  id: string,
+  source: string,
+): Promise<ScriptDetails> {
+  const response = await fetch(`${API_BASE_URL}/api/scripts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id, source }),
+  });
+  const body = await readJsonOrThrow(
+    response,
+    td.fields({ script: ScriptDetails }),
+  );
+  return body.script;
+}
+
 export async function saveScriptSource(
   id: string,
   source: string,

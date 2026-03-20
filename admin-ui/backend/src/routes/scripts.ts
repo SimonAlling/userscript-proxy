@@ -1,12 +1,19 @@
 import type { FastifyInstance } from "fastify";
+import { isSafeScriptId } from "@userscript-proxy/core/script-id";
 import {
   InvalidScriptSourceError,
+  ScriptAlreadyExistsError,
   ScriptNotFoundError,
   type ScriptStore,
 } from "../services/script-store.js";
 
 type ScriptIdParams = {
   id: string;
+};
+
+type CreateScriptBody = {
+  id: string;
+  source: string;
 };
 
 type SaveSourceBody = {
@@ -38,6 +45,35 @@ export function registerScriptRoutes(
       }
 
       return reply.send({ script });
+    },
+  );
+
+  app.post<{ Body: CreateScriptBody }>(
+    "/api/scripts",
+    async (request, reply) => {
+      if (!isSafeScriptId(request.body.id)) {
+        return reply
+          .code(400)
+          .send({ error: `Invalid script ID: ${request.body.id}` });
+      }
+
+      try {
+        const script = await scriptStore.createScript(
+          request.body.id,
+          request.body.source,
+        );
+        return await reply.code(201).send({ script });
+      } catch (error) {
+        if (error instanceof ScriptAlreadyExistsError) {
+          return reply.code(409).send({ error: error.message });
+        }
+
+        if (error instanceof InvalidScriptSourceError) {
+          return reply.code(400).send({ error: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 

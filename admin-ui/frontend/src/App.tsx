@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 import { extractMetadata } from "@userscript-proxy/core/metadata";
-import { quote } from "@userscript-proxy/core/strings";
 import "./App.css";
 import { EditScriptView, type WhatIsBeingEdited } from "./EditScriptView";
 import { ListScriptsView } from "./ListScriptsView";
+import { NewScriptFormView } from "./NewScriptFormView";
 import {
+  createScript,
   getScript,
   listScripts,
   saveScriptSource,
   setScriptEnabled,
   type ScriptDetails,
 } from "./api";
-import { isSafeScriptId, makeNewScriptSource, type Script } from "./userscript";
+import { makeNewScriptSource, type Script } from "./userscript";
 
 type UiState =
   | {
@@ -26,6 +27,11 @@ type UiState =
       tag: "ListScripts";
       scripts: ReadonlyArray<Script>;
       saving: boolean;
+    }
+  | {
+      tag: "NewScriptForm";
+      scripts: ReadonlyArray<Script>;
+      idDraft: string;
     }
   | {
       tag: "EditScript";
@@ -102,14 +108,9 @@ function App() {
           scripts={uiState.scripts}
           onAddScript={() => {
             setUiState({
-              tag: "EditScript",
+              tag: "NewScriptForm",
               scripts: uiState.scripts,
-              whatIsBeingEdited: { tag: "NewScript" },
-              draftSource: makeNewScriptSource(),
-              metadataError: null,
-              isDirty: false,
-              saving: false,
-              saveError: null,
+              idDraft: "new-script",
             });
           }}
           onDeleteScript={(scriptId) => {
@@ -193,6 +194,35 @@ function App() {
         />
       );
 
+    case "NewScriptForm":
+      return (
+        <NewScriptFormView
+          idDraft={uiState.idDraft}
+          onIdDraftChange={(idDraft) => {
+            setUiState({ ...uiState, idDraft });
+          }}
+          onCreate={() => {
+            setUiState({
+              tag: "EditScript",
+              scripts: uiState.scripts,
+              whatIsBeingEdited: { tag: "NewScript", id: uiState.idDraft },
+              draftSource: makeNewScriptSource(),
+              metadataError: null,
+              isDirty: false,
+              saving: false,
+              saveError: null,
+            });
+          }}
+          onCancel={() => {
+            setUiState({
+              tag: "ListScripts",
+              scripts: uiState.scripts,
+              saving: false,
+            });
+          }}
+        />
+      );
+
     case "EditScript": {
       return (
         <EditScriptView
@@ -235,20 +265,6 @@ function App() {
               return;
             }
 
-            const scriptId = getScriptId(uiState.whatIsBeingEdited);
-            if (scriptId === null) {
-              return;
-            }
-
-            if (!isSafeScriptId(scriptId)) {
-              setUiState({
-                ...uiState,
-                saving: false,
-                saveError: `Invalid script ID: ${quote(scriptId)}`,
-              });
-              return;
-            }
-
             setUiState({
               ...uiState,
               saving: true,
@@ -256,19 +272,32 @@ function App() {
             });
 
             try {
-              const savedScript = await saveScriptSource(
-                scriptId,
-                uiState.draftSource,
-              );
+              let savedScript: ScriptDetails;
+
+              if (uiState.whatIsBeingEdited.tag === "NewScript") {
+                savedScript = await createScript(
+                  uiState.whatIsBeingEdited.id,
+                  uiState.draftSource,
+                );
+              } else {
+                savedScript = await saveScriptSource(
+                  uiState.whatIsBeingEdited.script.id,
+                  uiState.draftSource,
+                );
+              }
+
+              const updatedScripts =
+                uiState.whatIsBeingEdited.tag === "NewScript"
+                  ? [...uiState.scripts, toFrontendScript(savedScript)]
+                  : uiState.scripts.map((script) =>
+                      script.id === savedScript.id
+                        ? toFrontendScript(savedScript)
+                        : script,
+                    );
 
               setUiState({
                 tag: "EditScript",
-                scripts: uiState.scripts.map((script) =>
-                  // TODO: WHY???
-                  script.id === savedScript.id
-                    ? toFrontendScript(savedScript)
-                    : script,
-                ),
+                scripts: updatedScripts,
                 whatIsBeingEdited: {
                   tag: "ExistingScript",
                   script: savedScript,
@@ -302,20 +331,6 @@ function App() {
               return;
             }
 
-            const scriptId = getScriptId(uiState.whatIsBeingEdited);
-            if (scriptId === null) {
-              return;
-            }
-
-            if (!isSafeScriptId(scriptId)) {
-              setUiState({
-                ...uiState,
-                saving: false,
-                saveError: `Invalid script ID: ${quote(scriptId)}`,
-              });
-              return;
-            }
-
             setUiState({
               ...uiState,
               saving: true,
@@ -323,18 +338,32 @@ function App() {
             });
 
             try {
-              const savedScript = await saveScriptSource(
-                scriptId,
-                uiState.draftSource,
-              );
+              let savedScript: ScriptDetails;
+
+              if (uiState.whatIsBeingEdited.tag === "NewScript") {
+                savedScript = await createScript(
+                  uiState.whatIsBeingEdited.id,
+                  uiState.draftSource,
+                );
+              } else {
+                savedScript = await saveScriptSource(
+                  uiState.whatIsBeingEdited.script.id,
+                  uiState.draftSource,
+                );
+              }
+
+              const updatedScripts =
+                uiState.whatIsBeingEdited.tag === "NewScript"
+                  ? [...uiState.scripts, toFrontendScript(savedScript)]
+                  : uiState.scripts.map((script) =>
+                      script.id === savedScript.id
+                        ? toFrontendScript(savedScript)
+                        : script,
+                    );
 
               setUiState({
                 tag: "ListScripts",
-                scripts: uiState.scripts.map((script) =>
-                  script.id === savedScript.id
-                    ? toFrontendScript(savedScript)
-                    : script,
-                ),
+                scripts: updatedScripts,
                 saving: false,
               });
             } catch (error) {
@@ -396,18 +425,5 @@ function deriveDirtiness(
 
     case "ExistingScript":
       return draftSource !== whatIsBeingEdited.script.source;
-  }
-}
-
-function getScriptId(whatIsBeingEdited: WhatIsBeingEdited): string | null {
-  switch (whatIsBeingEdited.tag) {
-    case "NewScript":
-      return window.prompt(
-        "Please enter a script ID (e.g. 'foo' to save as 'foo.user.js'):",
-        "something-like-this",
-      );
-
-    case "ExistingScript":
-      return whatIsBeingEdited.script.id;
   }
 }

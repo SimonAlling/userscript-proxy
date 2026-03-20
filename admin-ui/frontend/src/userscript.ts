@@ -14,7 +14,3 @@ export function makeNewScriptSource(): string {
 // ==/UserScript==
 `;
 }
-
-export function isSafeScriptId(id: string): boolean {
-  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id);
-}

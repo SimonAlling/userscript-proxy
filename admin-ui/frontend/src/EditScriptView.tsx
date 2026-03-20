@@ -14,7 +14,7 @@ type EditScriptViewProps = {
 };
 
 export type WhatIsBeingEdited =
-  | { tag: "NewScript" }
+  | { tag: "NewScript"; id: string }
   | { tag: "ExistingScript"; script: Script };
 
 export function EditScriptView(props: EditScriptViewProps) {
