@@ -10,7 +10,7 @@ export async function buildApp() {
 
   await app.register(cors, {
     origin: true,
-    methods: ["GET", "PUT", "POST"],
+    methods: ["GET", "PUT", "POST", "DELETE"],
   });
 
   app.get("/api/health", () => {
