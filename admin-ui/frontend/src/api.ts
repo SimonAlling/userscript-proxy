@@ -137,6 +137,33 @@ export async function saveScriptSource(
   return body.script;
 }
 
+export async function deleteScript(id: string): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/scripts/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
+
+  if (response.ok) {
+    return;
+  }
+
+  let errorMessage = `Request failed with status ${response.status}`;
+
+  try {
+    const decodingResult = decodeOrThrow({
+      codec: ErrorResponse,
+      data: await response.json(),
+      context: "API response",
+      dataIsSensitive: false,
+    });
+    errorMessage = decodingResult.error;
+  } catch {
+    // Ignore parse failure and keep default message.
+  }
+
+  throw new Error(errorMessage);
+}
+
 export async function setScriptEnabled(
   id: string,
   enabled: boolean,

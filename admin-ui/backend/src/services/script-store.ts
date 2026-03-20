@@ -27,6 +27,7 @@ export type ScriptStore = {
   createScript(id: string, source: string): Promise<ScriptDetails>;
   saveSource(id: string, source: string): Promise<ScriptDetails>;
   setEnabled(id: string, enabled: boolean): Promise<void>;
+  deleteScript(id: string): Promise<void>;
 };
 
 export class InMemoryScriptStore implements ScriptStore {
@@ -134,6 +135,19 @@ console.log("hello");
       ...current,
       enabled,
     };
+  }
+
+  public async deleteScript(id: string): Promise<void> {
+    await Promise.resolve();
+    const existingIndex = this.scripts.findIndex(
+      (candidate) => candidate.id === id,
+    );
+
+    if (existingIndex === -1) {
+      throw new ScriptNotFoundError(id);
+    }
+
+    this.scripts.splice(existingIndex, 1);
   }
 
   private toSummary(script: ScriptRecord): ScriptSummary {

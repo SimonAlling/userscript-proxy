@@ -7,6 +7,7 @@ import { ListScriptsView } from "./ListScriptsView";
 import { NewScriptFormView } from "./NewScriptFormView";
 import {
   createScript,
+  deleteScript,
   getScript,
   listScripts,
   saveScriptSource,
@@ -121,12 +122,30 @@ function App() {
             }
 
             setUiState({
-              tag: "ListScripts",
-              scripts: uiState.scripts.filter(
-                (script) => script.id !== scriptId,
-              ),
+              ...uiState,
               saving: true,
             });
+
+            deleteScript(scriptId).then(
+              () => {
+                setUiState({
+                  tag: "ListScripts",
+                  scripts: uiState.scripts.filter(
+                    (script) => script.id !== scriptId,
+                  ),
+                  saving: false,
+                });
+              },
+              (error: unknown) => {
+                setUiState({
+                  tag: "LoadFailed",
+                  error:
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to delete script.",
+                });
+              },
+            );
           }}
           onToggleEnabled={async (scriptId, enabled) => {
             setUiState({

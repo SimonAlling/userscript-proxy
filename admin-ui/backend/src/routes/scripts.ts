@@ -101,6 +101,22 @@ export function registerScriptRoutes(
     },
   );
 
+  app.delete<{ Params: ScriptIdParams }>(
+    "/api/scripts/:id",
+    async (request, reply) => {
+      try {
+        await scriptStore.deleteScript(request.params.id);
+        return await reply.code(204).send();
+      } catch (error) {
+        if (error instanceof ScriptNotFoundError) {
+          return reply.code(404).send({ error: error.message });
+        }
+
+        throw error;
+      }
+    },
+  );
+
   app.put<{ Params: ScriptIdParams; Body: SetEnabledBody }>(
     "/api/scripts/:id/enabled",
     async (request, reply) => {
