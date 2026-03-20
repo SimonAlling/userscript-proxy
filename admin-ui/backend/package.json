@@ -1,0 +1,13 @@
+{
+  "name": "@userscript-proxy/backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@userscript-proxy/core": "*",
+    "fastify": "^5.8.2"
+  }
+}
