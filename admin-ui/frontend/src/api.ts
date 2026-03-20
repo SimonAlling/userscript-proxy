@@ -1,9 +1,20 @@
+import * as td from "tiny-decoders";
+
+import { decodeOrThrow } from "@userscript-proxy/core/decoding";
+
 export type ScriptSummary = {
   id: string;
   enabled: boolean;
   name: string;
   version: string | null;
 };
+
+const ScriptSummary: td.Codec<ScriptSummary> = td.fields({
+  id: td.string,
+  enabled: td.boolean,
+  name: td.string,
+  version: td.nullOr(td.string),
+});
 
 export type ScriptDetails = {
   id: string;
@@ -13,24 +24,50 @@ export type ScriptDetails = {
   version: string | null;
 };
 
+const ScriptDetails: td.Codec<ScriptDetails> = td.fields({
+  id: td.string,
+  enabled: td.boolean,
+  source: td.string,
+  name: td.string,
+  version: td.nullOr(td.string),
+});
+
 type ErrorResponse = {
   error: string;
 };
 
+const ErrorResponse: td.Codec<ErrorResponse> = td.fields({
+  error: td.string,
+});
+
 const API_BASE_URL = "http://localhost:3000";
 
-async function readJsonOrThrow<T>(response: Response): Promise<T> {
+async function readJsonOrThrow<T>(
+  response: Response,
+  codec: td.Codec<T>,
+): Promise<T> {
+  const data: unknown = await response.json();
+
   if (response.ok) {
-    return (await response.json()) as T;
+    return decodeOrThrow({
+      codec: codec,
+      data: data,
+      context: "API response",
+      dataIsSensitive: false,
+    });
   }
 
   let errorMessage = `Request failed with status ${response.status}`;
 
   try {
-    const errorBody = (await response.json()) as Partial<ErrorResponse>;
-    if (typeof errorBody.error === "string") {
-      errorMessage = errorBody.error;
-    }
+    const decodingResult = decodeOrThrow({
+      codec: ErrorResponse,
+      data: data,
+      context: "API response",
+      dataIsSensitive: false,
+    });
+
+    errorMessage = decodingResult.error;
   } catch {
     // Ignore parse failure and keep default message.
   }
@@ -40,8 +77,11 @@ async function readJsonOrThrow<T>(response: Response): Promise<T> {
 
 export async function listScripts(): Promise<ReadonlyArray<ScriptSummary>> {
   const response = await fetch(`${API_BASE_URL}/api/scripts`);
-  const body = await readJsonOrThrow<{ scripts: ReadonlyArray<ScriptSummary> }>(
+  const body = await readJsonOrThrow(
     response,
+    td.fields({
+      scripts: td.array(ScriptSummary),
+    }),
   );
   return body.scripts;
 }
@@ -50,7 +90,10 @@ export async function getScript(id: string): Promise<ScriptDetails> {
   const response = await fetch(
     `${API_BASE_URL}/api/scripts/${encodeURIComponent(id)}`,
   );
-  const body = await readJsonOrThrow<{ script: ScriptDetails }>(response);
+  const body = await readJsonOrThrow(
+    response,
+    td.fields({ script: ScriptDetails }),
+  );
   return body.script;
 }
 
@@ -69,7 +112,10 @@ export async function saveScriptSource(
     },
   );
 
-  const body = await readJsonOrThrow<{ script: ScriptDetails }>(response);
+  const body = await readJsonOrThrow(
+    response,
+    td.fields({ script: ScriptDetails }),
+  );
   return body.script;
 }
 
@@ -88,7 +134,5 @@ export async function setScriptEnabled(
     },
   );
 
-  if (!response.ok) {
-    await readJsonOrThrow(response);
-  }
+  await readJsonOrThrow(response, td.number);
 }
