@@ -2,15 +2,18 @@ import { isSafeScriptId } from "@userscript-proxy/core/script-id";
 
 type NewScriptFormViewProps = {
   idDraft: string;
+  existingIds: ReadonlyArray<string>;
   onIdDraftChange: (id: string) => void;
   onCreate: () => void;
   onCancel: () => void;
 };
 
 export function NewScriptFormView(props: NewScriptFormViewProps) {
-  const { idDraft, onIdDraftChange, onCreate, onCancel } = props;
+  const { idDraft, existingIds, onIdDraftChange, onCreate, onCancel } = props;
 
   const isValid = isSafeScriptId(idDraft);
+  const alreadyExists = isValid && existingIds.includes(idDraft);
+  const canCreate = isValid && !alreadyExists;
 
   return (
     <div className="app">
@@ -19,7 +22,7 @@ export function NewScriptFormView(props: NewScriptFormViewProps) {
           <h1>New script</h1>
         </div>
         <div className="buttonGroup">
-          <button onClick={onCreate} disabled={!isValid}>
+          <button onClick={onCreate} disabled={!canCreate}>
             Create
           </button>
           <button onClick={onCancel}>Cancel</button>
@@ -43,7 +46,10 @@ export function NewScriptFormView(props: NewScriptFormViewProps) {
             ID must be lowercase letters, numbers, and hyphens (e.g. my-script)
           </div>
         )}
-        {isValid && <p>Will be saved as {idDraft}.user.js</p>}
+        {alreadyExists && (
+          <div className="errorBox">A script with this ID already exists</div>
+        )}
+        {canCreate && <p>Will be saved as {idDraft}.user.js</p>}
       </main>
     </div>
   );

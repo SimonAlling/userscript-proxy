@@ -217,6 +217,7 @@ function App() {
       return (
         <NewScriptFormView
           idDraft={uiState.idDraft}
+          existingIds={uiState.scripts.map((s) => s.id)}
           onIdDraftChange={(idDraft) => {
             setUiState({ ...uiState, idDraft });
           }}
