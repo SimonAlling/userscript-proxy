@@ -152,5 +152,23 @@ export async function setScriptEnabled(
     },
   );
 
-  await readJsonOrThrow(response, td.number);
+  if (response.ok) {
+    return;
+  }
+
+  let errorMessage = `Request failed with status ${response.status}`;
+
+  try {
+    const decodingResult = decodeOrThrow({
+      codec: ErrorResponse,
+      data: await response.json(),
+      context: "API response",
+      dataIsSensitive: false,
+    });
+    errorMessage = decodingResult.error;
+  } catch {
+    // Ignore parse failure and keep default message.
+  }
+
+  throw new Error(errorMessage);
 }
