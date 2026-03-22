@@ -12,3 +12,9 @@ services:
     environment:
       BACKEND_HOST: "0.0.0.0"
       BACKEND_PORT: 3000
+      SCRIPTS_DIR: /data
+    volumes:
+      - userscript_proxy_data:/data
+
+volumes:
+  userscript_proxy_data:
