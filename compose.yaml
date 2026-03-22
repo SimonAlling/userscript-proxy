@@ -1,0 +1,14 @@
+services:
+  admin-ui:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+      args:
+        BACKEND_HOST: "0.0.0.0"
+        BACKEND_PORT: 3000
+    restart: unless-stopped
+    ports:
+      - "8081:3000"
+    environment:
+      BACKEND_HOST: "0.0.0.0"
+      BACKEND_PORT: 3000

@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && esbuild --tsconfig=tsconfig.json --bundle src/index.ts --outfile=dist/index.cjs --platform=node --minify",
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
+    "@fastify/static": "^9.0.0",
     "@userscript-proxy/core": "*",
     "fastify": "^5.8.2"
   }

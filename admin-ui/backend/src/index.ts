@@ -8,7 +8,9 @@ const port = Number.parseInt(getEnvVarOrThrow("BACKEND_PORT"));
 
 async function main(): Promise<void> {
   try {
-    const app = await buildApp();
+    const frontendDir = getEnvVarOrThrow("FRONTEND_DIR"); // Set to the empty string to not serve frontend.
+
+    const app = await buildApp(frontendDir);
     await app.listen({ host, port });
   } catch (error) {
     console.error(errorMessageFromCaught(error));
