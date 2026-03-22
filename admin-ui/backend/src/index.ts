@@ -1,9 +1,10 @@
 import { errorMessageFromCaught } from "@userscript-proxy/core/errors";
 
 import { buildApp } from "./app";
+import { getEnvVarOrThrow } from "./environment";
 
-const host = "127.0.0.1";
-const port = 3000;
+const host = getEnvVarOrThrow("BACKEND_HOST");
+const port = Number.parseInt(getEnvVarOrThrow("BACKEND_PORT"));
 
 async function main(): Promise<void> {
   try {

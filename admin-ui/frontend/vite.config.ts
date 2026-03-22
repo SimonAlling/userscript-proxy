@@ -1,6 +1,13 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+import { getEnvVarOrThrow } from "@userscript-proxy/backend/src/environment";
+
+const backendHost = getEnvVarOrThrow("BACKEND_HOST");
+const backendPort = getEnvVarOrThrow("BACKEND_PORT");
+
+const backendBaseUrl = `http://${backendHost}:${backendPort}`;
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -11,7 +18,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      "/api": "http://localhost:3000",
+      "/api": backendBaseUrl,
     },
   },
 });
