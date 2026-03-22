@@ -3,6 +3,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ES2023", "DOM"],
+    "tsBuildInfoFile": "node_modules/.tsbuildinfo.app.json",
     "types": ["vite/client"],
   },
   "include": ["src"],

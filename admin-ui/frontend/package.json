@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "tsc --build tsconfig.json && vite build",
     "dev": "vite"
   },
   "dependencies": {
