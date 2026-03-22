@@ -4,5 +4,8 @@
   "type": "module",
   "exports": {
     "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "tiny-decoders": "^24.0.0"
   }
 }
