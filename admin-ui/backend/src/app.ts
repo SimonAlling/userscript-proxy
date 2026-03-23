@@ -8,7 +8,11 @@ import { listScripts } from "./storage";
 
 const NO_FRONTEND_DIR = "";
 
-export async function buildApp(frontendDir: string, scriptsDir: string) {
+export async function buildApp(
+  frontendDir: string,
+  scriptsDir: string,
+  proxyRestartUrl: string,
+) {
   const app = Fastify({
     logger: true,
   });
@@ -27,6 +31,11 @@ export async function buildApp(frontendDir: string, scriptsDir: string) {
   app.get<{ Reply: Array<ScriptSummary> }>("/api/scripts", async () =>
     listScripts(scriptsDir),
   );
+
+  app.post<{ Reply: HealthStatus }>("/api/proxy/restart", async () => {
+    const response = await fetch(proxyRestartUrl, { method: "POST" });
+    return { ok: response.ok };
+  });
 
   return app;
 }

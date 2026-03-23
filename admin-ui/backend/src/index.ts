@@ -10,8 +10,9 @@ async function main(): Promise<void> {
   try {
     const frontendDir = getEnvVarOrThrow("FRONTEND_DIR"); // Set to the empty string to not serve frontend.
     const scriptsDir = getEnvVarOrThrow("SCRIPTS_DIR");
+    const proxyRestartUrl = getEnvVarOrThrow("PROXY_RESTART_URL");
 
-    const app = await buildApp(frontendDir, scriptsDir);
+    const app = await buildApp(frontendDir, scriptsDir, proxyRestartUrl);
     await app.listen({ host, port });
   } catch (error) {
     console.error(errorMessageFromCaught(error));

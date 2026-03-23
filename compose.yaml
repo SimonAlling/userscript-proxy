@@ -1,4 +1,23 @@
 services:
+  userscript-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - --userscripts-dir
+      - /data
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    expose:
+      - "8765"
+    environment:
+      RESTART_CONTROL_HOST: "0.0.0.0"
+      RESTART_CONTROL_PORT: "8765"
+      RESTART_CONTROL_PATH: "/internal/restart"
+    volumes:
+      - userscript_proxy_data:/data
+
   admin-ui:
     build:
       context: ./admin-ui
@@ -7,12 +26,16 @@ services:
         BACKEND_HOST: "0.0.0.0"
         BACKEND_PORT: 3000
     restart: unless-stopped
+    depends_on:
+      userscript-proxy:
+        condition: service_started
     ports:
       - "8081:3000"
     environment:
       BACKEND_HOST: "0.0.0.0"
       BACKEND_PORT: 3000
       SCRIPTS_DIR: /data
+      PROXY_RESTART_URL: "http://userscript-proxy:8765/internal/restart"
     volumes:
       - userscript_proxy_data:/data
 
