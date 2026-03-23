@@ -44,6 +44,7 @@ export default defineConfig([
           allowNumber: true,
         },
       ],
+      curly: ["error"],
     },
   },
 ]);
