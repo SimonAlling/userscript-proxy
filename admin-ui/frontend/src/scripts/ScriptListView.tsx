@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import * as td from "tiny-decoders";
 
+import "./ScriptListView.css";
+
 import {
   ScriptSummaryCodec,
   type ScriptSummary,
@@ -28,10 +30,10 @@ export function ScriptListView() {
   }, []);
 
   return (
-    <>
+    <section id="script-list-section">
       <h2>Installed scripts</h2>
       {renderScriptListState(scriptListState)}
-    </>
+    </section>
   );
 }
 
@@ -42,7 +44,7 @@ function renderScriptListState(scriptListState: ScriptListState) {
 
     case "HaveScripts":
       return (
-        <ul>
+        <ul className="script-list">
           {scriptListState.scripts.map((s) => (
             <li key={s.filename}>{s.filename}</li>
           ))}

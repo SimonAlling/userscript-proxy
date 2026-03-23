@@ -1,0 +1,3 @@
+.restart-button {
+  min-width: 9em; /* So it doesn't change size when its content changes. */
+}

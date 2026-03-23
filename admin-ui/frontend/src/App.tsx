@@ -6,9 +6,16 @@ import { ScriptListView } from "./scripts/ScriptListView";
 function App() {
   return (
     <div className="the-app">
-      <HealthCheckView />
-      <RestartButton />
-      <ScriptListView />
+      <header id="app-header">
+        <h1>Userscript Proxy</h1>
+        <div id="app-header-actions">
+          <HealthCheckView />
+          <RestartButton />
+        </div>
+      </header>
+      <main>
+        <ScriptListView />
+      </main>
     </div>
   );
 }

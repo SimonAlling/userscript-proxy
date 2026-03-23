@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import "./HealthCheckView.css";
+
 import {
   showHealthCheckFailure,
   showHealthCheckResponse,
@@ -18,5 +20,7 @@ export function HealthCheckView() {
       });
   }, []);
 
-  return <aside>Backend status: {backendStatus}</aside>;
+  return (
+    <aside className="health-check">Backend status: {backendStatus}</aside>
+  );
 }

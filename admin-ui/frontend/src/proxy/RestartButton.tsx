@@ -2,10 +2,14 @@ import { useState } from "react";
 
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 
+import "./RestartButton.css";
+
 type RestartState =
   | { tag: "Idle" }
   | { tag: "Restarting" }
   | { tag: "Done"; ok: boolean };
+
+const FEEDBACK_DURATION_MS = 1000;
 
 export function RestartButton() {
   const [restartState, setRestartState] = useState<RestartState>({
@@ -17,37 +21,52 @@ export function RestartButton() {
     fetch("/api/proxy/restart", { method: "POST" })
       .then((r) => {
         setRestartState({ tag: "Done", ok: r.ok });
+        setTimeout(() => {
+          setRestartState({ tag: "Idle" });
+        }, FEEDBACK_DURATION_MS);
       })
       .catch(() => {
         setRestartState({ tag: "Done", ok: false });
+        setTimeout(() => {
+          setRestartState({ tag: "Idle" });
+        }, FEEDBACK_DURATION_MS);
       });
   }
 
   return (
-    <div>
-      <button
-        disabled={restartState.tag === "Restarting"}
-        onClick={handleClick}
-      >
-        Restart proxy
-      </button>
-      {renderRestartState(restartState)}
-    </div>
+    <button
+      className="restart-button"
+      disabled={shouldBeDisabled(restartState)}
+      onClick={handleClick}
+    >
+      {makeButtonLabel(restartState)}
+    </button>
   );
 }
 
-function renderRestartState(restartState: RestartState) {
+function makeButtonLabel(restartState: RestartState) {
   switch (restartState.tag) {
     case "Idle":
-      return null;
+      return "Restart proxy";
 
     case "Restarting":
-      return " ⏳";
+      return "Restarting …";
 
     case "Done":
-      return restartState.ok ? " ✅" : " ❌";
+      return restartState.ok ? "✅ Restarted" : "❌ Failed";
 
     default:
       assertExhausted(restartState, "restart state");
+  }
+}
+
+function shouldBeDisabled(restartState: RestartState): boolean {
+  switch (restartState.tag) {
+    case "Idle":
+      return false;
+
+    case "Restarting":
+    case "Done":
+      return true;
   }
 }
