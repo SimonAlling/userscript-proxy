@@ -14,7 +14,7 @@ SHUTDOWN_TIMEOUT_SECONDS = float(
     os.environ.get("RESTART_CONTROL_SHUTDOWN_TIMEOUT_SECONDS", "10")
 )
 
-LAUNCHER_COMMAND = [sys.executable, "-u", "src/launcher.py"]
+LAUNCHER_COMMAND = [sys.executable, "-u", "src/launcher.py", *sys.argv[1:]]
 
 
 class LauncherSupervisor:
