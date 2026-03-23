@@ -9,8 +9,10 @@
   ],
   "scripts": {
     "build": "npm run build --workspace backend && npm run build --workspace frontend",
-    "check": "cross-env BACKEND_HOST=localhost BACKEND_PORT=3000 npm run build && npm run lint",
+    "check": "cross-env BACKEND_HOST=localhost BACKEND_PORT=3000 npm run build && npm run lint && npm run format:check",
     "dev": "cross-env BACKEND_HOST=localhost BACKEND_PORT=3000 FRONTEND_DIR=\"\" PROXY_RESTART_URL=http://localhost:8765/internal/restart SCRIPTS_DIR=../../default-userscripts run-pty % npm run dev --workspace backend % npm run dev --workspace frontend",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
     "lint": "eslint . --config eslint.config.js"
   },
   "devDependencies": {

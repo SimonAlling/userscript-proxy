@@ -18,6 +18,7 @@ export default defineConfig([
     languageOptions: {
       parserOptions: {
         project: [
+          "./tsconfig.json",
           "./core/tsconfig.json",
           "./backend/tsconfig.json",
           "./frontend/tsconfig.node.json",
