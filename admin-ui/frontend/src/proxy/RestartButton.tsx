@@ -48,6 +48,6 @@ function renderRestartState(restartState: RestartState) {
       return restartState.ok ? " ✅" : " ❌";
 
     default:
-      return assertExhausted(restartState, "restart state");
+      assertExhausted(restartState, "restart state");
   }
 }
