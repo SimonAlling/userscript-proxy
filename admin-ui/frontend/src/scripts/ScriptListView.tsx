@@ -9,15 +9,20 @@ import {
 } from "@userscript-proxy/core/api/ScriptSummary";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 
+import { AddScriptView } from "./AddScriptView";
+
 type ScriptListState =
   | { tag: "Loading" }
   | { tag: "HaveScripts"; scripts: ReadonlyArray<ScriptSummary> }
   | { tag: "CouldNotGetScripts"; error: string };
 
+type ScriptListMode = { tag: "ViewingScripts" } | { tag: "AddingScript" };
+
 export function ScriptListView() {
   const [scriptListState, setScriptListState] = useState<ScriptListState>({
     tag: "Loading",
   });
+  const [mode, setMode] = useState<ScriptListMode>({ tag: "ViewingScripts" });
 
   useEffect(() => {
     fetch("/api/scripts")
@@ -29,9 +34,38 @@ export function ScriptListView() {
       .catch(console.error);
   }, []);
 
+  const scripts =
+    scriptListState.tag === "HaveScripts" ? scriptListState.scripts : null;
+
   return (
     <section id="script-list-section">
-      <h2>Installed scripts</h2>
+      <div className="script-list-header">
+        <h2>Installed scripts</h2>
+        {scripts !== null && mode.tag === "ViewingScripts" && (
+          <button
+            onClick={() => {
+              setMode({ tag: "AddingScript" });
+            }}
+          >
+            Add script
+          </button>
+        )}
+      </div>
+      {scripts !== null && mode.tag === "AddingScript" && (
+        <AddScriptView
+          existingFilenames={scripts.map((s) => s.filename)}
+          onSaved={(script) => {
+            setScriptListState({
+              tag: "HaveScripts",
+              scripts: [...scripts, script],
+            });
+            setMode({ tag: "ViewingScripts" });
+          }}
+          onCancelled={() => {
+            setMode({ tag: "ViewingScripts" });
+          }}
+        />
+      )}
       {renderScriptListState(scriptListState)}
     </section>
   );

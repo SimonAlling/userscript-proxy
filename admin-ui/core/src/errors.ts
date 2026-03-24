@@ -5,3 +5,8 @@ export function errorMessageFromCaught(caught: unknown): string {
       ? caught
       : String(caught);
 }
+
+export type ErrorInfo = {
+  uiError: string;
+  logError: string;
+};

@@ -1,0 +1,62 @@
+.modal-panel {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 100;
+}
+
+.button-secondary {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+}
+
+.button-secondary:hover:not(:disabled),
+.button-secondary:focus:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.script-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.script-editor-filename {
+  margin: 0;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.script-editor-error {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #dc2626;
+}
+
+.script-editor-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.script-editor-textarea {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  resize: none;
+  outline: none;
+}
+
+.script-editor-textarea:focus {
+  border-color: #2563eb;
+}

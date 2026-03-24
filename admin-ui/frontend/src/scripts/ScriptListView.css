@@ -1,7 +1,15 @@
+#script-list-section .script-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+}
+
 #script-list-section h2 {
   font-size: 1rem;
   font-weight: 600;
-  margin: 0 0 0.75rem;
+  margin: 0;
 }
 
 .script-list {
