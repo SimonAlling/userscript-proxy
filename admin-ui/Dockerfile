@@ -23,6 +23,7 @@ COPY eslint.config.js ./
 COPY prettier.config.ts ./
 COPY frontend/vite.config.ts ./frontend/
 COPY frontend/index.html ./frontend/
+COPY frontend/public/ ./frontend/public/
 
 COPY core/src/ ./core/src/
 COPY backend/src/ ./backend/src/
