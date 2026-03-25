@@ -48,7 +48,7 @@ export async function buildApp(
     const decodingResult = decodeWith(CreateScriptRequestCodec, body, false);
 
     if (decodingResult.tag === "Err") {
-      return await reply
+      return reply
         .code(400)
         .send(`Invalid request payload: ${decodingResult.error}`);
     }
@@ -62,20 +62,18 @@ export async function buildApp(
     );
 
     if (creationResult.tag === "Ok") {
-      return await reply.code(201).send();
+      return reply.code(201).send();
     }
 
     switch (creationResult.error.tag) {
       case "InvalidName":
-        return await reply.code(400).send(creationResult.error.reason);
+        return reply.code(400).send(creationResult.error.reason);
 
       case "AlreadyExists":
-        return await reply
-          .code(409)
-          .send(withExtension(filenameWithoutExtension));
+        return reply.code(409).send(withExtension(filenameWithoutExtension));
 
       case "CouldNotWrite":
-        return await reply.code(500).send(creationResult.error.reason);
+        return reply.code(500).send(creationResult.error.reason);
 
       default:
         assertExhausted(creationResult.error, "script-creation error");
