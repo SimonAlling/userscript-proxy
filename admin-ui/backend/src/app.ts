@@ -31,12 +31,14 @@ export async function buildApp(
     });
   }
 
-  app.get<{ Reply: HealthStatus }>("/api/health", () => {
-    return { ok: true };
+  app.get<{ Reply: HealthStatus }>("/api/health", async (_request, reply) => {
+    return reply.code(200).send({ ok: true });
   });
 
-  app.get<{ Reply: Array<ScriptSummary> }>("/api/scripts", async () =>
-    listScripts(scriptsDir),
+  app.get<{ Reply: Array<ScriptSummary> }>(
+    "/api/scripts",
+    async (_request, reply) =>
+      reply.code(200).send(await listScripts(scriptsDir)),
   );
 
   app.post<{
@@ -80,10 +82,13 @@ export async function buildApp(
     }
   });
 
-  app.post<{ Reply: HealthStatus }>("/api/proxy/restart", async () => {
-    const response = await fetch(proxyRestartUrl, { method: "POST" });
-    return { ok: response.ok };
-  });
+  app.post<{ Reply: HealthStatus }>(
+    "/api/proxy/restart",
+    async (_request, reply) => {
+      const response = await fetch(proxyRestartUrl, { method: "POST" });
+      return reply.code(200).send({ ok: response.ok });
+    },
+  );
 
   return app;
 }
