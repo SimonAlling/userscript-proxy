@@ -29,3 +29,7 @@ export function validateFilename(
 
   return Ok(undefined);
 }
+
+export function howToSortFilenames(a: string, b: string) {
+  return a.localeCompare(b);
+}

@@ -5,6 +5,7 @@ import type { ScriptSummary } from "@userscript-proxy/core/api/ScriptSummary";
 import { errorMessageFromCaught } from "@userscript-proxy/core/errors";
 import {
   isUserscriptFilename,
+  howToSortFilenames,
   validateFilename,
   withExtension,
 } from "@userscript-proxy/core/files";
@@ -14,7 +15,10 @@ export async function listScripts(
   scriptsDir: string,
 ): Promise<Array<ScriptSummary>> {
   const files = await fs.readdir(scriptsDir, { recursive: true });
-  return files.filter(isUserscriptFilename).map((f) => ({ filename: f }));
+  return files
+    .filter(isUserscriptFilename)
+    .toSorted(howToSortFilenames)
+    .map((f) => ({ filename: f }));
 }
 
 type ScriptCreationError =

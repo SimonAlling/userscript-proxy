@@ -8,6 +8,7 @@ import {
   type ScriptSummary,
 } from "@userscript-proxy/core/api/ScriptSummary";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
+import { howToSortFilenames } from "@userscript-proxy/core/files";
 
 import { AddScriptView } from "./AddScriptView";
 import { EditScriptView } from "./EditScriptView";
@@ -61,7 +62,9 @@ export function ScriptListView() {
           onSaved={(script) => {
             setScriptListState({
               tag: "HaveScripts",
-              scripts: [...scripts, script],
+              scripts: [...scripts, script].toSorted((a, b) =>
+                howToSortFilenames(a.filename, b.filename),
+              ),
             });
             setMode({ tag: "ViewingScripts" });
           }}
