@@ -83,7 +83,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
         <ScriptEditorView
           filename={filename}
           initialContent={state.content}
-          onSave_NoReject={(content) => save_NoReject(filename, content)}
+          onSave_NoReject={(content) => update_NoReject(filename, content)}
           onClose={onCancelled}
         />
       );
@@ -92,7 +92,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
       assertExhausted(state, "edit-script state");
   }
 
-  async function save_NoReject(
+  async function update_NoReject(
     filenameToSave: string,
     content: string,
   ): NoRejectPromise<null> {
@@ -107,7 +107,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
           } satisfies UpdateScriptRequest),
         },
       );
-      const result = await interpretSaveResponse(response);
+      const result = await interpretUpdateResponse(response);
       if (result.tag === "Ok") {
         onSaved();
       }
@@ -116,7 +116,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
       const errorMsg = errorMessageFromCaught(caught);
       return Err({
         uiError: "Unexpected error.",
-        logError: `Unexpected error when saving script: ${errorMsg}`,
+        logError: `Unexpected error when updating script: ${errorMsg}`,
       });
     }
   }
@@ -169,7 +169,7 @@ async function interpretLoadResponse(
   }
 }
 
-async function interpretSaveResponse(
+async function interpretUpdateResponse(
   response: Response,
 ): Promise<Result<null, ErrorInfo>> {
   if (response.ok) {
