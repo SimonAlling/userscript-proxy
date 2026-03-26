@@ -188,7 +188,7 @@ async function interpretSaveResponse(
     default:
       return Err({
         uiError: "Could not save script.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError: `${logMessagePrefix} Server responded with ${response.status} ${response.statusText}.`,
       });
   }
 }
