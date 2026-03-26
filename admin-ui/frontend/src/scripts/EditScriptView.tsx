@@ -9,7 +9,6 @@ import {
 import { ScriptNotFoundErrorBodyCodec } from "@userscript-proxy/core/api/ScriptNotFoundErrorBody";
 import type { UpdateScriptRequest } from "@userscript-proxy/core/api/UpdateScriptRequest";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
-import { decodeWith } from "@userscript-proxy/core/decoding";
 import {
   errorMessageFromCaught,
   type ErrorInfo,
@@ -37,7 +36,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
 
   useEffect(() => {
     void fetch(`/api/scripts/${encodeURIComponent(filename)}`)
-      .then((response) => interpretLoadResponse(response))
+      .then((response) => interpretLoadResponse_NoReject(response))
       .then((result) => {
         switch (result.tag) {
           case "Ok":
@@ -126,17 +125,16 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
   }
 }
 
-async function interpretLoadResponse(
+async function interpretLoadResponse_NoReject(
   response: Response,
 ): Promise<Result<ScriptDetails, ErrorInfo>> {
   if (response.ok) {
-    const body: unknown = await response.json();
-    const decoded = decodeWith(ScriptDetailsCodec, body, false);
+    const decoded = await decodeJsonBody_NoReject(response, ScriptDetailsCodec);
 
     if (decoded.tag === "Err") {
       return Err({
         uiError: "Could not load script.",
-        logError: `Could not load script. Reason: Unexpected response shape: ${decoded.error}`,
+        logError: `Could not load script. Reason: ${decoded.error}`,
       });
     }
 
