@@ -52,7 +52,7 @@ export async function buildApp(
 
   app.post<{
     Body: CreateScriptRequest;
-    Reply: undefined;
+    Reply: undefined | string;
   }>("/api/scripts", async (request, reply) => {
     const body: unknown = request.body;
 
@@ -73,7 +73,7 @@ export async function buildApp(
     );
 
     if (creationResult.tag === "Ok") {
-      return reply.code(201).send();
+      return reply.code(201).send(undefined);
     }
 
     switch (creationResult.error.tag) {
@@ -125,7 +125,7 @@ export async function buildApp(
   app.put<{
     Params: { filename: string };
     Body: UpdateScriptRequest;
-    Reply: string | undefined;
+    Reply: undefined | string;
   }>("/api/scripts/:filename", async (request, reply) => {
     const { filename } = request.params;
 
