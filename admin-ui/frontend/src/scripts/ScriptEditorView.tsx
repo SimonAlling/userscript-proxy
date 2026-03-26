@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { assertExhausted } from "@userscript-proxy/core/assertions";
+import type { ErrorInfo } from "@userscript-proxy/core/errors";
 import type { NoRejectPromise } from "@userscript-proxy/core/promises";
 
 import "./ScriptEditorView.css";
@@ -12,7 +13,7 @@ type ScriptEditorState =
 type Props = {
   filename: string;
   initialContent: string;
-  onSave_NoReject: (content: string) => NoRejectPromise<null>;
+  onSave_NoReject: (content: string) => NoRejectPromise<null, ErrorInfo>;
   onClose: () => void;
 };
 

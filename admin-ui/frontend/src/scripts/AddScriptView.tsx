@@ -128,7 +128,7 @@ export function AddScriptView({
   async function saveScript_NoReject(
     filenameWithoutExtension: string,
     content: string,
-  ): NoRejectPromise<null> {
+  ): NoRejectPromise<null, ErrorInfo> {
     try {
       const response = await fetch("/api/scripts", {
         method: "POST",

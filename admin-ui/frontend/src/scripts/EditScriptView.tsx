@@ -95,7 +95,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
   async function update_NoReject(
     filenameToSave: string,
     content: string,
-  ): NoRejectPromise<null> {
+  ): NoRejectPromise<null, ErrorInfo> {
     try {
       const response = await fetch(
         `/api/scripts/${encodeURIComponent(filenameToSave)}`,
