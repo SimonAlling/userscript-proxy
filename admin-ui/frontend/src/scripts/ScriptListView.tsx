@@ -162,6 +162,9 @@ function renderScriptListState(
       return "⏳ Loading …";
 
     case "HaveScripts":
+      if (scriptListState.scripts.length === 0) {
+        return <p className="script-list-empty">No scripts installed.</p>;
+      }
       return (
         <ul className="script-list">
           {scriptListState.scripts.map((s) => (
