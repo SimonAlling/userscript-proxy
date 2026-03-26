@@ -107,6 +107,29 @@ export async function updateScript(
   }
 }
 
+type ScriptDeleteError =
+  | { tag: "NotFound" }
+  | { tag: "CouldNotDelete"; reason: string };
+
+export async function deleteScript(
+  scriptsDir: string,
+  filename: string,
+): Promise<Result<void, ScriptDeleteError>> {
+  const filePath = path.join(scriptsDir, filename);
+  try {
+    await fs.unlink(filePath);
+    return Ok(undefined);
+  } catch (caught) {
+    if (isErrnoException(caught) && caught.code === "ENOENT") {
+      return Err({ tag: "NotFound" });
+    }
+    return Err({
+      tag: "CouldNotDelete",
+      reason: errorMessageFromCaught(caught),
+    });
+  }
+}
+
 function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
   return e instanceof Error && "code" in e;
 }

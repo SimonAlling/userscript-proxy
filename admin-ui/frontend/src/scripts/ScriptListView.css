@@ -35,6 +35,17 @@
   font-size: 0.9rem;
 }
 
+.script-list-item-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.script-list-delete-error {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: #dc2626;
+}
+
 .script-list li:last-child {
   border-bottom: none;
 }

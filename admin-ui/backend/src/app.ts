@@ -24,7 +24,13 @@ import {
 } from "@userscript-proxy/core/files";
 import { quote } from "@userscript-proxy/core/strings";
 
-import { createScript, listScripts, readScript, updateScript } from "./storage";
+import {
+  createScript,
+  deleteScript,
+  listScripts,
+  readScript,
+  updateScript,
+} from "./storage";
 
 const NO_FRONTEND_DIR = "";
 
@@ -186,6 +192,43 @@ export async function buildApp(
 
       default:
         assertExhausted(result.error, "script-update error");
+    }
+  });
+
+  app.delete<{
+    Params: { filename: string };
+    Reply:
+      | undefined
+      | ScriptNotFoundErrorBody
+      | BadRequestErrorBody
+      | InternalServerErrorBody;
+  }>("/api/scripts/:filename", async (request, reply) => {
+    const { filename } = request.params;
+
+    if (!isUserscriptFilename(filename)) {
+      // If nothing else, this should prevent us from accidentally deleting a non-userscript file.
+      return reply.code(400).send({
+        badRequestReason: `Invalid userscript filename: ${quote(filename)}`,
+      });
+    }
+
+    const result = await deleteScript(scriptsDir, filename);
+
+    if (result.tag === "Ok") {
+      return reply.code(200).send(undefined);
+    }
+
+    switch (result.error.tag) {
+      case "NotFound":
+        return reply.code(404).send({ missingScriptName: filename });
+
+      case "CouldNotDelete":
+        return reply.code(500).send({
+          serverErrorReason: result.error.reason,
+        });
+
+      default:
+        assertExhausted(result.error, "script-delete error");
     }
   });
 

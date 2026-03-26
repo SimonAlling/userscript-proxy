@@ -70,3 +70,14 @@ button:disabled {
 .button-secondary:focus:not(:disabled) {
   background: #f1f5f9;
 }
+
+.button-danger {
+  background: transparent;
+  color: #ad5353;
+  border: 1px solid #f0dada;
+}
+
+.button-danger:hover:not(:disabled),
+.button-danger:focus:not(:disabled) {
+  background: #fef2f2;
+}
