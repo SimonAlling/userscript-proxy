@@ -50,6 +50,59 @@ export async function createScript(
   }
 }
 
+type ScriptReadError =
+  | { tag: "NotFound" }
+  | { tag: "CouldNotRead"; reason: string };
+
+export async function readScript(
+  scriptsDir: string,
+  filename: string,
+): Promise<Result<string, ScriptReadError>> {
+  const filePath = path.join(scriptsDir, filename);
+  try {
+    const content = await fs.readFile(filePath, "utf-8");
+    return Ok(content);
+  } catch (caught) {
+    if (isErrnoException(caught) && caught.code === "ENOENT") {
+      return Err({ tag: "NotFound" });
+    }
+    return Err({ tag: "CouldNotRead", reason: errorMessageFromCaught(caught) });
+  }
+}
+
+type ScriptUpdateError =
+  | { tag: "NotFound" }
+  | { tag: "CouldNotWrite"; reason: string };
+
+export async function updateScript(
+  scriptsDir: string,
+  filename: string,
+  content: string,
+): Promise<Result<void, ScriptUpdateError>> {
+  const filePath = path.join(scriptsDir, filename);
+  try {
+    await fs.stat(filePath);
+  } catch (caught) {
+    if (isErrnoException(caught) && caught.code === "ENOENT") {
+      return Err({ tag: "NotFound" });
+    }
+    return Err({
+      tag: "CouldNotWrite",
+      reason: errorMessageFromCaught(caught),
+    });
+  }
+
+  try {
+    await fs.writeFile(filePath, content);
+    return Ok(undefined);
+  } catch (caught) {
+    return Err({
+      tag: "CouldNotWrite",
+      reason: errorMessageFromCaught(caught),
+    });
+  }
+}
+
 function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
   return e instanceof Error && "code" in e;
 }

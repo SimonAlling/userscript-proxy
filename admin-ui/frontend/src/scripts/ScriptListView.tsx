@@ -10,13 +10,17 @@ import {
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 
 import { AddScriptView } from "./AddScriptView";
+import { EditScriptView } from "./EditScriptView";
 
 type ScriptListState =
   | { tag: "Loading" }
   | { tag: "HaveScripts"; scripts: ReadonlyArray<ScriptSummary> }
   | { tag: "CouldNotGetScripts"; error: string };
 
-type ScriptListMode = { tag: "ViewingScripts" } | { tag: "AddingScript" };
+type ScriptListMode =
+  | { tag: "ViewingScripts" }
+  | { tag: "AddingScript" }
+  | { tag: "EditingScript"; filename: string };
 
 export function ScriptListView() {
   const [scriptListState, setScriptListState] = useState<ScriptListState>({
@@ -66,12 +70,28 @@ export function ScriptListView() {
           }}
         />
       )}
-      {renderScriptListState(scriptListState)}
+      {mode.tag === "EditingScript" && (
+        <EditScriptView
+          filename={mode.filename}
+          onSaved={() => {
+            setMode({ tag: "ViewingScripts" });
+          }}
+          onCancelled={() => {
+            setMode({ tag: "ViewingScripts" });
+          }}
+        />
+      )}
+      {renderScriptListState(scriptListState, (filename) => {
+        setMode({ tag: "EditingScript", filename });
+      })}
     </section>
   );
 }
 
-function renderScriptListState(scriptListState: ScriptListState) {
+function renderScriptListState(
+  scriptListState: ScriptListState,
+  onEdit: (filename: string) => void,
+) {
   switch (scriptListState.tag) {
     case "Loading":
       return "⏳ Loading …";
@@ -80,7 +100,17 @@ function renderScriptListState(scriptListState: ScriptListState) {
       return (
         <ul className="script-list">
           {scriptListState.scripts.map((s) => (
-            <li key={s.filename}>{s.filename}</li>
+            <li key={s.filename}>
+              <span className="script-list-item-filename">{s.filename}</span>
+              <button
+                className="button-secondary"
+                onClick={() => {
+                  onEdit(s.filename);
+                }}
+              >
+                Edit
+              </button>
+            </li>
           ))}
         </ul>
       );

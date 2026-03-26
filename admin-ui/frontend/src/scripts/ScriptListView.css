@@ -23,10 +23,16 @@
 }
 
 .script-list li {
-  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.script-list-item-filename {
   font-family: monospace;
   font-size: 0.9rem;
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .script-list li:last-child {
