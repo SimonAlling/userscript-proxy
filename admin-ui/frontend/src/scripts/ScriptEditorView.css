@@ -9,17 +9,6 @@
   z-index: 100;
 }
 
-.button-secondary {
-  background: transparent;
-  color: #374151;
-  border: 1px solid #e2e8f0;
-}
-
-.button-secondary:hover:not(:disabled),
-.button-secondary:focus:not(:disabled) {
-  background: #f1f5f9;
-}
-
 .script-editor-header {
   display: flex;
   align-items: center;

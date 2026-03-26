@@ -59,3 +59,14 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.button-secondary {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+}
+
+.button-secondary:hover:not(:disabled),
+.button-secondary:focus:not(:disabled) {
+  background: #f1f5f9;
+}
