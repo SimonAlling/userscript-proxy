@@ -1,15 +1,19 @@
 import { useState } from "react";
 
+import { BadRequestErrorBodyCodec } from "@userscript-proxy/core/api/BadRequestErrorBody";
 import type { CreateScriptRequest } from "@userscript-proxy/core/api/CreateScriptRequest";
+import { InternalServerErrorBodyCodec } from "@userscript-proxy/core/api/InternalServerErrorBody";
+import { ScriptAlreadyExistsErrorBodyCodec } from "@userscript-proxy/core/api/ScriptAlreadyExistsErrorBody";
 import type { ScriptSummary } from "@userscript-proxy/core/api/ScriptSummary";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 import {
   errorMessageFromCaught,
   type ErrorInfo,
 } from "@userscript-proxy/core/errors";
+import { decodeJsonBody_NoReject } from "@userscript-proxy/core/fetching";
 import { validateFilename, withExtension } from "@userscript-proxy/core/files";
 import type { NoRejectPromise } from "@userscript-proxy/core/promises";
-import { Err, Ok, type Result } from "@userscript-proxy/core/results";
+import { Err, Ok } from "@userscript-proxy/core/results";
 import { quote } from "@userscript-proxy/core/strings";
 import { boilerplate } from "@userscript-proxy/core/userscripts";
 
@@ -139,7 +143,7 @@ export function AddScriptView({
         } satisfies CreateScriptRequest),
       });
 
-      const result = await interpretSaveResponse(response);
+      const result = await interpretSaveResponse_NoReject(response);
 
       if (result.tag === "Ok") {
         onSaved({ filename: withExtension(filenameWithoutExtension) });
@@ -155,35 +159,57 @@ export function AddScriptView({
   }
 }
 
-async function interpretSaveResponse(
+async function interpretSaveResponse_NoReject(
   response: Response,
-): Promise<Result<null, ErrorInfo>> {
+): NoRejectPromise<null, ErrorInfo> {
   if (response.ok) {
     return Ok(null);
   }
 
-  const bodyText = await response.text();
-
   const logMessagePrefix = `Could not save script. Response status: ${response.status}.`;
 
   switch (response.status) {
-    case 400:
+    case 400: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        BadRequestErrorBodyCodec,
+      );
       return Err({
         uiError: "Invalid request.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Reason: ${bodyResult.value.badRequestReason}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
-    case 409:
+    case 409: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        ScriptAlreadyExistsErrorBodyCodec,
+      );
       return Err({
         uiError: "A script with that name already exists.",
-        logError: `${logMessagePrefix} A script named ${quote(bodyText)} already exists.`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} A script named ${quote(bodyResult.value.existingScriptName)} already exists.`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
-    case 500:
+    case 500: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        InternalServerErrorBodyCodec,
+      );
       return Err({
         uiError: "Server failed to save script.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Reason: ${bodyResult.value.serverErrorReason}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
     default:
       return Err({

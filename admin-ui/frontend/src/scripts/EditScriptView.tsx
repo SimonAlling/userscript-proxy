@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { BadRequestErrorBodyCodec } from "@userscript-proxy/core/api/BadRequestErrorBody";
+import { InternalServerErrorBodyCodec } from "@userscript-proxy/core/api/InternalServerErrorBody";
 import {
   ScriptDetailsCodec,
   type ScriptDetails,
 } from "@userscript-proxy/core/api/ScriptDetails";
+import { ScriptNotFoundErrorBodyCodec } from "@userscript-proxy/core/api/ScriptNotFoundErrorBody";
 import type { UpdateScriptRequest } from "@userscript-proxy/core/api/UpdateScriptRequest";
 import { assertExhausted } from "@userscript-proxy/core/assertions";
 import { decodeWith } from "@userscript-proxy/core/decoding";
@@ -11,6 +14,7 @@ import {
   errorMessageFromCaught,
   type ErrorInfo,
 } from "@userscript-proxy/core/errors";
+import { decodeJsonBody_NoReject } from "@userscript-proxy/core/fetching";
 import type { NoRejectPromise } from "@userscript-proxy/core/promises";
 import { Err, Ok, type Result } from "@userscript-proxy/core/results";
 import { quote } from "@userscript-proxy/core/strings";
@@ -107,7 +111,7 @@ export function EditScriptView({ filename, onSaved, onCancelled }: Props) {
           } satisfies UpdateScriptRequest),
         },
       );
-      const result = await interpretUpdateResponse(response);
+      const result = await interpretUpdateResponse_NoReject(response);
       if (result.tag === "Ok") {
         onSaved();
       }
@@ -139,27 +143,54 @@ async function interpretLoadResponse(
     return Ok(decoded.value);
   }
 
-  const bodyText = await response.text();
-  const logMessagePrefix = `Could not load script. Response status: ${response.status}.`;
+  const logMessagePrefix =
+    `Could not load script. Response status: ${response.status}.` as const;
 
   switch (response.status) {
-    case 400:
+    case 400: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        BadRequestErrorBodyCodec,
+      );
       return Err({
         uiError: "Invalid request.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Reason: ${bodyResult.value.badRequestReason}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
-    case 404:
+    case 404: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        ScriptNotFoundErrorBodyCodec,
+      );
       return Err({
-        uiError: `Script ${quote(bodyText)} not found.`,
-        logError: `${logMessagePrefix} Script ${quote(bodyText)} not found.`,
+        uiError:
+          bodyResult.tag === "Ok"
+            ? `Script ${quote(bodyResult.value.missingScriptName)} not found.`
+            : "Script not found.",
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Script ${quote(bodyResult.value.missingScriptName)} not found.`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
-    case 500:
+    case 500: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        InternalServerErrorBodyCodec,
+      );
       return Err({
         uiError: "Server failed to load script.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Reason: ${bodyResult.value.serverErrorReason}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
     default:
       return Err({
@@ -169,34 +200,61 @@ async function interpretLoadResponse(
   }
 }
 
-async function interpretUpdateResponse(
+async function interpretUpdateResponse_NoReject(
   response: Response,
-): Promise<Result<null, ErrorInfo>> {
+): NoRejectPromise<null, ErrorInfo> {
   if (response.ok) {
     return Ok(null);
   }
 
-  const bodyText = await response.text();
-  const logMessagePrefix = `Could not update script. Response status: ${response.status}.`;
+  const logMessagePrefix =
+    `Could not update script. Response status: ${response.status}.` as const;
 
   switch (response.status) {
-    case 400:
+    case 400: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        BadRequestErrorBodyCodec,
+      );
       return Err({
         uiError: "Invalid request.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Reason: ${bodyResult.value.badRequestReason}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
-    case 404:
+    case 404: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        ScriptNotFoundErrorBodyCodec,
+      );
       return Err({
-        uiError: `Script ${quote(bodyText)} not found on server.`,
-        logError: `${logMessagePrefix} Filename: ${bodyText}`,
+        uiError:
+          bodyResult.tag === "Ok"
+            ? `Script ${quote(bodyResult.value.missingScriptName)} not found on server.`
+            : "Script not found on server.",
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Filename: ${quote(bodyResult.value.missingScriptName)}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
-    case 500:
+    case 500: {
+      const bodyResult = await decodeJsonBody_NoReject(
+        response,
+        InternalServerErrorBodyCodec,
+      );
       return Err({
         uiError: "Server failed to update script.",
-        logError: `${logMessagePrefix} Reason: ${bodyText}`,
+        logError:
+          bodyResult.tag === "Ok"
+            ? `${logMessagePrefix} Reason: ${bodyResult.value.serverErrorReason}`
+            : `${logMessagePrefix} ${bodyResult.error}`,
       });
+    }
 
     default:
       return Err({

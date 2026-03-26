@@ -1,12 +1,16 @@
 import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 
+import { type BadRequestErrorBody } from "@userscript-proxy/core/api/BadRequestErrorBody";
 import {
   type CreateScriptRequest,
   CreateScriptRequestCodec,
 } from "@userscript-proxy/core/api/CreateScriptRequest";
 import type { HealthStatus } from "@userscript-proxy/core/api/HealthStatus";
+import { type InternalServerErrorBody } from "@userscript-proxy/core/api/InternalServerErrorBody";
+import { type ScriptAlreadyExistsErrorBody } from "@userscript-proxy/core/api/ScriptAlreadyExistsErrorBody";
 import type { ScriptDetails } from "@userscript-proxy/core/api/ScriptDetails";
+import { type ScriptNotFoundErrorBody } from "@userscript-proxy/core/api/ScriptNotFoundErrorBody";
 import type { ScriptSummary } from "@userscript-proxy/core/api/ScriptSummary";
 import {
   type UpdateScriptRequest,
@@ -52,16 +56,20 @@ export async function buildApp(
 
   app.post<{
     Body: CreateScriptRequest;
-    Reply: undefined | string;
+    Reply:
+      | undefined
+      | ScriptAlreadyExistsErrorBody
+      | BadRequestErrorBody
+      | InternalServerErrorBody;
   }>("/api/scripts", async (request, reply) => {
     const body: unknown = request.body;
 
     const decodingResult = decodeWith(CreateScriptRequestCodec, body, false);
 
     if (decodingResult.tag === "Err") {
-      return reply
-        .code(400)
-        .send(`Invalid request payload: ${decodingResult.error}`);
+      return reply.code(400).send({
+        badRequestReason: `Invalid request payload: ${decodingResult.error}`,
+      });
     }
 
     const { filenameWithoutExtension, content } = decodingResult.value;
@@ -78,70 +86,86 @@ export async function buildApp(
 
     switch (creationResult.error.tag) {
       case "InvalidName":
-        return reply.code(400).send(creationResult.error.reason);
+        return reply.code(400).send({
+          badRequestReason: creationResult.error.reason,
+        });
 
       case "AlreadyExists":
-        return reply.code(409).send(withExtension(filenameWithoutExtension));
+        return reply.code(409).send({
+          existingScriptName: withExtension(filenameWithoutExtension),
+        });
 
       case "CouldNotWrite":
-        return reply.code(500).send(creationResult.error.reason);
+        return reply.code(500).send({
+          serverErrorReason: creationResult.error.reason,
+        });
 
       default:
         assertExhausted(creationResult.error, "script-creation error");
     }
   });
 
-  app.get<{ Params: { filename: string }; Reply: ScriptDetails | string }>(
-    "/api/scripts/:filename",
-    async (request, reply) => {
-      const { filename } = request.params;
-
-      if (!isUserscriptFilename(filename)) {
-        // If nothing else, this should prevent us from accidentally serving a non-userscript file.
-        return reply
-          .code(400)
-          .send(`Invalid userscript filename: ${quote(filename)}`);
-      }
-
-      const result = await readScript(scriptsDir, filename);
-
-      if (result.tag === "Ok") {
-        return reply.code(200).send({ scriptContent: result.value });
-      }
-
-      switch (result.error.tag) {
-        case "NotFound":
-          return reply.code(404).send(filename);
-
-        case "CouldNotRead":
-          return reply.code(500).send(result.error.reason);
-
-        default:
-          assertExhausted(result.error, "script-read error");
-      }
-    },
-  );
-
-  app.put<{
+  app.get<{
     Params: { filename: string };
-    Body: UpdateScriptRequest;
-    Reply: undefined | string;
+    Reply:
+      | ScriptDetails
+      | ScriptNotFoundErrorBody
+      | BadRequestErrorBody
+      | InternalServerErrorBody;
   }>("/api/scripts/:filename", async (request, reply) => {
     const { filename } = request.params;
 
     if (!isUserscriptFilename(filename)) {
-      return reply
-        .code(400)
-        .send(`Invalid userscript filename: ${quote(filename)}`);
+      // If nothing else, this should prevent us from accidentally serving a non-userscript file.
+      return reply.code(400).send({
+        badRequestReason: `Invalid userscript filename: ${quote(filename)}`,
+      });
+    }
+
+    const result = await readScript(scriptsDir, filename);
+
+    if (result.tag === "Ok") {
+      return reply.code(200).send({ scriptContent: result.value });
+    }
+
+    switch (result.error.tag) {
+      case "NotFound":
+        return reply.code(404).send({ missingScriptName: filename });
+
+      case "CouldNotRead":
+        return reply.code(500).send({
+          serverErrorReason: result.error.reason,
+        });
+
+      default:
+        assertExhausted(result.error, "script-read error");
+    }
+  });
+
+  app.put<{
+    Params: { filename: string };
+    Body: UpdateScriptRequest;
+    Reply:
+      | undefined
+      | ScriptNotFoundErrorBody
+      | BadRequestErrorBody
+      | InternalServerErrorBody;
+  }>("/api/scripts/:filename", async (request, reply) => {
+    const { filename } = request.params;
+
+    if (!isUserscriptFilename(filename)) {
+      return reply.code(400).send({
+        badRequestReason: `Invalid userscript filename: ${quote(filename)}`,
+      });
     }
 
     const body: unknown = request.body;
     const decodingResult = decodeWith(UpdateScriptRequestCodec, body, false);
 
     if (decodingResult.tag === "Err") {
-      return reply
-        .code(400)
-        .send(`Invalid request payload: ${decodingResult.error}`);
+      return reply.code(400).send({
+        badRequestReason: `Invalid request payload: ${decodingResult.error}`,
+      });
     }
 
     const { newScriptContent } = decodingResult.value;
@@ -153,10 +177,12 @@ export async function buildApp(
 
     switch (result.error.tag) {
       case "NotFound":
-        return reply.code(404).send(filename);
+        return reply.code(404).send({ missingScriptName: filename });
 
       case "CouldNotWrite":
-        return reply.code(500).send(result.error.reason);
+        return reply.code(500).send({
+          serverErrorReason: result.error.reason,
+        });
 
       default:
         assertExhausted(result.error, "script-update error");
