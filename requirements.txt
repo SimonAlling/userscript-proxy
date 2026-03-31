@@ -12,7 +12,7 @@ h2==4.0.0
 hpack==4.0.0
 hyperframe==6.0.0
 itsdangerous==1.1.0
-Jinja2==2.11.3
+Jinja2==3.1.6
 kaitaistruct==0.9
 ldap3==2.8.1
 lxml==4.6.3
