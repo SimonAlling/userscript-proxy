@@ -31,15 +31,9 @@ def inject(script: Userscript, soup: BeautifulSoup, options: Options) -> Union[B
             s = "s" # JS variable name
             src = userscript.withVersionSuffix(script.downloadURL, script.version)
             JS_insertScriptTag = f"""document.head.appendChild({s});"""
-            JS_nonce = (
-                ""
-                if options.nonce is None
-                else f'{s}.setAttribute("nonce", "{options.nonce}");'
-            )
             JS_insertionCode = (stripIndentation(f"""
                 const {s} = document.createElement("script");
                 {s}.setAttribute("{C.ATTRIBUTE_UP_VERSION}", "{C.VERSION}");
-                {JS_nonce}
                 {s}.src = "{src}";
                 {withLoadListenerIfRunAtIdle(JS_insertScriptTag)}
             """))

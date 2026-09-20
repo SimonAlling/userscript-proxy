@@ -177,17 +177,12 @@ class UserscriptInjector:
                     soup,
                 )
                 inlineNonce = None
-                linkedNonce = None
                 if (
                     bypassCspValue == A.bypass_csp_script
                     and enforcingPolicies
                 ):
                     nativeNonces = csp.nonceCandidates(soup)
                     inlineNonce = csp.chooseInlineNonce(
-                        enforcingPolicies,
-                        nativeNonces,
-                    )
-                    linkedNonce = csp.reusableScriptNonce(
                         enforcingPolicies,
                         nativeNonces,
                     )
@@ -219,9 +214,11 @@ class UserscriptInjector:
                             logError(unsafeSequencesMessage(script))
                             continue
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + C.VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
-                        nonce = None
-                        if bypassCspValue == A.bypass_csp_script:
-                            nonce = inlineNonce if useInline else linkedNonce
+                        nonce = (
+                            inlineNonce
+                            if useInline and bypassCspValue == A.bypass_csp_script
+                            else None
+                        )
                         result = inject.inject(script, soup, inject.Options(
                             inline = option(A.inline),
                             nonce = nonce
@@ -231,7 +228,6 @@ class UserscriptInjector:
                             injections.append(csp.Injection(
                                 userscript = script,
                                 nonce = nonce,
-                                inline = useInline,
                             ))
                         else:
                             logError("Injection failed due to the following error:")

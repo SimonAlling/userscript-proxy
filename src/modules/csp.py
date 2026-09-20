@@ -8,7 +8,6 @@ from modules.userscript import Userscript
 class Injection(NamedTuple):
     userscript: Userscript
     nonce: Optional[str]
-    inline: bool = True
 
 
 class HeaderCollection(Protocol):
@@ -124,20 +123,6 @@ def policyAllowsInlineScript(
     return _policyAllowsInlineScript(parsePolicy(cspHeaderValue), nonce)
 
 
-def _policyAllowsScriptNonce(
-    directives: Sequence[Directive],
-    nonce: str,
-) -> bool:
-    directive = _effectiveScriptDirective(directives)
-    if directive is None:
-        return True
-    return f"'nonce-{nonce}'" in directive.values
-
-
-def policyAllowsScriptNonce(cspHeaderValue: str, nonce: str) -> bool:
-    return _policyAllowsScriptNonce(parsePolicy(cspHeaderValue), nonce)
-
-
 def _policyCanSafelyAddNonce(
     directives: Sequence[Directive],
 ) -> bool:
@@ -162,19 +147,6 @@ def reusableNonce(
     for nonce in candidates:
         if nonce and all(
             policyAllowsInlineScript(policy, nonce)
-            for policy in policies
-        ):
-            return nonce
-    return None
-
-
-def reusableScriptNonce(
-    policies: Sequence[str],
-    candidates: Sequence[str],
-) -> Optional[str]:
-    for nonce in candidates:
-        if nonce and all(
-            policyAllowsScriptNonce(policy, nonce)
             for policy in policies
         ):
             return nonce
@@ -236,18 +208,11 @@ def headerWithScriptsAllowed(
 
     directives = parsePolicy(cspHeaderValue)
     for injection in injections:
-        if injection.inline:
+        if injection.nonce is not None:
             if _policyAllowsInlineScript(directives, injection.nonce):
-                continue
-            if injection.nonce is None:
                 continue
             if not _policyCanSafelyAddNonce(directives):
                 continue
-        elif (
-            injection.nonce is not None
-            and _policyAllowsScriptNonce(directives, injection.nonce)
-        ):
-            continue
         _appendSource(directives, source(injection))
     return serializePolicy(directives)
 
@@ -335,11 +300,7 @@ def rewriteMetaPolicies(
 
 
 def source(injection: Injection) -> str:
-    if injection.inline:
-        if injection.nonce is None:
-            raise ValueError(
-                "An inline userscript requires a nonce for CSP authorization"
-            )
+    if injection.nonce is not None:
         return f"'nonce-{injection.nonce}'"
     downloadURL = injection.userscript.downloadURL
     if downloadURL is None:

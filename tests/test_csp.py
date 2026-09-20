@@ -42,14 +42,11 @@ class FakeUserscript:
 
 
 def inlineInjection(nonce="proxy-nonce"):
-    return csp.Injection(FakeUserscript(), nonce, True)
+    return csp.Injection(FakeUserscript(), nonce)
 
 
-def linkedInjection(
-    url="https://scripts.example/userscript.js",
-    nonce=None,
-):
-    return csp.Injection(FakeUserscript(url), nonce, False)
+def linkedInjection(url="https://scripts.example/userscript.js"):
+    return csp.Injection(FakeUserscript(url), None)
 
 
 class FakeHeaders:
@@ -202,26 +199,6 @@ class CspTests(unittest.TestCase):
                 "script-src 'self'; "
                 "script-src-elem 'self' https://scripts.example/userscript.js"
             ),
-        )
-
-    def test_linked_script_can_reuse_a_native_nonce(self):
-        policy = "script-src 'nonce-native' 'strict-dynamic' https:"
-        self.assertEqual(
-            csp.reusableScriptNonce([policy], ["native", "other"]),
-            "native",
-        )
-        self.assertEqual(
-            csp.headerWithScriptsAllowed(
-                policy,
-                [linkedInjection(nonce="native")],
-            ),
-            policy,
-        )
-
-    def test_unsafe_inline_does_not_authorize_an_external_script_nonce(self):
-        policy = "script-src 'self' 'unsafe-inline'"
-        self.assertIsNone(
-            csp.reusableScriptNonce([policy], ["native"]),
         )
 
     def test_multiple_csp_headers_are_rewritten_independently(self):
