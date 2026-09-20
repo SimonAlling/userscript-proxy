@@ -121,6 +121,20 @@ class CspTests(unittest.TestCase):
             csp.headerWithScriptsAllowed(policy, [inlineInjection()]),
             policy,
         )
+
+    def test_inline_script_still_gets_nonce_when_policy_needs_no_rewrite(self):
+        policy = "script-src 'self' 'unsafe-inline'"
+        originalGenerator = csp.generateNonce
+        csp.generateNonce = lambda: "generated"
+        try:
+            nonce = csp.chooseInlineNonce([policy], [])
+        finally:
+            csp.generateNonce = originalGenerator
+        self.assertEqual(nonce, "generated")
+        self.assertEqual(
+            csp.headerWithScriptsAllowed(policy, [inlineInjection(nonce)]),
+            policy,
+        )
     def test_youtube_style_multiple_policies_reuse_native_nonce_without_rewrite(self):
         policies = [
             (
@@ -247,8 +261,10 @@ class CspTests(unittest.TestCase):
     def test_meta_csp_is_safely_extended_when_needed(self):
         soup = BeautifulSoup(
             (
+                "<html><head>"
                 "<meta http-equiv='content-security-policy' "
                 "content=\"script-src 'self'\">"
+                "</head><body></body></html>"
             ),
             "html.parser",
         )
@@ -257,13 +273,28 @@ class CspTests(unittest.TestCase):
             csp.metaPolicyValues(soup),
             ["script-src 'self' 'nonce-proxy-nonce'"],
         )
+
+    def test_meta_csp_outside_head_is_ignored(self):
+        soup = BeautifulSoup(
+            (
+                "<html><head></head><body>"
+                "<meta http-equiv='Content-Security-Policy' "
+                "content=\"script-src 'none'\">"
+                "</body></html>"
+            ),
+            "html.parser",
+        )
+        self.assertEqual(csp.metaPolicyValues(soup), [])
     def test_everything_mode_removes_enforcing_header_and_meta_only_when_injecting(self):
         headers = FakeHeaders([
             ("Content-Security-Policy", "default-src 'self'"),
             ("Content-Security-Policy-Report-Only", "default-src 'self'"),
         ])
         soup = BeautifulSoup(
-            "<meta http-equiv='Content-Security-Policy' content=\"default-src 'self'\">",
+            (
+                "<html><head><meta http-equiv='Content-Security-Policy' "
+                "content=\"default-src 'self'\"></head><body></body></html>"
+            ),
             "html.parser",
         )
 

@@ -165,9 +165,7 @@ def nonceCandidates(soup: Any) -> list[str]:
 def chooseInlineNonce(
     policies: Sequence[str],
     candidates: Sequence[str],
-) -> Optional[str]:
-    if all(policyAllowsInlineScript(policy, None) for policy in policies):
-        return None
+) -> str:
     nativeNonce = reusableNonce(policies, candidates)
     if nativeNonce is not None:
         return nativeNonce
@@ -260,7 +258,10 @@ def rewriteCspHeaders(
 
 def _metaPolicyTags(soup: Any) -> list[Any]:
     tags: list[Any] = []
-    for tag in soup.find_all("meta"):
+    head = soup.find("head")
+    if head is None:
+        return tags
+    for tag in head.find_all("meta"):
         httpEquiv = tag.get("http-equiv")
         content = tag.get("content")
         if (
