@@ -173,7 +173,12 @@ class CspTests(unittest.TestCase):
             rewritten[1],
             "script-src 'self' 'nonce-proxy-nonce'",
         )
-    def test_strict_dynamic_without_existing_trust_is_not_activated(self):
+    def test_strict_dynamic_ignores_unsafe_inline_without_trust(self):
+        policy = "script-src 'strict-dynamic' 'unsafe-inline' https: 'self'"
+        self.assertFalse(csp.policyAllowsInlineScript(policy, None))
+        self.assertFalse(csp.policyAllowsInlineScript(policy, "generated"))
+
+    def test_strict_dynamic_without_existing_trust_is_not_rewritten(self):
         policy = "script-src 'strict-dynamic' https: 'self'"
         self.assertFalse(csp.policyCanSafelyAddNonce(policy))
         self.assertEqual(

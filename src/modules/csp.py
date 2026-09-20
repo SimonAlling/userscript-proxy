@@ -110,6 +110,8 @@ def _policyAllowsInlineScript(
     sources = directive.values
     if nonce is not None and f"'nonce-{nonce}'" in sources:
         return True
+    if _hasKeyword(sources, "'strict-dynamic'"):
+        return False
     return (
         _hasKeyword(sources, "'unsafe-inline'")
         and not _hasNonceOrHash(sources)

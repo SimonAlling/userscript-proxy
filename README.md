@@ -246,8 +246,9 @@ Bypass host site's Content Security Policy (if any) to allow userscripts to run 
 If `ALLOW` is `script`, only the injected script tag is authorized. When possible,
 Userscript Proxy reuses a nonce already trusted by every enforcing CSP policy; otherwise
 it modifies only policies that actually block the injected script. Policies that already
-allow inline scripts through `'unsafe-inline'` are left unchanged, and
-`'strict-dynamic'` policies are not made stricter merely to add a proxy-generated nonce.
+allow inline scripts through `'unsafe-inline'` are left unchanged. For
+`'strict-dynamic'` policies that have no nonce/hash trust token yet, the proxy avoids
+adding the first one so CSP2 fallback behavior is preserved.
 Multiple CSP headers and `<meta http-equiv="Content-Security-Policy">` policies are
 handled independently.
 Use `nothing` to never bypass any CSP (meaning userscripts won't work at all on some sites).
