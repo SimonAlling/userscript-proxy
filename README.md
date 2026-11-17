@@ -6,6 +6,14 @@ No jailbreak/root required.
 Userscript Proxy is built around [mitmproxy][mitmproxy] and acts as a MITM, injecting userscripts into web pages as they flow through it.
 Both HTTP and HTTPS are supported.
 
+> [!CAUTION]
+> Userscript Proxy has outdated dependencies with critical vulnerabilities.
+>
+> For example, it trusts [eMudhra's compromised intermediate CA certificates][eMudhra].
+>
+> Recommendation: **DO NOT USE IT.**
+>
+> [eMudhra]: https://emudhra.we-have-a-problem.com/
 
 # Getting started
 
