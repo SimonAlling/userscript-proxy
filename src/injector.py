@@ -171,6 +171,37 @@ class UserscriptInjector:
                     HTML_PARSER,
                     from_encoding=inferEncoding(response)
                 )
+                bypassCspValue = option(A.bypass_csp)
+                enforcingPolicies = csp.enforcingPolicyValues(
+                    response.headers,
+                    soup,
+                )
+                inlineNonce = None
+                if (
+                    bypassCspValue == A.bypass_csp_script
+                    and enforcingPolicies
+                ):
+                    nativeNonces = csp.nonceCandidates(soup)
+                    inlineNonce = csp.chooseInlineNonce(
+                        enforcingPolicies,
+                        nativeNonces,
+                    )
+                    if inlineNonce is not None:
+                        unsafePolicies = [
+                            policy
+                            for policy in enforcingPolicies
+                            if not csp.policyAllowsInlineScript(
+                                policy,
+                                inlineNonce,
+                            )
+                            and not csp.policyCanSafelyAddNonce(policy)
+                        ]
+                        if unsafePolicies:
+                            logWarning(
+                                "CSP contains a strict-dynamic policy that "
+                                "cannot be safely extended with a new nonce; "
+                                "inline userscripts may remain blocked."
+                            )
                 requestURL = flow.request.pretty_url # should work in transparent mode too, unless the Host header is spoofed
                 if containsQueryParam(option(A.query_param_to_disable), flow.request):
                     logInfo(f"""Not injecting any userscripts into {requestURL} because it contains a `{option(A.query_param_to_disable)}` query parameter.""")
@@ -183,8 +214,11 @@ class UserscriptInjector:
                             logError(unsafeSequencesMessage(script))
                             continue
                         logInfo(f"""Injecting {script.name}{"" if script.version is None else " " + C.VERSION_PREFIX + script.version} into {requestURL} ({"inline" if useInline else "linked"}) ...""")
-                        shouldUseNonce = useInline and option(A.bypass_csp) == A.bypass_csp_script # If not inline, then URL is used for bypassing; if bypass for nothing or everything, then the nonce would have no effect anyway.
-                        nonce = csp.generateNonce() if shouldUseNonce else None
+                        nonce = (
+                            inlineNonce
+                            if useInline and bypassCspValue == A.bypass_csp_script
+                            else None
+                        )
                         result = inject.inject(script, soup, inject.Options(
                             inline = option(A.inline),
                             nonce = nonce
@@ -199,7 +233,7 @@ class UserscriptInjector:
                             logError("Injection failed due to the following error:")
                             logError(str(result))
 
-                handleContentSecurityPolicy(response, injections)
+                handleContentSecurityPolicy(response, soup, injections)
                 index_DTD: Optional[int] = indexOfDTD(soup)
                 # Insert information comment:
                 if option(A.list_injected):
@@ -217,19 +251,36 @@ class UserscriptInjector:
                 )
 
 
-def handleContentSecurityPolicy(response: http.HTTPFlow.response, injections: list[csp.Injection]) -> None:
-    # If there is a CSP header, we may need to modify it for the userscript(s) to work.
-    ContentSecurityPolicy = "Content-Security-Policy"
-    if ContentSecurityPolicy in response.headers:
-        bypassCspValue = option(A.bypass_csp)
-        if bypassCspValue == A.bypass_csp_script:
-            logInfo(f"Bypassing host site's Content Security Policy for userscripts only (not any resources injected _by_ userscripts, such as stylesheets and images). Try `{flag(A.bypass_csp)} {A.bypass_csp_everything}` if something does not work properly.")
-            response.headers[ContentSecurityPolicy] = csp.headerWithScriptsAllowed(response.headers[ContentSecurityPolicy], injections)
-        elif bypassCspValue == A.bypass_csp_everything:
-            logInfo(f"Bypassing host site's Content Security Policy altogether due to `{flag(A.bypass_csp)} {A.bypass_csp_everything}`.")
-            del response.headers[ContentSecurityPolicy]
-        else:
-            logWarning(f"Host site has a Content Security Policy. Try the {flag(A.bypass_csp)} flag if userscripts don't work properly.")
+def handleContentSecurityPolicy(
+    response: http.HTTPFlow.response,
+    soup: BeautifulSoup,
+    injections: list[csp.Injection],
+) -> None:
+    if not injections:
+        return
+    if not csp.enforcingPolicyValues(response.headers, soup):
+        return
+
+    bypassCspValue = option(A.bypass_csp)
+    if bypassCspValue == A.bypass_csp_script:
+        logInfo(
+            "Authorizing injected userscript tags while preserving the "
+            "host site's existing CSP behavior where possible."
+        )
+        csp.rewriteCspHeaders(response.headers, bypassCspValue, injections)
+        csp.rewriteMetaPolicies(soup, bypassCspValue, injections)
+    elif bypassCspValue == A.bypass_csp_everything:
+        logInfo(
+            f"Bypassing host site's Content Security Policy altogether due "
+            f"to `{flag(A.bypass_csp)} {A.bypass_csp_everything}`."
+        )
+        csp.rewriteCspHeaders(response.headers, bypassCspValue, injections)
+        csp.rewriteMetaPolicies(soup, bypassCspValue, injections)
+    else:
+        logWarning(
+            "Host site has a Content Security Policy. Try the "
+            f"{flag(A.bypass_csp)} flag if userscripts don't work properly."
+        )
 
 
 addons = [ UserscriptInjector() ]
